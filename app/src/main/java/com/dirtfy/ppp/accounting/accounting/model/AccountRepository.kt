@@ -1,14 +1,23 @@
 package com.dirtfy.ppp.accounting.accounting.model
 
+import android.util.Log
 import com.dirtfy.ppp.common.Repository
 import com.dirtfy.ppp.common.RepositoryPath
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
+import kotlin.coroutines.CoroutineContext
 
 object AccountRepository: Repository<AccountData> {
+
+    private const val TAG = "AccountRepository"
 
     private val repositoryRef =
         Firebase.firestore.collection(RepositoryPath.ACCOUNT)
@@ -34,7 +43,7 @@ object AccountRepository: Repository<AccountData> {
         )
     }
 
-    override suspend fun readAll(): List<AccountData> {
+    override suspend fun read(filter: (AccountData) -> Boolean): List<AccountData> {
         val accountList = mutableListOf<AccountData>()
 
         repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
@@ -49,6 +58,7 @@ object AccountRepository: Repository<AccountData> {
                 _account.balance!!
             )
 
+            if (!filter(account)) return@forEach
 
             accountList.add(account)
         }
@@ -56,13 +66,11 @@ object AccountRepository: Repository<AccountData> {
         return accountList
     }
 
-    override suspend fun delete(data: AccountData) {
+    override suspend fun update(filter: (AccountData) -> AccountData) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun update(data: AccountData) {
-        if (data.accountID == null) return
-
+    override suspend fun delete(filter: (AccountData) -> Boolean) {
         TODO("Not yet implemented")
     }
 

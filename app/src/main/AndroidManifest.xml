@@ -13,16 +13,6 @@
         android:theme="@style/Theme.PPP"
         tools:targetApi="31">
         <activity
-            android:name=".accounting.accountRecording.view.AccountRecordTestActivity"
-            android:exported="false"
-            android:label="@string/title_activity_account_record_test"
-            android:theme="@style/Theme.PPP" />
-        <activity
-            android:name=".accounting.accounting.view.AccountTestActivity"
-            android:exported="false"
-            android:label="@string/title_activity_account_test"
-            android:theme="@style/Theme.PPP" />
-        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"

@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.accounting.accounting.model
 
+import androidx.compose.runtime.Stable
 import com.google.firebase.Timestamp
 
 data class AccountData(

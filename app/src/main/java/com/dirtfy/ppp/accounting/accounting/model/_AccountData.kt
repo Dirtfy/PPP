@@ -7,4 +7,7 @@ data class _AccountData(
     var phoneNumber: String?,
     var registerTimestamp: Timestamp?,
     var balance: Int?
-)
+) {
+    // for firebase toObject
+    constructor() : this(null, null, null, null)
+}

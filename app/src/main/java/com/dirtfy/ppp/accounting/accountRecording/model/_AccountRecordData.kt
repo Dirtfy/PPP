@@ -8,4 +8,7 @@ data class _AccountRecordData(
     var userName: String?,
     var amount: Int?,
     var result: Int?
-)
+){
+    // for firebase toObject
+    constructor() : this(null, null, null, null, null)
+}
