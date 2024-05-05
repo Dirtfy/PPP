@@ -10,7 +10,8 @@ import androidx.compose.ui.Modifier
 @Composable
 fun TestMainScreen(
     navigateToAccountTest: () -> Unit,
-    navigateToRecordTest: () -> Unit
+    navigateToRecordTest: () -> Unit,
+    navigateToMenuTest: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -20,6 +21,9 @@ fun TestMainScreen(
         }
         Button(onClick = navigateToRecordTest) {
             Text(text = "account record test")
+        }
+        Button(onClick = navigateToMenuTest) {
+            Text(text = "menu test")
         }
     }
 }

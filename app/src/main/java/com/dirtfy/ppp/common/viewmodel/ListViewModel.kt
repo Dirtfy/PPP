@@ -19,28 +19,16 @@ abstract class ListViewModel<T>: ViewModel() {
     private val TAG = "ListViewModel"
 
     private val _mutableDataList = mutableListOf<T>()
-    private val _dataList: MutableLiveData<List<T>> =
-        MutableLiveData(listOf())
-    val dataList: LiveData<List<T>>
+    private val _dataList: MutableStateFlow<List<T>> =
+        MutableStateFlow(listOf())
+    val dataList: StateFlow<List<T>>
         get() = _dataList
-
-    init {
-        dataList.observeForever {
-            Log.d("$TAG:init", "dataList: $it")
-        }
-    }
 
     private fun changeData(edit: () -> Unit) {
         edit()
-        Log.d("$TAG:changeData", "${_dataList.value}")
-        Log.d("$TAG:changeData", "${_mutableDataList.toList()}")
-        Log.d("$TAG:changeData", "${_dataList.value?.equals(_mutableDataList.toList())}")
         val newList = mutableListOf<T>()
         newList.addAll(_mutableDataList)
         _dataList.value = newList
-        Log.d("$TAG:changeData", "${_dataList.value?.equals(_mutableDataList.toList())}")
-        Log.d("$TAG:changeData", "${_dataList.value}")
-        Log.d("$TAG:changeData", "${_mutableDataList.toList()}")
     }
 
     fun insertData(data: T) {

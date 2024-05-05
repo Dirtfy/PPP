@@ -1,8 +1,8 @@
 package com.dirtfy.ppp.test.view
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,24 +11,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.accounting.accountRecording.model.AccountRecordData
 import com.dirtfy.ppp.accounting.accountRecording.viewmodel.AccountRecordListViewModel
+import com.dirtfy.ppp.accounting.accounting.viewmodel.AccountViewModel
 import com.dirtfy.ppp.accounting.accounting.model.AccountData
-import com.dirtfy.ppp.accounting.accounting.viewmodel.AccountListViewModel
 import com.dirtfy.ppp.ui.theme.PPPTheme
 import com.google.firebase.Timestamp
 import java.util.Date
 
-object Const{
+object AccountRecordTestScreen{
     const val TAG = "AccountTestScreen"
 }
 
@@ -63,7 +62,7 @@ fun AccountRecordItem(data: AccountRecordData) {
 
 @Composable
 fun AccountRecordTest(
-    accountListViewModel: AccountListViewModel = viewModel(),
+    accountViewModel: AccountViewModel = viewModel(),
     accountRecordListViewModel: AccountRecordListViewModel = viewModel()
 ) {
 
@@ -74,17 +73,13 @@ fun AccountRecordTest(
         var accountID by remember {
             mutableStateOf("")
         }
-        val accountDataList by accountListViewModel.dataList.observeAsState(listOf())
-        val accountData = when(accountDataList.size) {
-            0 -> AccountData(null, "test", "test",  Timestamp(Date()), 8888)
-            else -> accountDataList[0]
-        }
+        val accountData by accountViewModel.data.collectAsStateWithLifecycle(AccountData())
         Column {
             TextField(value = accountID, onValueChange = {accountID = it}, label = {
                 Text(text = "account ID")
             })
             Button(onClick = {
-                accountListViewModel.reloadData {
+                accountViewModel.reloadData {
                     it.accountID == accountID
                 }
             }) {
@@ -107,23 +102,41 @@ fun AccountRecordTest(
             TextField(value = amount, onValueChange = {amount = it}, label = {
                 Text(text = "amount")
             })
-            Button(onClick = {
-                accountRecordListViewModel.insertData(
-                    AccountRecordData(
-                        recordID = null,
-                        accountID = accountData.accountID?:"error!!",
-                        timestamp = Timestamp(Date()),
-                        userName = userName,
-                        amount = amount.toInt(),
-                        result = amount.toInt()+accountData.balance
+            Row{
+                Button(onClick = {
+                    // TODO: record insert 와 account update 가 둘다 동시에 성공하도록 구성해야함
+                    accountRecordListViewModel.insertData(
+                        AccountRecordData(
+                            recordID = null,
+                            accountID = accountData.accountID?:"error!!",
+                            timestamp = Timestamp(Date()),
+                            userName = userName,
+                            amount = amount.toInt(),
+                            result = amount.toInt()+accountData.balance
+                        )
                     )
-                )
-            }) {
-                Text(text = "create")
+                    val newAccountData = accountData.copy(balance = accountData.balance+amount.toInt())
+                    accountViewModel.updateData(newAccountData)
+                }) {
+                    Text(text = "create")
+                }
+
+                Button(onClick = {
+                    accountRecordListViewModel.reloadData {
+                        it.accountID == accountData.accountID
+                    }
+                }) {
+                    Text(text = "reload All")
+                }
+
+                Button(onClick = { accountRecordListViewModel.clearData() }) {
+                    Text(text = "clear")
+                }
             }
+
         }
 
-        val accountRecordData by accountRecordListViewModel.dataList.observeAsState(listOf())
+        val accountRecordData by accountRecordListViewModel.dataList.collectAsStateWithLifecycle(listOf())
         AccountRecordList(accountRecords = accountRecordData)
     }
 }

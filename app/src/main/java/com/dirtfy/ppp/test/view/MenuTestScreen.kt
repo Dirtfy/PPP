@@ -21,43 +21,44 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.accounting.accounting.model.AccountData
 import com.dirtfy.ppp.accounting.accounting.viewmodel.AccountListViewModel
+import com.dirtfy.ppp.ordering.menuManaging.model.MenuData
+import com.dirtfy.ppp.ordering.menuManaging.viewmodel.MenuListViewModel
 import com.dirtfy.ppp.ui.theme.PPPTheme
 import com.google.firebase.Timestamp
 import java.util.Date
 
-object AccountTestScreen{
+object MenuTestScreen {
     const val TAG = "AccountTestScreen"
 }
 
 @Composable
-fun AccountList(accounts: List<AccountData>) {
+fun MenuList(menu: List<MenuData>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         items(
-            items = accounts,
+            items = menu,
             key = { item ->
-                item.accountID?:""
+                item.menuID?:""
             }
         ) { item ->
-            AccountItem(data = item)
+            MenuItem(data = item)
         }
     }
 }
 
 @Composable
-fun AccountItem(data: AccountData) {
+fun MenuItem(data: MenuData) {
     Column{
-        Text(text = "ID: ${data.accountID?:"null"}")
-        Text(text = "Name: "+ data.accountName)
-        Text(text = "Balance:" + data.balance.toString())
-        Text(text = "Timestamp:" + data.registerTimestamp.toString())
+        Text(text = "ID: ${data.menuID?:"null"}")
+        Text(text = "Name: "+ data.name)
+        Text(text = "Price:" + data.price.toString())
     }
 }
 
 @Composable
-fun AccountTest(
-    accountListViewModel: AccountListViewModel = viewModel()
+fun MenuTest(
+    menuListViewModel: MenuListViewModel = viewModel()
 ) {
 
     Column(
@@ -68,58 +69,48 @@ fun AccountTest(
         TextField(
             value = nameText,
             onValueChange = { nameText = it },
-            label = { Text("account name") }
+            label = { Text("menu name") }
         )
 
-        var pnText by remember { mutableStateOf("") }
+        var priceText by remember { mutableStateOf("") }
         TextField(
-            value = pnText,
-            onValueChange = { pnText = it },
-            label = { Text("phone number") }
-        )
-
-        var balance by remember { mutableStateOf("") }
-        TextField(
-            value = balance,
-            onValueChange = { balance = it },
-            label = { Text("balance") }
+            value = priceText,
+            onValueChange = { priceText = it },
+            label = { Text("menu price") }
         )
 
         Row {
             Button(onClick = {
-                accountListViewModel.insertData(
-                    AccountData(
-                        accountID = null,
-                        accountName = nameText,
-                        phoneNumber = pnText,
-                        registerTimestamp = Timestamp(Date()),
-                        balance = balance.toInt()
+                menuListViewModel.insertData(
+                    MenuData(
+                        menuID = null,
+                        name = nameText,
+                        price = priceText.toInt()
                     )
                 )
                 nameText = ""
-                pnText = ""
-                balance = ""
+                priceText = ""
             }) {
                 Text(text = "create")
             }
             Button(onClick = {
-                accountListViewModel.reloadData { true }
+                menuListViewModel.reloadData { true }
             }) {
                 Text(text = "readAll")
             }
-            Button(onClick = { accountListViewModel.clearData() }) {
+            Button(onClick = { menuListViewModel.clearData() }) {
                 Text(text = "clear")
             }
         }
 
-        val accountData by accountListViewModel.dataList.collectAsStateWithLifecycle(listOf())
-        AccountList(accounts = accountData)
+        val menuData by menuListViewModel.dataList.collectAsStateWithLifecycle(listOf())
+        MenuList(menu = menuData)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun AccountTestPreview() {
+fun MenuTestPreview() {
     PPPTheme {
         MenuTest()
     }

@@ -6,7 +6,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 
 object AccountRecordRepository: Repository<AccountRecordData> {
@@ -27,14 +26,7 @@ object AccountRecordRepository: Repository<AccountRecordData> {
             )
         )
 
-        return AccountRecordData(
-            recordID = newAccountRecordRef.id,
-            timestamp = data.timestamp,
-            accountID = data.accountID,
-            userName = data.userName,
-            amount = data.amount,
-            result = data.result
-        )
+        return data.copy(recordID = newAccountRecordRef.id)
     }
 
     override suspend fun read(filter: (AccountRecordData) -> Boolean): List<AccountRecordData> {
@@ -69,26 +61,4 @@ object AccountRecordRepository: Repository<AccountRecordData> {
         TODO("Not yet implemented")
     }
 
-    suspend fun readAll(): List<AccountRecordData> {
-        val recordList = mutableListOf<AccountRecordData>()
-
-        repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
-            if (documentSnapshot == null) return@forEach
-
-            val _accountRecord = documentSnapshot.toObject<_AccountRecordData>()!!
-            val accountRecord = AccountRecordData(
-                recordID = documentSnapshot.id,
-                timestamp = _accountRecord.timestamp!!,
-                accountID = _accountRecord.accountID!!,
-                userName = _accountRecord.userName!!,
-                amount = _accountRecord.amount!!,
-                result = _accountRecord.result!!
-            )
-
-
-            recordList.add(accountRecord)
-        }
-
-        return recordList
-    }
 }

@@ -4,4 +4,5 @@ object RepositoryPath {
 
     const val ACCOUNT: String = "account"
     const val ACCOUNT_RECORD: String = "record"
+    const val MENU: String = "menu"
 }

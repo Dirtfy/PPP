@@ -14,9 +14,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.dirtfy.ppp.accounting.accounting.model.AccountData
 import com.dirtfy.ppp.test.view.AccountRecordTest
 import com.dirtfy.ppp.test.view.AccountTest
+import com.dirtfy.ppp.test.view.MenuTest
 import com.dirtfy.ppp.test.view.TestMainScreen
 import com.dirtfy.ppp.ui.theme.PPPTheme
 
@@ -50,13 +50,17 @@ fun MainScreen() {
             composable(route = PPPScreen.Start.name) {
                 TestMainScreen(
                     navigateToAccountTest = { navController.navigate(PPPScreen.Account.name) },
-                    navigateToRecordTest = {navController.navigate(PPPScreen.AccountRecord.name)})
+                    navigateToRecordTest = {navController.navigate(PPPScreen.AccountRecord.name)},
+                    navigateToMenuTest = {navController.navigate(PPPScreen.Menu.name)})
             }
             composable(route = PPPScreen.Account.name) {
                 AccountTest()
             }
             composable(route = PPPScreen.AccountRecord.name) {
                 AccountRecordTest()
+            }
+            composable(route = PPPScreen.Menu.name) {
+                MenuTest()
             }
         }
     }

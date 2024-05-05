@@ -1,12 +1,12 @@
 package com.dirtfy.ppp.accounting.accounting.model
 
-import androidx.compose.runtime.Stable
 import com.google.firebase.Timestamp
+import java.util.Date
 
 data class AccountData(
-    val accountID: String?,
-    val accountName: String,
-    val phoneNumber: String,
-    val registerTimestamp: Timestamp,
-    val balance: Int
+    val accountID: String? = null,
+    val accountName: String = "loading..",
+    val phoneNumber: String = "...",
+    val registerTimestamp: Timestamp = Timestamp(Date()),
+    val balance: Int = 0
 )
