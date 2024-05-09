@@ -1,7 +1,5 @@
 package com.dirtfy.ppp.common
 
-import kotlinx.coroutines.flow.Flow
-
 interface Repository<T> {
 
     suspend fun create(data: T): T

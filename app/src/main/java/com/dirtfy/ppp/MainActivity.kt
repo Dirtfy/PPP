@@ -14,11 +14,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.dirtfy.ppp.accounting.accounting.model.AccountData
 import com.dirtfy.ppp.test.view.AccountRecordTest
 import com.dirtfy.ppp.test.view.AccountTest
 import com.dirtfy.ppp.test.view.MenuTest
+import com.dirtfy.ppp.test.view.QRCodeGenerateTest
+import com.dirtfy.ppp.test.view.QRCodeScanTest
 import com.dirtfy.ppp.test.view.TestMainScreen
 import com.dirtfy.ppp.ui.theme.PPPTheme
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,23 +49,40 @@ fun MainScreen() {
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = PPPScreen.Start.name,
+            startDestination = PPPScreen.Start.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(route = PPPScreen.Start.name) {
+            composable(route = PPPScreen.Start.route) {
                 TestMainScreen(
-                    navigateToAccountTest = { navController.navigate(PPPScreen.Account.name) },
-                    navigateToRecordTest = {navController.navigate(PPPScreen.AccountRecord.name)},
-                    navigateToMenuTest = {navController.navigate(PPPScreen.Menu.name)})
+                    navigateToAccountTest = { navController.navigate(PPPScreen.Account.route) },
+                    navigateToRecordTest = {
+                        navController.navigate("${PPPScreen.AccountRecord.route}/$")
+                                           },
+                    navigateToMenuTest = { navController.navigate(PPPScreen.Menu.route) })
             }
-            composable(route = PPPScreen.Account.name) {
+            composable(route = PPPScreen.Account.route) {
                 AccountTest()
             }
-            composable(route = PPPScreen.AccountRecord.name) {
-                AccountRecordTest()
+            composable(
+                route = PPPScreen.AccountRecord.routeWitchArgument,
+                arguments = PPPScreen.AccountRecord.arguments,
+                deepLinks = PPPScreen.AccountRecord.deepLinks
+            ) {
+                val serializedAccountData =
+                    it.arguments?.getString(PPPScreen.AccountRecord.accountTypeArg)?:
+                    Json.encodeToString(AccountData())
+                val accountData = Json.decodeFromString<AccountData>(serializedAccountData)
+
+                AccountRecordTest(accountData)
             }
-            composable(route = PPPScreen.Menu.name) {
+            composable(route = PPPScreen.Menu.route) {
                 MenuTest()
+            }
+            composable(route = PPPScreen.QRCodeGenerateTest.route) {
+                QRCodeGenerateTest()
+            }
+            composable(route = PPPScreen.QRCodeScanTest.route) {
+                QRCodeScanTest()
             }
         }
     }

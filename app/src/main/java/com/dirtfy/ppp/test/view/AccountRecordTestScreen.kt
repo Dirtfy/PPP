@@ -21,8 +21,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.accounting.accountRecording.model.AccountRecordData
 import com.dirtfy.ppp.accounting.accountRecording.viewmodel.AccountRecordListViewModel
-import com.dirtfy.ppp.accounting.accounting.viewmodel.AccountViewModel
 import com.dirtfy.ppp.accounting.accounting.model.AccountData
+import com.dirtfy.ppp.accounting.accounting.viewmodel.AccountViewModel
 import com.dirtfy.ppp.ui.theme.PPPTheme
 import com.google.firebase.Timestamp
 import java.util.Date
@@ -62,6 +62,7 @@ fun AccountRecordItem(data: AccountRecordData) {
 
 @Composable
 fun AccountRecordTest(
+    arrivedAccountData: AccountData,
     accountViewModel: AccountViewModel = viewModel(),
     accountRecordListViewModel: AccountRecordListViewModel = viewModel()
 ) {
@@ -73,7 +74,7 @@ fun AccountRecordTest(
         var accountID by remember {
             mutableStateOf("")
         }
-        val accountData by accountViewModel.data.collectAsStateWithLifecycle(AccountData())
+        val accountData by accountViewModel.data.collectAsStateWithLifecycle(arrivedAccountData)
         Column {
             TextField(value = accountID, onValueChange = {accountID = it}, label = {
                 Text(text = "account ID")
@@ -145,6 +146,6 @@ fun AccountRecordTest(
 @Composable
 fun AccountRecordTestPreview() {
     PPPTheme {
-        AccountRecordTest()
+        AccountRecordTest(AccountData())
     }
 }

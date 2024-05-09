@@ -3,4 +3,7 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_account_test">AccountTestActivity</string>
     <string name="title_activity_account_record_test">AccountRecordTestActivity</string>
+
+    <string name="deeplink_scheme">ppp</string>
+    <string name="deeplink_host">account_record</string>
 </resources>

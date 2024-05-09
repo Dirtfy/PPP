@@ -22,8 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.accounting.accounting.model.AccountData
 import com.dirtfy.ppp.accounting.accounting.viewmodel.AccountListViewModel
 import com.dirtfy.ppp.ui.theme.PPPTheme
-import com.google.firebase.Timestamp
-import java.util.Date
+import java.util.Calendar
 
 object AccountTestScreen{
     const val TAG = "AccountTestScreen"
@@ -92,7 +91,7 @@ fun AccountTest(
                         accountID = null,
                         accountName = nameText,
                         phoneNumber = pnText,
-                        registerTimestamp = Timestamp(Date()),
+                        registerTimestamp = Calendar.getInstance().timeInMillis,
                         balance = balance.toInt()
                     )
                 )

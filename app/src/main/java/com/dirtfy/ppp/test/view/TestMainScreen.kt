@@ -6,11 +6,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.dirtfy.ppp.accounting.accounting.model.AccountData
 
 @Composable
 fun TestMainScreen(
     navigateToAccountTest: () -> Unit,
-    navigateToRecordTest: () -> Unit,
+    navigateToRecordTest: (AccountData) -> Unit,
     navigateToMenuTest: () -> Unit,
 ) {
     Column(
@@ -19,7 +20,7 @@ fun TestMainScreen(
         Button(onClick = navigateToAccountTest) {
             Text(text = "account test")
         }
-        Button(onClick = navigateToRecordTest) {
+        Button(onClick = { navigateToRecordTest(AccountData()) }) {
             Text(text = "account record test")
         }
         Button(onClick = navigateToMenuTest) {

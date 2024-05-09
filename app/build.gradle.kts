@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.gms.google-services")
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -80,6 +81,12 @@ dependencies {
 
     // collectAsStateWithLifecycle
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // zxing(QR code)
+    implementation(libs.zxing.android.embedded)
+
+    // data class serializable
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

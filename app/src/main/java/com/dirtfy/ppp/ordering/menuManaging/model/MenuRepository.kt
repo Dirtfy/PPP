@@ -1,7 +1,5 @@
 package com.dirtfy.ppp.ordering.menuManaging.model
 
-import com.dirtfy.ppp.accounting.accounting.model.AccountData
-import com.dirtfy.ppp.accounting.accounting.model.AccountRepository
 import com.dirtfy.ppp.common.Repository
 import com.dirtfy.ppp.common.RepositoryPath
 import com.google.firebase.firestore.DocumentSnapshot

@@ -19,13 +19,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.accounting.accounting.model.AccountData
-import com.dirtfy.ppp.accounting.accounting.viewmodel.AccountListViewModel
 import com.dirtfy.ppp.ordering.menuManaging.model.MenuData
 import com.dirtfy.ppp.ordering.menuManaging.viewmodel.MenuListViewModel
 import com.dirtfy.ppp.ui.theme.PPPTheme
-import com.google.firebase.Timestamp
-import java.util.Date
 
 object MenuTestScreen {
     const val TAG = "AccountTestScreen"

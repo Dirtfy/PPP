@@ -20,7 +20,7 @@ abstract class SingleViewModel<T>: ViewModel() {
     val data: StateFlow<T>
         get() = _data
 
-    fun reloadData(filter: (T) -> Boolean) {
+    open fun reloadData(filter: (T) -> Boolean) {
         viewModelScope.launch {
             val target = repository.read(filter)
 
@@ -33,7 +33,7 @@ abstract class SingleViewModel<T>: ViewModel() {
         }
     }
 
-    fun updateData(newData: T) {
+    open fun updateData(newData: T) {
         viewModelScope.launch {
             repository.update {
                 return@update if (_data.value == it)
