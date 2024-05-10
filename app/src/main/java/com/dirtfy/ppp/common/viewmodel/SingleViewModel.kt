@@ -46,4 +46,9 @@ abstract class SingleViewModel<T>: ViewModel() {
         }
     }
 
+    // TODO: 너무 위험하지 않나? 언젠가 뺴야지..
+    fun forceDataInjection(newData: T) {
+        _data.value = newData
+    }
+
 }

@@ -11,4 +11,5 @@ class AccountViewModel: SingleViewModel<AccountData>() {
         get() = AccountRepository
     override val initialValue: AccountData
         get() = AccountData()
+
 }

@@ -67,6 +67,9 @@ fun AccountRecordTest(
     accountRecordListViewModel: AccountRecordListViewModel = viewModel()
 ) {
 
+    // TODO : 일단은 이렇게...
+    accountViewModel.forceDataInjection(arrivedAccountData)
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {

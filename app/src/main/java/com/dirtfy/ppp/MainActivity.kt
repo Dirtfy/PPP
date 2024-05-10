@@ -22,12 +22,20 @@ import com.dirtfy.ppp.test.view.QRCodeGenerateTest
 import com.dirtfy.ppp.test.view.QRCodeScanTest
 import com.dirtfy.ppp.test.view.TestMainScreen
 import com.dirtfy.ppp.ui.theme.PPPTheme
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class MainActivity : ComponentActivity() {
+
+    object Const{
+        var deepLinkScheme: String = "com.dirtfy.ppp"
+        var deepLinkHost: String = "account_record"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Const.deepLinkScheme = getString(R.string.deeplink_scheme)
+        Const.deepLinkHost = getString(R.string.deeplink_host)
+
         setContent {
             PPPTheme {
                 // A surface container using the 'background' color from the theme
@@ -56,9 +64,13 @@ fun MainScreen() {
                 TestMainScreen(
                     navigateToAccountTest = { navController.navigate(PPPScreen.Account.route) },
                     navigateToRecordTest = {
-                        navController.navigate("${PPPScreen.AccountRecord.route}/$")
-                                           },
-                    navigateToMenuTest = { navController.navigate(PPPScreen.Menu.route) })
+                        navController.navigate(
+                            "${PPPScreen.AccountRecord.route}/" +
+                                    PPPScreen.AccountRecord.buildArgumentString(it))},
+                    navigateToMenuTest = { navController.navigate(PPPScreen.Menu.route) },
+                    navigateToQRScanTest = { navController.navigate(PPPScreen.QRCodeScanTest.route) },
+                    navigateToQRGenerateTest = { navController.navigate(PPPScreen.QRCodeGenerateTest.route) }
+                )
             }
             composable(route = PPPScreen.Account.route) {
                 AccountTest()
@@ -68,10 +80,15 @@ fun MainScreen() {
                 arguments = PPPScreen.AccountRecord.arguments,
                 deepLinks = PPPScreen.AccountRecord.deepLinks
             ) {
-                val serializedAccountData =
-                    it.arguments?.getString(PPPScreen.AccountRecord.accountTypeArg)?:
-                    Json.encodeToString(AccountData())
-                val accountData = Json.decodeFromString<AccountData>(serializedAccountData)
+                val arguments = requireNotNull(it.arguments)
+                val accountData =
+                    AccountData(
+                        accountID = requireNotNull(arguments.getString(PPPScreen.AccountRecord.accountIDArg)),
+                        accountName = requireNotNull(arguments.getString(PPPScreen.AccountRecord.accountNameArg)),
+                        phoneNumber = requireNotNull(arguments.getString(PPPScreen.AccountRecord.phoneNumberArg)),
+                        registerTimestamp = requireNotNull(arguments.getLong(PPPScreen.AccountRecord.registerTimestampArg)),
+                        balance = requireNotNull(arguments.getInt(PPPScreen.AccountRecord.balanceArg))
+                    )
 
                 AccountRecordTest(accountData)
             }

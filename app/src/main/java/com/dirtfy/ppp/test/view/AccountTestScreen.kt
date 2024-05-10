@@ -10,6 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +27,35 @@ import java.util.Calendar
 
 object AccountTestScreen{
     const val TAG = "AccountTestScreen"
+}
+
+@Composable
+fun AccountCreate(
+    name: String, onNameChanged: (String) -> Unit,
+    phoneNumber: String, onPhoneNumberChanged: (String) -> Unit,
+    balance: String, onBalanceChanged: (String) -> Unit,
+    onCreateButtonClick: () -> Unit
+) {
+    Column {
+        TextField(
+            value = name,
+            onValueChange = { onNameChanged(it) },
+            label = { Text("account name") }
+        )
+        TextField(
+            value = phoneNumber,
+            onValueChange = { onPhoneNumberChanged(it) },
+            label = { Text("phone number") }
+        )
+        TextField(
+            value = balance,
+            onValueChange = { onBalanceChanged(it) },
+            label = { Text("balance") }
+        )
+        Button(onClick = onCreateButtonClick) {
+            Text(text = "create")
+        }
+    }
 }
 
 @Composable
@@ -51,6 +81,7 @@ fun AccountItem(data: AccountData) {
         Text(text = "Name: "+ data.accountName)
         Text(text = "Balance:" + data.balance.toString())
         Text(text = "Timestamp:" + data.registerTimestamp.toString())
+        Text(text = "Phone Number: "+ data.phoneNumber)
     }
 }
 
@@ -63,44 +94,33 @@ fun AccountTest(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        var nameText by remember { mutableStateOf("") }
-        TextField(
-            value = nameText,
-            onValueChange = { nameText = it },
-            label = { Text("account name") }
-        )
-
-        var pnText by remember { mutableStateOf("") }
-        TextField(
-            value = pnText,
-            onValueChange = { pnText = it },
-            label = { Text("phone number") }
-        )
-
+        var name by remember { mutableStateOf("") }
+        var phoneNumber by remember { mutableStateOf("") }
         var balance by remember { mutableStateOf("") }
-        TextField(
-            value = balance,
-            onValueChange = { balance = it },
-            label = { Text("balance") }
-        )
+
+        AccountCreate(
+            name = name,
+            onNameChanged = { name = it },
+            phoneNumber = phoneNumber,
+            onPhoneNumberChanged = { phoneNumber = it },
+            balance = balance,
+            onBalanceChanged = { balance = it }
+        ) {
+            accountListViewModel.insertData(
+                AccountData(
+                    accountID = null,
+                    accountName = name,
+                    phoneNumber = phoneNumber,
+                    registerTimestamp = Calendar.getInstance().timeInMillis,
+                    balance = balance.toInt()
+                )
+            )
+            name = ""
+            phoneNumber = ""
+            balance = ""
+        }
 
         Row {
-            Button(onClick = {
-                accountListViewModel.insertData(
-                    AccountData(
-                        accountID = null,
-                        accountName = nameText,
-                        phoneNumber = pnText,
-                        registerTimestamp = Calendar.getInstance().timeInMillis,
-                        balance = balance.toInt()
-                    )
-                )
-                nameText = ""
-                pnText = ""
-                balance = ""
-            }) {
-                Text(text = "create")
-            }
             Button(onClick = {
                 accountListViewModel.reloadData { true }
             }) {
