@@ -52,7 +52,7 @@ fun AccountRecordList(accountRecords: List<AccountRecordData>) {
 fun AccountRecordItem(data: AccountRecordData) {
     Column{
         Text(text = "ID: ${data.recordID?:"null"}")
-        Text(text = "Account ID: ${data.accountID}")
+        Text(text = "Account ID: ${data.accountNumber}")
         Text(text = "Timestamp:" + data.timestamp.toString())
         Text(text = "User Name: "+ data.userName)
         Text(text = "Amount:" + data.amount.toString())
@@ -84,7 +84,7 @@ fun AccountRecordTest(
             })
             Button(onClick = {
                 accountViewModel.reloadData {
-                    it.accountID == accountID
+                    it.accountNumber == accountID
                 }
             }) {
                 Text(text = "load account")
@@ -112,7 +112,7 @@ fun AccountRecordTest(
                     accountRecordListViewModel.insertData(
                         AccountRecordData(
                             recordID = null,
-                            accountID = accountData.accountID?:"error!!",
+                            accountNumber = accountData.accountNumber?:"error!!",
                             timestamp = Timestamp(Date()),
                             userName = userName,
                             amount = amount.toInt(),
@@ -127,7 +127,7 @@ fun AccountRecordTest(
 
                 Button(onClick = {
                     accountRecordListViewModel.reloadData {
-                        it.accountID == accountData.accountID
+                        it.accountNumber == accountData.accountNumber
                     }
                 }) {
                     Text(text = "reload All")

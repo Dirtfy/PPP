@@ -1,27 +1,25 @@
 package com.dirtfy.ppp.accounting.accountRecording.barcoding.viewmodel
 
-import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.ImageBitmapConfig
 import androidx.lifecycle.ViewModel
+import com.dirtfy.ppp.accounting.accountRecording.barcoding.model.BarCodeGenerator
 import com.dirtfy.ppp.accounting.accountRecording.barcoding.model.BarcodeData
-import com.dirtfy.ppp.accounting.accountRecording.barcoding.model.QRCodeGenerator
 import com.dirtfy.ppp.accounting.accounting.model.AccountData
 import com.dirtfy.ppp.common.Generator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class QRCodeViewModel: ViewModel(){
+class BarCodeViewModel: ViewModel(){
 
-    private val generator: Generator<BarcodeData, ImageBitmap> = QRCodeGenerator
+    private val generator: Generator<BarcodeData, ImageBitmap> = BarCodeGenerator
 
-    private val _QRCode: MutableStateFlow<ImageBitmap> =
+    private val _barCode: MutableStateFlow<ImageBitmap> =
         MutableStateFlow(ImageBitmap(400, 400))
-    val QRCode: StateFlow<ImageBitmap>
-        get() = _QRCode
+    val barCode: StateFlow<ImageBitmap>
+        get() = _barCode
 
     fun generate(inputData: AccountData) {
-        _QRCode.value = generator.generate(
+        _barCode.value = generator.generate(
             BarcodeData(
                 inputData.accountID?: "null"
             )

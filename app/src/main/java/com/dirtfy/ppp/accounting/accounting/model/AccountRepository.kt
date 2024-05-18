@@ -20,6 +20,7 @@ object AccountRepository: Repository<AccountData> {
 
         newAccountRef.set(
             _AccountData(
+                data.accountNumber,
                 data.accountName,
                 data.phoneNumber,
                 data.registerTimestamp,
@@ -27,7 +28,7 @@ object AccountRepository: Repository<AccountData> {
             )
         )
 
-        return data.copy(accountID = newAccountRef.id)
+        return data
     }
 
     override suspend fun read(filter: (AccountData) -> Boolean): List<AccountData> {
@@ -39,6 +40,7 @@ object AccountRepository: Repository<AccountData> {
             val _account = documentSnapshot.toObject<_AccountData>()!!
             val account = AccountData(
                 documentSnapshot.id,
+                _account.accountNumber!!,
                 _account.accountName!!,
                 _account.phoneNumber!!,
                 _account.registerTimestamp!!,
@@ -60,13 +62,24 @@ object AccountRepository: Repository<AccountData> {
             val _account = documentSnapshot.toObject<_AccountData>()!!
             val account = AccountData(
                 documentSnapshot.id,
+                _account.accountNumber!!,
                 _account.accountName!!,
                 _account.phoneNumber!!,
                 _account.registerTimestamp!!,
                 _account.balance!!
             )
 
-            repositoryRef.document(account.accountID!!).set(filter(account))
+            val updatedAccount = filter(account)
+
+            repositoryRef.document(documentSnapshot.id).set(
+                _AccountData(
+                    updatedAccount.accountNumber,
+                    updatedAccount.accountName,
+                    updatedAccount.phoneNumber,
+                    updatedAccount.registerTimestamp,
+                    updatedAccount.balance
+                )
+            )
         }
     }
 

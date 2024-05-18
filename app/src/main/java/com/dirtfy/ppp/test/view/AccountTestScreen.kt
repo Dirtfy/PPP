@@ -10,7 +10,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,12 +30,18 @@ object AccountTestScreen{
 
 @Composable
 fun AccountCreate(
+    number: String, onNumberChanged: (String) -> Unit,
     name: String, onNameChanged: (String) -> Unit,
     phoneNumber: String, onPhoneNumberChanged: (String) -> Unit,
     balance: String, onBalanceChanged: (String) -> Unit,
     onCreateButtonClick: () -> Unit
 ) {
     Column {
+        TextField(
+            value = number,
+            onValueChange = { onNumberChanged(it) },
+            label = { Text("account number") }
+        )
         TextField(
             value = name,
             onValueChange = { onNameChanged(it) },
@@ -66,7 +71,7 @@ fun AccountList(accounts: List<AccountData>) {
         items(
             items = accounts,
             key = { item ->
-                item.accountID?:""
+                item.accountNumber?:""
             }
         ) { item ->
             AccountItem(data = item)
@@ -77,7 +82,7 @@ fun AccountList(accounts: List<AccountData>) {
 @Composable
 fun AccountItem(data: AccountData) {
     Column{
-        Text(text = "ID: ${data.accountID?:"null"}")
+        Text(text = "ID: ${data.accountNumber?:"null"}")
         Text(text = "Name: "+ data.accountName)
         Text(text = "Balance:" + data.balance.toString())
         Text(text = "Timestamp:" + data.registerTimestamp.toString())
@@ -94,11 +99,14 @@ fun AccountTest(
         modifier = Modifier.fillMaxSize()
     ) {
 
+        var number by remember { mutableStateOf("") }
         var name by remember { mutableStateOf("") }
         var phoneNumber by remember { mutableStateOf("") }
         var balance by remember { mutableStateOf("") }
 
         AccountCreate(
+            number = number,
+            onNumberChanged = { number = it},
             name = name,
             onNameChanged = { name = it },
             phoneNumber = phoneNumber,
@@ -108,7 +116,7 @@ fun AccountTest(
         ) {
             accountListViewModel.insertData(
                 AccountData(
-                    accountID = null,
+                    accountNumber = number,
                     accountName = name,
                     phoneNumber = phoneNumber,
                     registerTimestamp = Calendar.getInstance().timeInMillis,

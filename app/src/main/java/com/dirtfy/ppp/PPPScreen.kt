@@ -40,7 +40,7 @@ sealed class PPPScreen(val route: String) {
         )
 
         fun buildArgumentString(data: AccountData): String {
-            return "account_id=${data.accountID}&" +
+            return "account_id=${data.accountNumber}&" +
                     "account_name=${data.accountName}&" +
                     "phone_number=${data.phoneNumber}&" +
                     "register_timestamp=${data.registerTimestamp}&" +
@@ -50,4 +50,6 @@ sealed class PPPScreen(val route: String) {
 
     data object QRCodeGenerateTest: PPPScreen("qr_generate")
     data object QRCodeScanTest: PPPScreen("qr_scan")
+
+    data object TablingTest: PPPScreen("tabling")
 }

@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ordering.menuManaging.model
+package com.dirtfy.ppp.selling.menuManaging.model
 
 data class _MenuData(
     val name: String?,

@@ -19,7 +19,7 @@ object AccountRecordRepository: Repository<AccountRecordData> {
         newAccountRecordRef.set(
             _AccountRecordData(
                 timestamp = data.timestamp,
-                accountID = data.accountID,
+                accountNumber = data.accountNumber,
                 userName = data.userName,
                 amount = data.amount,
                 result = data.result
@@ -39,7 +39,7 @@ object AccountRecordRepository: Repository<AccountRecordData> {
             val accountRecord = AccountRecordData(
                 recordID = documentSnapshot.id,
                 timestamp = _accountRecord.timestamp!!,
-                accountID = _accountRecord.accountID!!,
+                accountNumber = _accountRecord.accountNumber!!,
                 userName = _accountRecord.userName!!,
                 amount = _accountRecord.amount!!,
                 result = _accountRecord.result!!

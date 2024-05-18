@@ -14,7 +14,8 @@ fun TestMainScreen(
     navigateToRecordTest: (AccountData) -> Unit,
     navigateToMenuTest: () -> Unit,
     navigateToQRScanTest: () -> Unit,
-    navigateToQRGenerateTest: () -> Unit
+    navigateToQRGenerateTest: () -> Unit,
+    navigateToTablingTest: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -22,7 +23,7 @@ fun TestMainScreen(
         Button(onClick = navigateToAccountTest) {
             Text(text = "account test")
         }
-        Button(onClick = { navigateToRecordTest(AccountData(accountID = "test")) }) {
+        Button(onClick = { navigateToRecordTest(AccountData(accountNumber = "test")) }) {
             Text(text = "account record test")
         }
         Button(onClick = navigateToMenuTest) {
@@ -33,6 +34,9 @@ fun TestMainScreen(
         }
         Button(onClick = { navigateToQRGenerateTest() }) {
             Text(text = "QR Code generate test")
+        }
+        Button(onClick = { navigateToTablingTest() }) {
+            Text(text = "tabling test")
         }
     }
 }

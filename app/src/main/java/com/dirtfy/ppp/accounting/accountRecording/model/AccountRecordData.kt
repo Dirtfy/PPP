@@ -5,7 +5,7 @@ import java.util.Date
 
 data class AccountRecordData(
     val recordID: String? = null,
-    val accountID: String = "...",
+    val accountNumber: String = "...",
     val timestamp: Timestamp = Timestamp(Date()),
     val userName: String = "loading..",
     val amount: Int = 0,

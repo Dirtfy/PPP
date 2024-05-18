@@ -20,6 +20,7 @@ import com.dirtfy.ppp.test.view.AccountTest
 import com.dirtfy.ppp.test.view.MenuTest
 import com.dirtfy.ppp.test.view.QRCodeGenerateTest
 import com.dirtfy.ppp.test.view.QRCodeScanTest
+import com.dirtfy.ppp.test.view.TablingTestScreen
 import com.dirtfy.ppp.test.view.TestMainScreen
 import com.dirtfy.ppp.ui.theme.PPPTheme
 
@@ -69,7 +70,8 @@ fun MainScreen() {
                                     PPPScreen.AccountRecord.buildArgumentString(it))},
                     navigateToMenuTest = { navController.navigate(PPPScreen.Menu.route) },
                     navigateToQRScanTest = { navController.navigate(PPPScreen.QRCodeScanTest.route) },
-                    navigateToQRGenerateTest = { navController.navigate(PPPScreen.QRCodeGenerateTest.route) }
+                    navigateToQRGenerateTest = { navController.navigate(PPPScreen.QRCodeGenerateTest.route) },
+                    navigateToTablingTest = { navController.navigate(PPPScreen.TablingTest.route) }
                 )
             }
             composable(route = PPPScreen.Account.route) {
@@ -83,7 +85,7 @@ fun MainScreen() {
                 val arguments = requireNotNull(it.arguments)
                 val accountData =
                     AccountData(
-                        accountID = requireNotNull(arguments.getString(PPPScreen.AccountRecord.accountIDArg)),
+                        accountNumber = requireNotNull(arguments.getString(PPPScreen.AccountRecord.accountIDArg)),
                         accountName = requireNotNull(arguments.getString(PPPScreen.AccountRecord.accountNameArg)),
                         phoneNumber = requireNotNull(arguments.getString(PPPScreen.AccountRecord.phoneNumberArg)),
                         registerTimestamp = requireNotNull(arguments.getLong(PPPScreen.AccountRecord.registerTimestampArg)),
@@ -100,6 +102,9 @@ fun MainScreen() {
             }
             composable(route = PPPScreen.QRCodeScanTest.route) {
                 QRCodeScanTest()
+            }
+            composable(route = PPPScreen.TablingTest.route) {
+                TablingTestScreen()
             }
         }
     }

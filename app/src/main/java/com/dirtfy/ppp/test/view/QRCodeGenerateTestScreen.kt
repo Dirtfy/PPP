@@ -18,11 +18,14 @@ fun QRCodeGenerateTest(
     qrCodeViewModel: QRCodeViewModel = viewModel()
 ){
     Column {
+        var number by remember { mutableStateOf("") }
         var name by remember { mutableStateOf("") }
         var phoneNumber by remember { mutableStateOf("") }
         var balance by remember { mutableStateOf("") }
 
         AccountCreate(
+            number = number,
+            onNumberChanged = { number = it },
             name = name,
             onNameChanged = { name = it },
             phoneNumber = phoneNumber,
@@ -31,7 +34,7 @@ fun QRCodeGenerateTest(
             onBalanceChanged = { balance = it }
         ) {
             val accountData = AccountData(
-                accountID = "test",
+                accountNumber = "test",
                 accountName = name,
                 phoneNumber = phoneNumber,
                 registerTimestamp = Calendar.getInstance().timeInMillis,

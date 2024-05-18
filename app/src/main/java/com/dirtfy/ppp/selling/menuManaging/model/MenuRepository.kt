@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ordering.menuManaging.model
+package com.dirtfy.ppp.selling.menuManaging.model
 
 import com.dirtfy.ppp.common.Repository
 import com.dirtfy.ppp.common.RepositoryPath

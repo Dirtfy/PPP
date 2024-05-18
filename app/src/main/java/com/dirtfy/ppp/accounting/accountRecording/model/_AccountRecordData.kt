@@ -4,7 +4,7 @@ import com.google.firebase.Timestamp
 
 data class _AccountRecordData(
     var timestamp: Timestamp?,
-    var accountID: String?,
+    var accountNumber: String?,
     var userName: String?,
     var amount: Int?,
     var result: Int?

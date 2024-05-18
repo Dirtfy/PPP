@@ -19,12 +19,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.ordering.menuManaging.model.MenuData
-import com.dirtfy.ppp.ordering.menuManaging.viewmodel.MenuListViewModel
+import com.dirtfy.ppp.selling.menuManaging.model.MenuData
+import com.dirtfy.ppp.selling.menuManaging.viewmodel.MenuListViewModel
 import com.dirtfy.ppp.ui.theme.PPPTheme
 
 object MenuTestScreen {
     const val TAG = "AccountTestScreen"
+}
+
+@Composable
+fun MenuCreate(
+    name: String, onNameChange: (String) -> Unit,
+    price: String, onPriceChange: (String) -> Unit,
+    onCreateButtonClick: () -> Unit
+) {
+    Column {
+        TextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = { Text("menu name") }
+        )
+        TextField(
+            value = price,
+            onValueChange = onPriceChange,
+            label = { Text("menu price") }
+        )
+        Button(onClick = { onCreateButtonClick() }) {
+            Text(text = "create")
+        }
+    }
+
 }
 
 @Composable
@@ -61,34 +85,23 @@ fun MenuTest(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        var nameText by remember { mutableStateOf("") }
-        TextField(
-            value = nameText,
-            onValueChange = { nameText = it },
-            label = { Text("menu name") }
-        )
+        var name by remember { mutableStateOf("") }
+        var price by remember { mutableStateOf("") }
 
-        var priceText by remember { mutableStateOf("") }
-        TextField(
-            value = priceText,
-            onValueChange = { priceText = it },
-            label = { Text("menu price") }
-        )
+        MenuCreate(
+            name = name, onNameChange = { name = it },
+            price = price, onPriceChange = { price = it }) {
+
+            menuListViewModel.insertData(
+                MenuData(
+                    menuID = null,
+                    name = name,
+                    price = price.toInt()
+                )
+            )
+        }
 
         Row {
-            Button(onClick = {
-                menuListViewModel.insertData(
-                    MenuData(
-                        menuID = null,
-                        name = nameText,
-                        price = priceText.toInt()
-                    )
-                )
-                nameText = ""
-                priceText = ""
-            }) {
-                Text(text = "create")
-            }
             Button(onClick = {
                 menuListViewModel.reloadData { true }
             }) {

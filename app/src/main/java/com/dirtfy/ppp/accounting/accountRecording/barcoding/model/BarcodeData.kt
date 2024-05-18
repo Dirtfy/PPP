@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BarcodeData(
-    val uri: String
+    val accountID: String
 )
