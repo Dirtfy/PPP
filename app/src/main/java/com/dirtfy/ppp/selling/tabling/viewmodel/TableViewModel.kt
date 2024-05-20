@@ -20,7 +20,8 @@ class TableViewModel: ViewModel() {
     init {
         viewModelScope.launch {
             (0..10).forEach {
-                tablingManager.setupTable(it)
+                if (!tablingManager.isSetup(it))
+                    tablingManager.setupTable(it)
 
                 val tableData = tablingManager.checkTable(it)
 
@@ -38,7 +39,7 @@ class TableViewModel: ViewModel() {
 
         menuNameList.indices.forEach {
             if (countMap[menuNameList[it]] == null) {
-                countMap[menuNameList[it]] = 0
+                countMap[menuNameList[it]] = 1
             }
             else {
                 countMap[menuNameList[it]] = countMap[menuNameList[it]]!! + 1
@@ -85,6 +86,23 @@ class TableViewModel: ViewModel() {
             tablingManager.updateMenu(updatedTableData)
 
             _tableList.value[tableNumber].value = updatedTableData.convertToTableOrderData()
+        }
+    }
+
+    fun groupTable(tableNumberList: List<Int>) {
+        viewModelScope.launch {
+            (1..<tableNumberList.size).forEach {
+                tablingManager.mergeTable(
+                    _tableList.value[0].value.convertToTableData(tableNumberList[0]),
+                    _tableList.value[it].value.convertToTableData(tableNumberList[it])
+                )
+            }
+        }
+    }
+
+    fun cleanTable(tableNumber: Int) {
+        viewModelScope.launch {
+            tablingManager.cleanTable(tableNumber)
         }
     }
 

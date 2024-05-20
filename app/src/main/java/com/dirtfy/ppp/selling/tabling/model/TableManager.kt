@@ -18,11 +18,13 @@ object TableManager {
     private val logicalRef = 
         repositoryRef.document(RepositoryPath.TABLE_LOGICAL)
 
-    suspend fun setupTable(tableNumber: Int) {
+    suspend fun isSetup(tableNumber: Int): Boolean {
         val target = physicalRef.get().await().getString("$tableNumber")
-        if (target != null && target != "")
-            return
 
+        return target != null && target != ""
+    }
+
+    suspend fun setupTable(tableNumber: Int) {
         val logicalTable = logicalRef.collection(RepositoryPath.TABLE_LOGICAL_TABLE).document()
 
         logicalTable.set(_TableData()).await()
@@ -100,16 +102,25 @@ object TableManager {
     }
     
     suspend fun cleanTable(tableNumber: Int) {
-        val logicalTableID = physicalRef.get().await().getString("$tableNumber")
+        val logicalTargetTableID = physicalRef.get().await().getString("$tableNumber")
 
-        if (logicalTableID == null) {
+        if (logicalTargetTableID == null) {
             Log.d(TAG, "logical table lost!")
             return
         }
 
         logicalRef.collection(RepositoryPath.TABLE_LOGICAL_TABLE)
-            .document(logicalTableID)
+            .document(logicalTargetTableID)
             .delete().await()
+
+        (0..10).forEach {
+            val logicalTableID = physicalRef.get().await().getString("$it")
+
+            if (logicalTableID == logicalTargetTableID) {
+                physicalRef.update("$it", "").await()
+            }
+        }
+
     }
 
     suspend fun mergeTable(baseTable: TableData, mergingTable: TableData) {

@@ -1,8 +1,6 @@
 package com.dirtfy.ppp.accounting.accountRecording.barcoding.viewmodel
 
-import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.ImageBitmapConfig
 import androidx.lifecycle.ViewModel
 import com.dirtfy.ppp.accounting.accountRecording.barcoding.model.BarcodeData
 import com.dirtfy.ppp.accounting.accountRecording.barcoding.model.QRCodeGenerator

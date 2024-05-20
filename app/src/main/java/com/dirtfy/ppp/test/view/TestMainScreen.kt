@@ -15,7 +15,8 @@ fun TestMainScreen(
     navigateToMenuTest: () -> Unit,
     navigateToQRScanTest: () -> Unit,
     navigateToQRGenerateTest: () -> Unit,
-    navigateToTablingTest: () -> Unit
+    navigateToTablingTest: () -> Unit,
+    navigateToSalesTest: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -37,6 +38,9 @@ fun TestMainScreen(
         }
         Button(onClick = { navigateToTablingTest() }) {
             Text(text = "tabling test")
+        }
+        Button(onClick = { navigateToSalesTest() }) {
+            Text(text = "sales test")
         }
     }
 }

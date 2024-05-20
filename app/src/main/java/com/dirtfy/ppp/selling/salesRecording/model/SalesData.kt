@@ -1,8 +1,8 @@
 package com.dirtfy.ppp.selling.salesRecording.model
 
-import com.dirtfy.ppp.selling.menuManaging.model.MenuData
-
 data class SalesData(
-    val menuList: ArrayList<MenuData>,
+    val salesID: String?,
+    val menuCountMap: Map<String, Int>,
+    val menuPriceMap: Map<String, Int>,
     val pointAccountNumber: String?
 )

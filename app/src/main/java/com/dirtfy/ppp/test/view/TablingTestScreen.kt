@@ -11,8 +11,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.selling.tabling.model.TableData
 import com.dirtfy.ppp.selling.tabling.viewmodel.TableOrderData
 import com.dirtfy.ppp.selling.tabling.viewmodel.TableViewModel
 
@@ -35,20 +36,39 @@ fun Table(
 ) {
     Box(
         modifier = Modifier
-            .background(tableColor)
-            .padding(PaddingValues(Dp(10F)))
+            .padding(PaddingValues(Dp(2F)))
             .clickable {
                 onClick()
             }
     ) {
-        Text(text = "$tableNumber")
+        Text(text = "$tableNumber", modifier = Modifier.background(tableColor))
+    }
+}
+
+@Composable
+fun MergeFrame(
+    onMergeStartButtonClick: (List<Int>) -> Unit
+) {
+    var list by remember { mutableStateOf("") }
+
+    Column {
+        TextField(value = list, onValueChange = { list = it })
+        Button(onClick = {
+            onMergeStartButtonClick(
+                list.split(',')
+                    .map { it.toInt() }
+            )
+        }) {
+            Text(text = "merge start")
+        }
     }
 }
 
 @Composable
 fun TableInfo(
     tableData: TableOrderData,
-    onMenuAdd: (name: String, price: String) -> Unit
+    onMenuAdd: (name: String, price: String) -> Unit,
+    onCleanClick: () -> Unit
 ) {
     var menuName by remember { mutableStateOf("") }
     var menuPrice by remember { mutableStateOf("") }
@@ -60,6 +80,10 @@ fun TableInfo(
                 price = menuPrice, onPriceChange = { menuPrice = it }) {
 
                 onMenuAdd(menuName, menuPrice)
+            }
+
+            Button(onClick = onCleanClick) {
+                Text(text = "table Clean")
             }
 
             LazyColumn {
@@ -89,20 +113,28 @@ fun TablingTestScreen(
             columns = GridCells.Fixed(10)
         ) {
             items(tableList.size) {
-                Table(it, Color.Blue) {
+                Table(it, Color.Gray) {
                     activeTableInfo = !activeTableInfo
                     currentTableNumber = it
                 }
             }
         }
 
+        MergeFrame(onMergeStartButtonClick = {
+            tableViewModel.groupTable(it)
+        })
+
         if (activeTableInfo) {
             val tableData by tableList[currentTableNumber].collectAsStateWithLifecycle()
 
-            TableInfo(tableData = tableData, onMenuAdd = {
-                    name, price ->
-                tableViewModel.menuAdd(currentTableNumber, name, price.toInt())
-            })
+            TableInfo(tableData = tableData,
+                onMenuAdd = {
+                            name, price ->
+                    tableViewModel.menuAdd(currentTableNumber, name, price.toInt())
+                            },
+                onCleanClick = {
+                    tableViewModel.cleanTable(currentTableNumber)
+                })
         }
     }
 

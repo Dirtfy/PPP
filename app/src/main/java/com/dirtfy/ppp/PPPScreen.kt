@@ -50,6 +50,6 @@ sealed class PPPScreen(val route: String) {
 
     data object QRCodeGenerateTest: PPPScreen("qr_generate")
     data object QRCodeScanTest: PPPScreen("qr_scan")
-
     data object TablingTest: PPPScreen("tabling")
+    data object SalesTest: PPPScreen("sales")
 }

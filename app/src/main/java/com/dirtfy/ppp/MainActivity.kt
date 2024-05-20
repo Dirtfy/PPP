@@ -20,6 +20,7 @@ import com.dirtfy.ppp.test.view.AccountTest
 import com.dirtfy.ppp.test.view.MenuTest
 import com.dirtfy.ppp.test.view.QRCodeGenerateTest
 import com.dirtfy.ppp.test.view.QRCodeScanTest
+import com.dirtfy.ppp.test.view.SalesRecordingTest
 import com.dirtfy.ppp.test.view.TablingTestScreen
 import com.dirtfy.ppp.test.view.TestMainScreen
 import com.dirtfy.ppp.ui.theme.PPPTheme
@@ -71,7 +72,8 @@ fun MainScreen() {
                     navigateToMenuTest = { navController.navigate(PPPScreen.Menu.route) },
                     navigateToQRScanTest = { navController.navigate(PPPScreen.QRCodeScanTest.route) },
                     navigateToQRGenerateTest = { navController.navigate(PPPScreen.QRCodeGenerateTest.route) },
-                    navigateToTablingTest = { navController.navigate(PPPScreen.TablingTest.route) }
+                    navigateToTablingTest = { navController.navigate(PPPScreen.TablingTest.route) },
+                    navigateToSalesTest = { navController.navigate(PPPScreen.SalesTest.route) }
                 )
             }
             composable(route = PPPScreen.Account.route) {
@@ -105,6 +107,9 @@ fun MainScreen() {
             }
             composable(route = PPPScreen.TablingTest.route) {
                 TablingTestScreen()
+            }
+            composable(route = PPPScreen.SalesTest.route) {
+                SalesRecordingTest()
             }
         }
     }
