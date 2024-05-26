@@ -9,8 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.accounting.accountRecording.barcoding.viewmodel.QRCodeViewModel
-import com.dirtfy.ppp.accounting.accounting.model.AccountData
+import com.dirtfy.ppp.model.accounting.accounting.AccountData
+import com.dirtfy.ppp.viewmodel.accounting.managing.barcoding.QRCodeViewModel
 import java.util.Calendar
 
 @Composable

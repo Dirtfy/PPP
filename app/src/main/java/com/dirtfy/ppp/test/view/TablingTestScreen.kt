@@ -25,8 +25,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.selling.tabling.viewmodel.TableOrderData
-import com.dirtfy.ppp.selling.tabling.viewmodel.TableViewModel
+import com.dirtfy.ppp.viewmodel.selling.tabling.TableOrderData
+import com.dirtfy.ppp.viewmodel.selling.tabling.TableViewModel
 
 @Composable
 fun Table(
@@ -125,7 +125,7 @@ fun TablingTestScreen(
         })
 
         if (activeTableInfo) {
-            val tableData by tableList[currentTableNumber].collectAsStateWithLifecycle()
+            val tableData = tableList[currentTableNumber]
 
             TableInfo(tableData = tableData,
                 onMenuAdd = {

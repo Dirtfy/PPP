@@ -19,11 +19,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.accounting.accountRecording.model.AccountRecordData
-import com.dirtfy.ppp.accounting.accountRecording.viewmodel.AccountRecordListViewModel
-import com.dirtfy.ppp.accounting.accounting.model.AccountData
-import com.dirtfy.ppp.accounting.accounting.viewmodel.AccountViewModel
-import com.dirtfy.ppp.ui.theme.PPPTheme
+import com.dirtfy.ppp.model.accounting.accounting.AccountData
+import com.dirtfy.ppp.model.accounting.managing.AccountRecordData
+import com.dirtfy.ppp.view.ui.theme.PPPTheme
+import com.dirtfy.ppp.viewmodel.accounting.accounting.AccountViewModel
+import com.dirtfy.ppp.viewmodel.accounting.managing.AccountRecordListViewModel
 import com.google.firebase.Timestamp
 import java.util.Date
 

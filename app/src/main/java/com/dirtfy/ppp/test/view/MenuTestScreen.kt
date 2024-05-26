@@ -19,9 +19,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.selling.menuManaging.model.MenuData
-import com.dirtfy.ppp.selling.menuManaging.viewmodel.MenuListViewModel
-import com.dirtfy.ppp.ui.theme.PPPTheme
+import com.dirtfy.ppp.model.selling.menu.managing.MenuData
+import com.dirtfy.ppp.view.ui.theme.PPPTheme
+import com.dirtfy.ppp.viewmodel.selling.menu.managing.MenuListViewModel
 
 object MenuTestScreen {
     const val TAG = "AccountTestScreen"

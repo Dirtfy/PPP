@@ -16,9 +16,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.selling.menuManaging.model.MenuData
-import com.dirtfy.ppp.selling.salesRecording.model.SalesData
-import com.dirtfy.ppp.selling.salesRecording.viewmodel.SalesViewModel
+import com.dirtfy.ppp.model.selling.menu.managing.MenuData
+import com.dirtfy.ppp.model.selling.recording.SalesData
+import com.dirtfy.ppp.viewmodel.selling.recording.SalesViewModel
 
 @Composable
 fun SalesItem(data: SalesData) {
@@ -29,7 +29,8 @@ fun SalesItem(data: SalesData) {
                     menuID = item,
                     name = data.menuCountMap[item]!!.toString(),
                     price = data.menuPriceMap[item]!!
-                ))
+                )
+                )
             }
         }
     }
@@ -66,7 +67,8 @@ fun SalesRecordingTest(
     var menuName by remember { mutableStateOf("") }
     var menuPrice by remember { mutableStateOf("") }
     var salesData by remember {
-        mutableStateOf(SalesData(
+        mutableStateOf(
+            SalesData(
             null,
             mapOf("..." to 1),
             mapOf("..." to 999),

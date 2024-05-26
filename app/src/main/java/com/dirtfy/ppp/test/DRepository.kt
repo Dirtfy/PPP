@@ -1,6 +1,6 @@
 package com.dirtfy.ppp.test
 
-import com.dirtfy.ppp.common.Repository
+import com.dirtfy.ppp.model.Repository
 
 object DRepository: Repository<DClass> {
 
