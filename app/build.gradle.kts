@@ -58,41 +58,38 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.firebase.firestore)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.navigation.compose)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    val composeBom = platform("androidx.compose:compose-bom:2024.04.01")
-    implementation(composeBom)
-    androidTestImplementation(composeBom)
-
-    // Material Design 3
-    implementation("androidx.compose.material3:material3")
-
-    // Android Studio Preview support
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-
-    // navigation
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-
-    // observeAsState
-    implementation(libs.androidx.runtime.livedata)
-
-    // collectAsStateWithLifecycle
-    implementation(libs.androidx.lifecycle.runtime.compose)
-
-    // zxing(QR code)
-    implementation(libs.zxing.android.embedded)
-
-    // data class serializable
-    implementation(libs.kotlinx.serialization.json)
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    // Material Design 3
+    implementation(libs.androidx.material3)
+    // Android Studio Preview support
+    implementation(libs.androidx.ui.tooling.preview)
+    // navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    // observeAsState
+    implementation(libs.androidx.runtime.livedata)
+    // collectAsStateWithLifecycle
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    // zxing(QR code)
+    implementation(libs.zxing.android.embedded)
+    // data class serializable
+    implementation(libs.kotlinx.serialization.json)
+    // constraint layout
+    implementation(libs.androidx.constraintlayout.compose)
+
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    
     debugImplementation(libs.androidx.ui.test.manifest)
+    // Android Studio Preview support
+    debugImplementation(libs.androidx.ui.tooling)
 }

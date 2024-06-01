@@ -9,40 +9,50 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dirtfy.ppp.contract.DummyUser
+import com.dirtfy.ppp.contract.User
+import com.dirtfy.ppp.contract.view.tabling.TableScreenContract
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-@Composable
-fun Table(
-    tableNumber: Int,
-    tableColor: Color
-) {
-    Box(
-        modifier = Modifier
-            .size(35.dp)
-            .background(tableColor)
+object TableScreen: TableScreenContract.API {
+    @Composable
+    override fun Table(
+        table: TableScreenContract.DTO.Table,
+        user: User,
+        modifier: Modifier
     ) {
-        Text(text = "$tableNumber")
+        Box(
+            modifier = modifier
+        ) {
+            Text(text = table.number)
+        }
     }
-}
 
-@Composable
-fun TableScreen(
-    tableStateList: List<Int>
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(10),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    @Composable
+    override fun TableLayout(
+        tableList: List<TableScreenContract.DTO.Table>,
+        user: User,
+        modifier: Modifier
     ) {
-        items(tableStateList) {
-            Table(it, Color.LightGray)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(10),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = modifier
+        ) {
+            items(tableList) {
+                Table(
+                    table = it,
+                    user = user,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .background(Color(it.color))
+                )
+            }
         }
     }
 }
@@ -50,17 +60,20 @@ fun TableScreen(
 @Preview(showBackground = true)
 @Composable
 fun TableScreenPreview() {
-    val testList by remember {
-        mutableStateOf(
-            listOf(
-                11, 10, 9, 8, 7, 6, 5, 4, 3, 0,
-                 0,  0, 0, 0, 0, 0, 0, 0, 0, 2,
-                 0,  0, 0, 0, 0, 0, 0, 0, 0, 1
-            )
-        )
-    }
+    val tableList: List<TableScreenContract.DTO.Table> =
+        listOf(
+            11, 10, 9, 8, 7, 6, 5, 4, 3, 0,
+            0,  0, 0, 0, 0, 0, 0, 0, 0, 2,
+            0,  0, 0, 0, 0, 0, 0, 0, 0, 1
+        ).map {
+            TableScreenContract.DTO.Table("$it", Color.LightGray.value)
+        }
 
     PPPTheme {
-        TableScreen(testList)
+        TableScreen.TableLayout(
+            tableList = tableList,
+            user = DummyUser,
+            modifier = Modifier
+        )
     }
 }
