@@ -1,4 +1,9 @@
 package com.dirtfy.ppp.contract
 
-abstract class User {
+interface User {
+    fun mergeTable() {}
+    fun payTable() {}
+    fun menuAddAtOrder() {}
+    fun menuAddAtMenuList() {}
+    fun menuAddInstant() {}
 }

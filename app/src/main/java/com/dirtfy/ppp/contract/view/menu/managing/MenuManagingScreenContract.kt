@@ -1,10 +1,10 @@
-package com.dirtfy.ppp.contract.view.tabling
+package com.dirtfy.ppp.contract.view.menu.managing
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.dirtfy.ppp.contract.User
 
-object MenuListScreenContract {
+object MenuManagingScreenContract {
 
     object DTO {
 

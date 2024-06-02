@@ -1,4 +1,4 @@
 package com.dirtfy.ppp.contract
 
-object DummyUser: User() {
+object DummyUser: User {
 }
