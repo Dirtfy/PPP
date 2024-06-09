@@ -34,7 +34,7 @@ sealed class PPPScreen(val route: String) {
         )
         val deepLinks = listOf(
             navDeepLink {
-                uriPattern = "${MainActivity.Const.deepLinkScheme}://" +
+                uriPattern = "${TestMainActivity.Const.deepLinkScheme}://" +
                         routeWitchArgument
             }
         )

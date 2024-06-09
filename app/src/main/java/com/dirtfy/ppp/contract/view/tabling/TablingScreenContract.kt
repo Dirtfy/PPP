@@ -2,7 +2,8 @@ package com.dirtfy.ppp.contract.view.tabling
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.contract.User
+import com.dirtfy.ppp.contract.user.User
+import com.dirtfy.ppp.contract.viewmodel.TablingContract
 
 object TablingScreenContract {
 
@@ -10,16 +11,14 @@ object TablingScreenContract {
 
         @Composable
         fun Main(
-            orderList: List<OrderScreenContract.DTO.Order>,
-            totalOrderData: OrderScreenContract.DTO.Total,
-            tableList: List<TableScreenContract.DTO.Table>,
-            menuList: List<MenuListScreenContract.DTO.Menu>,
-            user: User,
-            modifier: Modifier
+            viewModel: TablingContract.API,
+            modifier: Modifier,
+            user: User
         )
 
         @Composable
         fun InstantMenuCreation(
+            menu: TablingContract.DTO.Menu,
             user: User,
             modifier: Modifier
         )

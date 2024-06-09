@@ -2,45 +2,38 @@ package com.dirtfy.ppp.contract.view.sales.recording
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.contract.User
+import com.dirtfy.ppp.contract.user.User
+import com.dirtfy.ppp.contract.viewmodel.SalesRecordingContract
 
 object SalesRecordingScreenContract {
-
-    object DTO {
-
-        data class Record(
-            val totalPrice: String,
-            val payment: String
-        )
-
-        data class Menu(
-            val name: String,
-            val price: String,
-            val count: String
-        )
-
-    }
 
     interface API {
 
         @Composable
         fun RecordList(
-            recordList: List<DTO.Record>,
+            recordList: List<SalesRecordingContract.DTO.Record>,
             user: User,
             modifier: Modifier
         )
 
         @Composable
         fun RecordItem(
-            record: DTO.Record,
+            record: SalesRecordingContract.DTO.Record,
             user: User,
             modifier: Modifier
         )
 
         @Composable
         fun RecordDetail(
-            record: DTO.Record,
-            menuList: List<DTO.Menu>,
+            record: SalesRecordingContract.DTO.Record,
+            menuList: List<SalesRecordingContract.DTO.Menu>,
+            user: User,
+            modifier: Modifier
+        )
+
+        @Composable
+        fun Main(
+            viewModel: SalesRecordingContract.API,
             user: User,
             modifier: Modifier
         )

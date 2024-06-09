@@ -2,31 +2,23 @@ package com.dirtfy.ppp.contract.view.tabling
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.contract.User
+import com.dirtfy.ppp.contract.user.User
+import com.dirtfy.ppp.contract.viewmodel.TablingContract
 
 object MenuListScreenContract {
-
-    object DTO {
-
-        data class Menu(
-            val name: String,
-            val price: String
-        )
-
-    }
 
     interface API {
 
         @Composable
         fun MenuList(
-            menuList: List<DTO.Menu>,
+            menuList: List<TablingContract.DTO.Menu>,
             user: User,
             modifier: Modifier
         )
 
         @Composable
         fun MenuItem(
-            menu: DTO.Menu,
+            menu: TablingContract.DTO.Menu,
             user: User,
             modifier: Modifier
         )

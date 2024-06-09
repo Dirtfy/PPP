@@ -2,31 +2,23 @@ package com.dirtfy.ppp.contract.view.tabling
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.contract.User
+import com.dirtfy.ppp.contract.user.User
+import com.dirtfy.ppp.contract.viewmodel.TablingContract
 
 object TableScreenContract {
-
-    object DTO {
-
-        data class Table(
-            val number: String,
-            val color: ULong
-        )
-
-    }
 
     interface API {
 
         @Composable
         fun Table(
-            table: DTO.Table,
+            table: TablingContract.DTO.Table,
             user: User,
             modifier: Modifier
         )
 
         @Composable
         fun TableLayout(
-            tableList: List<DTO.Table>,
+            tableList: List<TablingContract.DTO.Table>,
             user: User,
             modifier: Modifier
         )

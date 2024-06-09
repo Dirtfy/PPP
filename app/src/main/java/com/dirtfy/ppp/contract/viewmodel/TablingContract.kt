@@ -1,35 +1,44 @@
 package com.dirtfy.ppp.contract.viewmodel
 
-object TablingContract {
-    object DTD {
-        data class Menu(
-            val name: String,
-            val price: Int
-        )
+import com.dirtfy.ppp.contract.user.selling.tabling.TablingUser
+import kotlinx.coroutines.flow.StateFlow
 
-        data class Serve(
-            val menu: Menu,
-            val count: Int
-        )
+object TablingContract {
+
+    object DTO {
 
         data class Table(
-            val color: Int,
-            val order: List<Serve>
+            val number: String,
+            val color: ULong
         )
+
+        data class Menu(
+            val name: String,
+            val price: String
+        )
+
+        data class Order(
+            val name: String,
+            val price: String,
+            val count: String
+        )
+
+        data class Total(
+            val price: String
+        )
+
+        enum class Payment {
+            Card,
+            Cash,
+            Point
+        }
+
     }
 
-    object API {
-        interface MenuList {
-
-        }
-
-        interface Order {
-
-        }
-
-        interface Table {
-
-        }
+    interface API: TablingUser {
+        val tableList: StateFlow<List<DTO.Table>>
+        val menuList: StateFlow<List<DTO.Menu>>
+        val orderList: StateFlow<List<DTO.Order>>
+        val total: StateFlow<DTO.Total>
     }
-
 }

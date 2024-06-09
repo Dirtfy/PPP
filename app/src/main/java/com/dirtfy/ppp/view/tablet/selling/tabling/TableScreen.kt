@@ -13,15 +13,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.dirtfy.ppp.contract.DummyUser
-import com.dirtfy.ppp.contract.User
+import com.dirtfy.ppp.contract.user.DummyUser
+import com.dirtfy.ppp.contract.user.User
 import com.dirtfy.ppp.contract.view.tabling.TableScreenContract
+import com.dirtfy.ppp.contract.viewmodel.TablingContract
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
 object TableScreen: TableScreenContract.API {
     @Composable
     override fun Table(
-        table: TableScreenContract.DTO.Table,
+        table: TablingContract.DTO.Table,
         user: User,
         modifier: Modifier
     ) {
@@ -34,7 +35,7 @@ object TableScreen: TableScreenContract.API {
 
     @Composable
     override fun TableLayout(
-        tableList: List<TableScreenContract.DTO.Table>,
+        tableList: List<TablingContract.DTO.Table>,
         user: User,
         modifier: Modifier
     ) {
@@ -60,13 +61,13 @@ object TableScreen: TableScreenContract.API {
 @Preview(showBackground = true)
 @Composable
 fun TableScreenPreview() {
-    val tableList: List<TableScreenContract.DTO.Table> =
+    val tableList: List<TablingContract.DTO.Table> =
         listOf(
             11, 10, 9, 8, 7, 6, 5, 4, 3, 0,
             0,  0, 0, 0, 0, 0, 0, 0, 0, 2,
             0,  0, 0, 0, 0, 0, 0, 0, 0, 1
         ).map {
-            TableScreenContract.DTO.Table("$it", Color.LightGray.value)
+            TablingContract.DTO.Table("$it", Color.LightGray.value)
         }
 
     PPPTheme {

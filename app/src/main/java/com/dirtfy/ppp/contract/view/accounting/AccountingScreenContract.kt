@@ -2,7 +2,8 @@ package com.dirtfy.ppp.contract.view.accounting
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.contract.User
+import com.dirtfy.ppp.contract.user.User
+import com.dirtfy.ppp.contract.viewmodel.AccountingContract
 
 object AccountingScreenContract {
 
@@ -20,14 +21,14 @@ object AccountingScreenContract {
 
         @Composable
         fun AccountList(
-            accountList: List<DTO.Account>,
+            accountList: List<AccountingContract.DTO.Account>,
             user: User,
             modifier: Modifier
         )
 
         @Composable
         fun Account(
-            account: DTO.Account,
+            account: AccountingContract.DTO.Account,
             user: User,
             modifier: Modifier
         )
@@ -35,6 +36,13 @@ object AccountingScreenContract {
         @Composable
         fun SearchBar(
             searchClue: String,
+            user: User,
+            modifier: Modifier
+        )
+
+        @Composable
+        fun Main(
+            viewModel: AccountingContract.API,
             user: User,
             modifier: Modifier
         )
