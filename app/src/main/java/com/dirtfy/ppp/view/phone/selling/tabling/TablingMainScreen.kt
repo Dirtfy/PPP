@@ -1,9 +1,11 @@
-package com.dirtfy.ppp.view.tablet.selling.tabling
+package com.dirtfy.ppp.view.phone.selling.tabling
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -27,6 +29,7 @@ import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
 object TablingMainScreen: TablingScreenContract.API {
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun Main(
         viewModel: TablingContract.API,
@@ -38,28 +41,35 @@ object TablingMainScreen: TablingScreenContract.API {
         val tableList by viewModel.tableList.collectAsStateWithLifecycle()
         val menuList by viewModel.menuList.collectAsStateWithLifecycle()
 
-        Row(
-            modifier = modifier
-        ) {
-            OrderScreen.Main(
+        Column {
+            TableScreen.TableLayout(
+                tableList = tableList,
                 user = user,
-                orderList = orderList,
-                total = total,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .widthIn(200.dp, 300.dp)
+                modifier = Modifier.widthIn(600.dp, 800.dp)
             )
-            Column {
-                TableScreen.TableLayout(
-                    tableList = tableList,
-                    user = user,
-                    modifier = Modifier.widthIn(600.dp, 800.dp)
-                )
-                MenuListScreen.MenuList(
-                    menuList = menuList,
-                    user = user,
-                    modifier = Modifier.widthIn(600.dp, 800.dp)
-                )
+
+            HorizontalPager(
+                state = rememberPagerState{ 2 }
+            ) { page ->
+                when(page) {
+                    1 ->  {
+                        OrderScreen.Main(
+                            user = user,
+                            orderList = orderList,
+                            total = total,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .widthIn(200.dp, 300.dp)
+                        )
+                    }
+                    else -> {
+                        MenuListScreen.MenuList(
+                            menuList = menuList,
+                            user = user,
+                            modifier = Modifier.widthIn(600.dp, 800.dp)
+                        )
+                    }
+                }
             }
         }
     }
@@ -97,7 +107,8 @@ object TablingMainScreen: TablingScreenContract.API {
     }
 }
 
-@Preview(showBackground = true, device = Devices.TABLET)
+@OptIn(ExperimentalFoundationApi::class)
+@Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun TablingMainScreenPreview() {
     val orderList = MutableList(10) {
@@ -128,34 +139,41 @@ fun TablingMainScreenPreview() {
     }
 
     PPPTheme {
-        Row(
-            modifier = Modifier
-        ) {
-            OrderScreen.Main(
+        Column {
+            TableScreen.TableLayout(
+                tableList = tableList,
                 user = DummyUser,
-                orderList = orderList,
-                total = total,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .widthIn(200.dp, 300.dp)
+                modifier = Modifier.widthIn(600.dp, 800.dp)
             )
-            Column {
-                TableScreen.TableLayout(
-                    tableList = tableList,
-                    user = DummyUser,
-                    modifier = Modifier.widthIn(600.dp, 800.dp)
-                )
-                MenuListScreen.MenuList(
-                    menuList = menuDataList,
-                    user = DummyUser,
-                    modifier = Modifier.widthIn(600.dp, 800.dp)
-                )
+
+            HorizontalPager(
+                state = rememberPagerState{ 2 }
+            ) { page ->
+                when(page) {
+                    1 ->  {
+                        OrderScreen.Main(
+                            user = DummyUser,
+                            orderList = orderList,
+                            total = total,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .widthIn(200.dp, 300.dp)
+                        )
+                    }
+                    else -> {
+                        MenuListScreen.MenuList(
+                            menuList = menuDataList,
+                            user = DummyUser,
+                            modifier = Modifier.widthIn(600.dp, 800.dp)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-@Preview(showBackground = true, device = Devices.TABLET)
+@Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun InstantMenuCreationPreview(){
     val menu = TablingContract.DTO.Menu(

@@ -2,8 +2,8 @@ package com.dirtfy.ppp.contract.view.accounting.managing
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.contract.user.User
 import com.dirtfy.ppp.contract.viewmodel.AccountManagingContract
+import com.dirtfy.ppp.contract.viewmodel.user.User
 
 object AccountManagingScreenContract {
 

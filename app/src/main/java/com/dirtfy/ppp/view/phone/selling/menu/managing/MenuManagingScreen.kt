@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.view.phone.menu.managing
+package com.dirtfy.ppp.view.phone.selling.menu.managing
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,13 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.user.DummyUser
-import com.dirtfy.ppp.contract.user.User
 import com.dirtfy.ppp.contract.view.menu.managing.MenuManagingScreenContract
 import com.dirtfy.ppp.contract.viewmodel.MenuManagingContract
+import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
+import com.dirtfy.ppp.contract.viewmodel.user.User
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
@@ -133,7 +134,7 @@ object MenuManagingScreen : MenuManagingScreenContract.API {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun MenuManagingScreenPreview() {
     val menuList = MutableList(10) {

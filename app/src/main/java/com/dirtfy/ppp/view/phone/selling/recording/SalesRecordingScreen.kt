@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.view.tablet.selling.recording
+package com.dirtfy.ppp.view.phone.selling.recording
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,7 +38,7 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
         modifier: Modifier
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(5),
+            columns = GridCells.Fixed(2),
             modifier = modifier
         ) {
             items(recordList) {
@@ -132,17 +132,10 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
 
         val menuList by viewModel.selectedRecordMenuList.collectAsStateWithLifecycle()
 
-        Row(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier
         ) {
-            RecordList(
-                recordList = recordList,
-                user = user,
-                modifier = Modifier.widthIn(600.dp, 800.dp)
-            )
-
-            Spacer(Modifier.size(10.dp))
-
             if (selectedRecord != null) {
                 RecordDetail(
                     record = selectedRecord,
@@ -151,11 +144,20 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
                     modifier = Modifier.widthIn(200.dp, 300.dp)
                 )
             }
+
+            Spacer(Modifier.size(10.dp))
+
+            RecordList(
+                recordList = recordList,
+                user = user,
+                modifier = Modifier.widthIn(600.dp, 800.dp)
+            )
         }
     }
 }
 
-@Preview(showBackground = true, device = Devices.TABLET)
+
+@Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun SalesRecordingScreenPreview() {
     val recordList = MutableList(10) {
@@ -179,22 +181,23 @@ fun SalesRecordingScreenPreview() {
     )
 
     PPPTheme {
-        Row(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
         ) {
-            SalesRecordingScreen.RecordList(
-                recordList = recordList,
-                user = DummyUser,
-                modifier = Modifier.widthIn(600.dp, 800.dp)
-            )
-
-            Spacer(Modifier.size(10.dp))
-
             SalesRecordingScreen.RecordDetail(
                 record = selectedRecord,
                 menuList = menuList,
                 user = DummyUser,
                 modifier = Modifier.widthIn(200.dp, 300.dp)
+            )
+
+            Spacer(Modifier.size(10.dp))
+
+            SalesRecordingScreen.RecordList(
+                recordList = recordList,
+                user = DummyUser,
+                modifier = Modifier.widthIn(600.dp, 800.dp)
             )
         }
     }

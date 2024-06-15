@@ -1,7 +1,10 @@
-package com.dirtfy.ppp.view.tablet
+package com.dirtfy.ppp.view.phone
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.rounded.AccountBox
 import androidx.compose.material.icons.rounded.Add
@@ -9,9 +12,10 @@ import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Devices
@@ -22,13 +26,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dirtfy.ppp.contract.view.ScreenContract
+import com.dirtfy.ppp.contract.viewmodel.AccountingContract
 import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
 import com.dirtfy.ppp.contract.viewmodel.user.User
-import com.dirtfy.ppp.view.tablet.selling.tabling.TablingMainScreenPreview
+import com.dirtfy.ppp.view.phone.accounting.AccountingMainScreen
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object TabletScreen: ScreenContract.API {
+object PhoneScreen: ScreenContract.API {
+
     @Composable
     override fun Navigator(
         destinationList: List<ScreenContract.DTO.Screen>,
@@ -36,9 +42,11 @@ object TabletScreen: ScreenContract.API {
         user: User,
         modifier: Modifier
     ) {
-        NavigationRail {
+        NavigationBar(
+            modifier = modifier
+        ) {
             destinationList.forEach {
-                NavigationRailItem(
+                NavigationBarItem(
                     selected = (it == nowPosition),
                     onClick = { /*TODO*/ },
                     icon = {
@@ -91,7 +99,8 @@ object TabletScreen: ScreenContract.API {
         )
         val navController = rememberNavController()
 
-        Row(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier
         ) {
             NavGraph(
@@ -119,9 +128,10 @@ object TabletScreen: ScreenContract.API {
         return ScreenContract.DTO.Screen.entries
             .filter { it.route == route }[0]
     }
+
 }
 
-@Preview(showBackground = true, device = Devices.TABLET)
+@Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun TabletScreenPreview() {
     PPPTheme {
@@ -132,14 +142,38 @@ fun TabletScreenPreview() {
             ScreenContract.DTO.Screen.SalesRecording
         )
 
-        Row(
+        val accountList = MutableList(10) {
+            AccountingContract.DTO.Account(
+                number = "$it",
+                name = "test_$it",
+                registerDate = "2024.6.${it+1}"
+            )
+        }
+        val searchClue = ""
+
+        Column(
             modifier = Modifier
         ) {
-            TablingMainScreenPreview()
+            Column(
+                modifier = Modifier.heightIn(600.dp, 750.dp)
+            ) {
+                AccountingMainScreen.SearchBar(
+                    searchClue = searchClue,
+                    user = DummyUser,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                )
+                AccountingMainScreen.AccountList(
+                    accountList = accountList,
+                    user = DummyUser,
+                    modifier = Modifier
+                )
+            }
 
             Spacer(Modifier.size(10.dp))
 
-            TabletScreen.Navigator(
+            PhoneScreen.Navigator(
                 destinationList = destinationList,
                 nowPosition = ScreenContract.DTO.Screen.Tabling,
                 user = DummyUser,

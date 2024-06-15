@@ -2,8 +2,8 @@ package com.dirtfy.ppp.contract.view.sales.recording
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.contract.user.User
 import com.dirtfy.ppp.contract.viewmodel.SalesRecordingContract
+import com.dirtfy.ppp.contract.viewmodel.user.User
 
 object SalesRecordingScreenContract {
 

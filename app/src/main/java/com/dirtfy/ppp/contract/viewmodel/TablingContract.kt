@@ -1,6 +1,6 @@
 package com.dirtfy.ppp.contract.viewmodel
 
-import com.dirtfy.ppp.contract.user.selling.tabling.TablingUser
+import com.dirtfy.ppp.contract.viewmodel.user.selling.tabling.TablingUser
 import kotlinx.coroutines.flow.StateFlow
 
 object TablingContract {

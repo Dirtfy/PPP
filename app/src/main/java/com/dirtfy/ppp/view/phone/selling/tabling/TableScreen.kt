@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.view.tablet.selling.tabling
+package com.dirtfy.ppp.view.phone.selling.tabling
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dirtfy.ppp.contract.view.tabling.TableScreenContract
@@ -73,7 +74,7 @@ object TableScreen: TableScreenContract.API {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun TableScreenPreview() {
     val tableList: List<TablingContract.DTO.Table> =

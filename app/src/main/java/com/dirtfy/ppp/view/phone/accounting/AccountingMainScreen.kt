@@ -23,13 +23,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.user.DummyUser
-import com.dirtfy.ppp.contract.user.User
 import com.dirtfy.ppp.contract.view.accounting.AccountingScreenContract
 import com.dirtfy.ppp.contract.viewmodel.AccountingContract
+import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
+import com.dirtfy.ppp.contract.viewmodel.user.User
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
@@ -156,7 +157,7 @@ object AccountingMainScreen: AccountingScreenContract.API {
 }
 
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun AccountingMainScreenPreview() {
     val accountList = MutableList(10) {

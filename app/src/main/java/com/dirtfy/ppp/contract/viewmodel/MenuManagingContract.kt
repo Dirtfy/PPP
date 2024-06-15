@@ -1,6 +1,6 @@
 package com.dirtfy.ppp.contract.viewmodel
 
-import com.dirtfy.ppp.contract.user.selling.menu.managing.MenuManagingUser
+import com.dirtfy.ppp.contract.viewmodel.user.selling.menu.managing.MenuManagingUser
 import kotlinx.coroutines.flow.StateFlow
 
 object MenuManagingContract {

@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.view.tablet.selling.tabling
+package com.dirtfy.ppp.view.phone.selling.tabling
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +31,7 @@ object MenuListScreen: MenuListScreenContract.API {
         modifier: Modifier
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(8),
+            columns = GridCells.Fixed(2),
             modifier = modifier
         ) {
             items(menuList) {
@@ -80,7 +80,7 @@ object MenuListScreen: MenuListScreenContract.API {
     }
 }
 
-@Preview(showBackground = true, device = Devices.TABLET)
+@Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun MenuListPreview() {
     val menuDataList = MutableList(10) {

@@ -26,10 +26,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.user.DummyUser
-import com.dirtfy.ppp.contract.user.User
 import com.dirtfy.ppp.contract.view.accounting.managing.AccountManagingScreenContract
 import com.dirtfy.ppp.contract.viewmodel.AccountManagingContract
+import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
+import com.dirtfy.ppp.contract.viewmodel.user.User
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 

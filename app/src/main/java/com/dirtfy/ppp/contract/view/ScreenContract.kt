@@ -3,7 +3,7 @@ package com.dirtfy.ppp.contract.view
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import com.dirtfy.ppp.contract.user.User
+import com.dirtfy.ppp.contract.viewmodel.user.User
 
 object ScreenContract {
 

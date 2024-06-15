@@ -1,6 +1,6 @@
 package com.dirtfy.ppp.contract.viewmodel
 
-import com.dirtfy.ppp.contract.user.accounting.managing.AccountManagingUser
+import com.dirtfy.ppp.contract.viewmodel.user.accounting.managing.AccountManagingUser
 import kotlinx.coroutines.flow.StateFlow
 
 object AccountManagingContract {
