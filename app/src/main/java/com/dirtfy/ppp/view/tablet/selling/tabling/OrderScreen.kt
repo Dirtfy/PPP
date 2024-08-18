@@ -15,20 +15,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import com.dirtfy.ppp.contract.view.tabling.OrderScreenContract
-import com.dirtfy.ppp.contract.viewmodel.TablingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyTablingViewModel
+import com.dirtfy.ppp.contract.view.selling.tabling.OrderViewContract
+import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object OrderScreen: OrderScreenContract.API {
+object OrderScreen: OrderViewContract.API {
 
     private val listWidthRequest: Modifier = Modifier.widthIn(100.dp, 500.dp)
 
     @Composable
     override fun OrderList(
-        orderList: List<TablingContract.DTO.Order>,
-        user: User,
+        orderList: List<TablingViewModelContract.DTO.Order>,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         LazyColumn(
@@ -37,7 +36,7 @@ object OrderScreen: OrderScreenContract.API {
             items(orderList) {
                 OrderItem(
                     order = it,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier
                 )
             }
@@ -46,8 +45,8 @@ object OrderScreen: OrderScreenContract.API {
 
     @Composable
     override fun OrderItem(
-        order: TablingContract.DTO.Order,
-        user: User,
+        order: TablingViewModelContract.DTO.Order,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         ListItem(
@@ -66,8 +65,8 @@ object OrderScreen: OrderScreenContract.API {
 
     @Composable
     override fun Total(
-        total: TablingContract.DTO.Total,
-        user: User,
+        total: TablingViewModelContract.DTO.Total,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         Box(modifier = modifier) {
@@ -89,7 +88,7 @@ object OrderScreen: OrderScreenContract.API {
 
     @Composable
     override fun PaymentSelector(
-        user: User,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         Row(
@@ -106,9 +105,9 @@ object OrderScreen: OrderScreenContract.API {
     
     @Composable
     fun Main(
-        user: User,
-        orderList: List<TablingContract.DTO.Order>,
-        total: TablingContract.DTO.Total,
+        viewModel: TablingViewModelContract.API,
+        orderList: List<TablingViewModelContract.DTO.Order>,
+        total: TablingViewModelContract.DTO.Total,
         modifier: Modifier = Modifier
     ) {
         ConstraintLayout(
@@ -118,7 +117,7 @@ object OrderScreen: OrderScreenContract.API {
             
             OrderList(
                 orderList = orderList,
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier.constrainAs(orderLayout) {
                     top.linkTo(parent.top)
                     bottom.linkTo(totalLayout.top)
@@ -128,14 +127,14 @@ object OrderScreen: OrderScreenContract.API {
 
             Total(
                 total = total,
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier.constrainAs(totalLayout) {
                     bottom.linkTo(buttonLayout.top)
                 }
             )
 
             PaymentSelector(
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier.constrainAs(buttonLayout) {
                     bottom.linkTo(parent.bottom)
                 }
@@ -148,7 +147,7 @@ object OrderScreen: OrderScreenContract.API {
 @Composable
 fun OrderScreenPreview() {
     val orderList = MutableList(10) {
-        TablingContract.DTO.Order(
+        TablingViewModelContract.DTO.Order(
             "test_${it}",
             "${it*1234}",
             "$it"
@@ -156,11 +155,11 @@ fun OrderScreenPreview() {
     }
     val totalPrice = orderList.sumOf { it.price.toInt() }
     val total =
-        TablingContract.DTO.Total("$totalPrice")
+        TablingViewModelContract.DTO.Total("$totalPrice")
 
     PPPTheme {
         OrderScreen.Main(
-            user = DummyUser,
+            viewModel = DummyTablingViewModel,
             orderList = orderList,
             total = total,
             modifier = Modifier.fillMaxHeight()

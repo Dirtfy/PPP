@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.model.selling.recording
 
-import com.dirtfy.ppp.model.Repository
+import com.dirtfy.ppp.contract.model.selling.SalesRecordModelContract
+import com.dirtfy.ppp.contract.model.selling.SalesRecordModelContract.DTO.Sales
 import com.dirtfy.ppp.model.RepositoryPath
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -8,14 +9,14 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
-object SalesRecordRepository: Repository<SalesData> {
+object SalesRecordRepository: SalesRecordModelContract.API {
 
     private const val TAG = "SalesRecordManager"
 
     private val repositoryRef =
         Firebase.firestore.collection(RepositoryPath.SALES_RECORD)
 
-    private fun SalesData.convertToInternalData(): _SalesData {
+    private fun Sales.convertToInternalData(): _SalesData {
         val menuNameList = menuCountMap.keys.toList()
         val menuPriceList = menuNameList.map { menuPriceMap[it]!! }
 
@@ -26,7 +27,7 @@ object SalesRecordRepository: Repository<SalesData> {
         )
     }
 
-    private fun _SalesData.convertToExternalData(): SalesData {
+    private fun _SalesData.convertToExternalData(): Sales {
         val countMap = HashMap<String, Int>()
         val priceMap = HashMap<String, Int>()
 
@@ -41,7 +42,7 @@ object SalesRecordRepository: Repository<SalesData> {
             priceMap[menuNameList[it]] = menuPriceList?.get(it)?: throw IllegalAccessException()
         }
 
-        return SalesData(
+        return Sales(
             salesID = null,
             menuCountMap = countMap,
             menuPriceMap = priceMap,
@@ -49,7 +50,7 @@ object SalesRecordRepository: Repository<SalesData> {
         )
     }
 
-    override suspend fun create(data: SalesData): SalesData {
+    override suspend fun create(data: Sales): Sales {
         val newSalesRef = repositoryRef.document()
 
         newSalesRef.set(data.convertToInternalData())
@@ -57,8 +58,8 @@ object SalesRecordRepository: Repository<SalesData> {
         return data.copy(salesID = newSalesRef.id)
     }
 
-    override suspend fun read(filter: (SalesData) -> Boolean): List<SalesData> {
-        val accountList = mutableListOf<SalesData>()
+    override suspend fun read(filter: (Sales) -> Boolean): List<Sales> {
+        val accountList = mutableListOf<Sales>()
 
         repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
             if (documentSnapshot == null) return@forEach
@@ -75,11 +76,11 @@ object SalesRecordRepository: Repository<SalesData> {
         return accountList
     }
 
-    override suspend fun update(filter: (SalesData) -> SalesData) {
+    override suspend fun update(filter: (Sales) -> Sales) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun delete(filter: (SalesData) -> Boolean) {
+    override suspend fun delete(filter: (Sales) -> Boolean) {
         TODO("Not yet implemented")
     }
 }

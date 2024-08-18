@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.view.phone.selling.tabling
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -14,23 +15,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.dirtfy.ppp.contract.view.tabling.TableScreenContract
-import com.dirtfy.ppp.contract.viewmodel.TablingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyTablingViewModel
+import com.dirtfy.ppp.contract.view.selling.tabling.TableViewContract
+import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object TableScreen: TableScreenContract.API {
+object TableScreen: TableViewContract.API {
     @Composable
     override fun Table(
-        table: TablingContract.DTO.Table,
-        user: User,
+        table: TablingViewModelContract.DTO.Table,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         Box(
             modifier = modifier
                 .size(35.dp)
                 .background(Color(table.color))
+                .clickable {
+                    if (viewModel.selectedTableNumber.value != 0) {
+                        viewModel.deselectTable(viewModel.selectedTableNumber.value)
+                    }
+                    viewModel.selectTable(table.number.toInt())
+                }
         ) {
             Text(text = table.number)
         }
@@ -38,8 +44,8 @@ object TableScreen: TableScreenContract.API {
 
     @Composable
     override fun TableLayout(
-        tableList: List<TablingContract.DTO.Table>,
-        user: User,
+        tableList: List<TablingViewModelContract.DTO.Table>,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         LazyVerticalGrid(
@@ -52,18 +58,18 @@ object TableScreen: TableScreenContract.API {
                 when(it.number.toInt()) {
                     0 -> {
                         Table(
-                            table = TablingContract.DTO.Table(
+                            table = TablingViewModelContract.DTO.Table(
                                 number = "",
                                 color = Color.Transparent.value
                             ),
-                            user = user,
+                            viewModel = viewModel,
                             modifier = Modifier
                         )
                     }
                     else -> {
                         Table(
                             table = it,
-                            user = user,
+                            viewModel = viewModel,
                             modifier = Modifier
                         )
                     }
@@ -77,19 +83,19 @@ object TableScreen: TableScreenContract.API {
 @Preview(showBackground = true, device = Devices.PHONE)
 @Composable
 fun TableScreenPreview() {
-    val tableList: List<TablingContract.DTO.Table> =
+    val tableList: List<TablingViewModelContract.DTO.Table> =
         listOf(
             11, 10, 9, 8, 7, 6, 5, 4, 3, 0,
             0,  0, 0, 0, 0, 0, 0, 0, 0, 2,
             0,  0, 0, 0, 0, 0, 0, 0, 0, 1
         ).map {
-            TablingContract.DTO.Table("$it", Color.LightGray.value)
+            TablingViewModelContract.DTO.Table("$it", Color.LightGray.value)
         }
 
     PPPTheme {
         TableScreen.TableLayout(
             tableList = tableList,
-            user = DummyUser,
+            viewModel = DummyTablingViewModel,
             modifier = Modifier
         )
     }

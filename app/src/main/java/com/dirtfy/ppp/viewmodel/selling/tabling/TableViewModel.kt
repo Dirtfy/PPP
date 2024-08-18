@@ -2,7 +2,7 @@ package com.dirtfy.ppp.viewmodel.selling.tabling
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.model.selling.tabling.TableData
+import com.dirtfy.ppp.contract.model.selling.TableModelContract.DTO.Table
 import com.dirtfy.ppp.model.selling.tabling.TableManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +36,7 @@ class TableViewModel: ViewModel() {
         }
     }
 
-    private fun TableData.convertToTableOrderData(): TableOrderData {
+    private fun Table.convertToTableOrderData(): TableOrderData {
         val countMap = HashMap<String, Int>()
         val priceMap = HashMap<String, Int>()
 
@@ -56,11 +56,11 @@ class TableViewModel: ViewModel() {
             priceMap = priceMap
         )
     }
-    private fun TableOrderData.convertToTableData(tableNumber: Int): TableData {
+    private fun TableOrderData.convertToTableData(tableNumber: Int): Table {
         val menuNameList = priceMap.keys.toList()
         val menuPriceList = menuNameList.map { priceMap[it]!! }
 
-        return TableData(
+        return Table(
             tableNumber,
             menuNameList,
             menuPriceList
@@ -80,7 +80,7 @@ class TableViewModel: ViewModel() {
         viewModelScope.launch {
             val currentTableData = _tableList.value[tableNumber].value.convertToTableData(tableNumber)
 
-            val updatedTableData = TableData(
+            val updatedTableData = Table(
                 tableNumber,
                 currentTableData.menuNameList+name,
                 currentTableData.menuPriceList+price

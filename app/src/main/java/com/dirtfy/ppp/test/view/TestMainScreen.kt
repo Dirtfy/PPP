@@ -6,12 +6,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.model.accounting.accounting.AccountData
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract.DTO.Account
 
 @Composable
 fun TestMainScreen(
     navigateToAccountTest: () -> Unit,
-    navigateToRecordTest: (AccountData) -> Unit,
+    navigateToRecordTest: (Account) -> Unit,
     navigateToMenuTest: () -> Unit,
     navigateToQRScanTest: () -> Unit,
     navigateToQRGenerateTest: () -> Unit,
@@ -24,7 +24,7 @@ fun TestMainScreen(
         Button(onClick = navigateToAccountTest) {
             Text(text = "account test")
         }
-        Button(onClick = { navigateToRecordTest(AccountData(accountNumber = "test")) }) {
+        Button(onClick = { navigateToRecordTest(Account(accountNumber = "test")) }) {
             Text(text = "account record test")
         }
         Button(onClick = navigateToMenuTest) {

@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.model.accounting.accounting
 
-import com.dirtfy.ppp.model.Repository
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract.DTO.Account
 import com.dirtfy.ppp.model.RepositoryPath
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -8,14 +9,16 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
-object AccountRepository: Repository<AccountData> {
+object AccountRepository: AccountModelContract.API {
 
     private const val TAG = "AccountRepository"
 
     private val repositoryRef =
         Firebase.firestore.collection(RepositoryPath.ACCOUNT)
 
-    override suspend fun create(data: AccountData): AccountData {
+    override suspend fun create(
+        data: Account
+    ): Account {
         val newAccountRef = repositoryRef.document()
 
         newAccountRef.set(
@@ -31,14 +34,16 @@ object AccountRepository: Repository<AccountData> {
         return data
     }
 
-    override suspend fun read(filter: (AccountData) -> Boolean): List<AccountData> {
-        val accountList = mutableListOf<AccountData>()
+    override suspend fun read(
+        filter: (Account) -> Boolean
+    ): List<Account> {
+        val accountList = mutableListOf<Account>()
 
         repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
             if (documentSnapshot == null) return@forEach
 
             val _account = documentSnapshot.toObject<_AccountData>()!!
-            val account = AccountData(
+            val account = Account(
                 documentSnapshot.id,
                 _account.accountNumber!!,
                 _account.accountName!!,
@@ -55,12 +60,14 @@ object AccountRepository: Repository<AccountData> {
         return accountList
     }
 
-    override suspend fun update(filter: (AccountData) -> AccountData) {
+    override suspend fun update(
+        filter: (Account) -> Account
+    ) {
         repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
             if (documentSnapshot == null) return@forEach
 
             val _account = documentSnapshot.toObject<_AccountData>()!!
-            val account = AccountData(
+            val account = Account(
                 documentSnapshot.id,
                 _account.accountNumber!!,
                 _account.accountName!!,
@@ -83,7 +90,7 @@ object AccountRepository: Repository<AccountData> {
         }
     }
 
-    override suspend fun delete(filter: (AccountData) -> Boolean) {
+    override suspend fun delete(filter: (Account) -> Boolean) {
         TODO("Not yet implemented")
     }
 

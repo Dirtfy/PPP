@@ -3,7 +3,7 @@ package com.dirtfy.ppp.view
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import com.dirtfy.ppp.model.accounting.accounting.AccountData
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract
 
 sealed class PPPScreen(val route: String) {
     data object Start: PPPScreen("start")
@@ -39,8 +39,8 @@ sealed class PPPScreen(val route: String) {
             }
         )
 
-        fun buildArgumentString(data: AccountData): String {
-            return "account_id=${data.accountNumber}&" +
+        fun buildArgumentString(data: AccountModelContract.DTO.Account): String {
+            return "account_id=${data.accountID}&" +
                     "account_name=${data.accountName}&" +
                     "phone_number=${data.phoneNumber}&" +
                     "register_timestamp=${data.registerTimestamp}&" +

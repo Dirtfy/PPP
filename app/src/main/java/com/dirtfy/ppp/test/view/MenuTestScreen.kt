@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.model.selling.menu.managing.MenuData
+import com.dirtfy.ppp.contract.model.selling.MenuModelContract.DTO.Menu
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 import com.dirtfy.ppp.viewmodel.selling.menu.managing.MenuListViewModel
 
@@ -52,7 +52,7 @@ fun MenuCreate(
 }
 
 @Composable
-fun MenuList(menu: List<MenuData>) {
+fun MenuList(menu: List<Menu>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
@@ -68,7 +68,7 @@ fun MenuList(menu: List<MenuData>) {
 }
 
 @Composable
-fun MenuItem(data: MenuData) {
+fun MenuItem(data: Menu) {
     Column{
         Text(text = "ID: ${data.menuID?:"null"}")
         Text(text = "Name: "+ data.name)
@@ -93,7 +93,7 @@ fun MenuTest(
             price = price, onPriceChange = { price = it }) {
 
             menuListViewModel.insertData(
-                MenuData(
+                Menu(
                     menuID = null,
                     name = name,
                     price = price.toInt()

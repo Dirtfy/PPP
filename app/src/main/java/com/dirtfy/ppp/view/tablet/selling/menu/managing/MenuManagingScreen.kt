@@ -23,19 +23,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.view.menu.managing.MenuManagingScreenContract
-import com.dirtfy.ppp.contract.viewmodel.MenuManagingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyMenuManagingViewModel
+import com.dirtfy.ppp.contract.view.selling.menu.managing.MenuManagingViewContract
+import com.dirtfy.ppp.contract.viewmodel.selling.menu.managing.MenuManagingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object MenuManagingScreen : MenuManagingScreenContract.API {
+object MenuManagingScreen : MenuManagingViewContract.API {
     @Composable
     override fun MenuList(
-        menuList: List<MenuManagingContract.DTO.Menu>,
-        user: User,
+        menuList: List<MenuManagingViewModelContract.DTO.Menu>,
+        viewModel: MenuManagingViewModelContract.MenuList.API,
         modifier: Modifier
     ) {
         LazyVerticalGrid(
@@ -45,7 +43,7 @@ object MenuManagingScreen : MenuManagingScreenContract.API {
             items(menuList) {
                 MenuItem(
                     menu = it,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier
                 )
             }
@@ -54,8 +52,8 @@ object MenuManagingScreen : MenuManagingScreenContract.API {
 
     @Composable
     override fun MenuItem(
-        menu: MenuManagingContract.DTO.Menu,
-        user: User,
+        menu: MenuManagingViewModelContract.DTO.Menu,
+        viewModel: MenuManagingViewModelContract.MenuList.API,
         modifier: Modifier
     ) {
         ListItem(
@@ -66,9 +64,9 @@ object MenuManagingScreen : MenuManagingScreenContract.API {
     }
 
     @Composable
-    override fun MenuAdd(
-        menu: MenuManagingContract.DTO.Menu,
-        user: User,
+    override fun NewMenu(
+        menu: MenuManagingViewModelContract.DTO.Menu,
+        viewModel: MenuManagingViewModelContract.NewMenu.API,
         modifier: Modifier
     ) {
         ElevatedCard(
@@ -105,25 +103,24 @@ object MenuManagingScreen : MenuManagingScreenContract.API {
 
     @Composable
     override fun Main(
-        viewModel: MenuManagingContract.API,
-        user: User,
+        viewModel: MenuManagingViewModelContract.API,
         modifier: Modifier
     ) {
-        val menuList by viewModel.menuList.collectAsStateWithLifecycle()
-        val newMenu by viewModel.newMenu.collectAsStateWithLifecycle()
+        val menuList by viewModel.menuList
+        val newMenu by viewModel.newMenu
 
         Row(
             modifier = modifier
         ) {
             MenuList(
                 menuList = menuList,
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier.widthIn(600.dp, 800.dp)
             )
 
-            MenuAdd(
+            NewMenu(
                 menu = newMenu,
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier.widthIn(200.dp, 300.dp)
             )
         }
@@ -134,12 +131,12 @@ object MenuManagingScreen : MenuManagingScreenContract.API {
 @Composable
 fun MenuManagingScreenPreview() {
     val menuList = MutableList(10) {
-        MenuManagingContract.DTO.Menu(
+        MenuManagingViewModelContract.DTO.Menu(
             name = "test_${it}",
             price = "23,000"
         )
     }
-    val newMenu = MenuManagingContract.DTO.Menu(
+    val newMenu = MenuManagingViewModelContract.DTO.Menu(
         name = "new_test",
         price = "23,000"
     )
@@ -150,13 +147,13 @@ fun MenuManagingScreenPreview() {
         ) {
             MenuManagingScreen.MenuList(
                 menuList = menuList,
-                user = DummyUser,
+                viewModel = DummyMenuManagingViewModel,
                 modifier = Modifier.widthIn(600.dp, 800.dp)
             )
 
-            MenuManagingScreen.MenuAdd(
+            MenuManagingScreen.NewMenu(
                 menu = newMenu,
-                user = DummyUser,
+                viewModel = DummyMenuManagingViewModel,
                 modifier = Modifier.widthIn(200.dp, 300.dp)
             )
         }

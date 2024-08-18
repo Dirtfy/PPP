@@ -1,15 +1,16 @@
 package com.dirtfy.ppp.model.selling.tabling
 
 import android.util.Log
+import com.dirtfy.tagger.Tagger
+import com.dirtfy.ppp.contract.model.selling.TableModelContract
+import com.dirtfy.ppp.contract.model.selling.TableModelContract.DTO.Table
 import com.dirtfy.ppp.model.RepositoryPath
 import com.google.firebase.firestore.getField
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
-object TableManager {
-
-    private const val TAG = "TableManager"
+object TableManager: TableModelContract.API, Tagger {
     
     private val repositoryRef = 
         Firebase.firestore.collection(RepositoryPath.TABLE)
@@ -18,13 +19,13 @@ object TableManager {
     private val logicalRef = 
         repositoryRef.document(RepositoryPath.TABLE_LOGICAL)
 
-    suspend fun isSetup(tableNumber: Int): Boolean {
+    override suspend fun isSetup(tableNumber: Int): Boolean {
         val target = physicalRef.get().await().getString("$tableNumber")
 
         return target != null && target != ""
     }
 
-    suspend fun setupTable(tableNumber: Int) {
+    override suspend fun setupTable(tableNumber: Int) {
         val logicalTable = logicalRef.collection(RepositoryPath.TABLE_LOGICAL_TABLE).document()
 
         logicalTable.set(_TableData()).await()
@@ -32,7 +33,7 @@ object TableManager {
         physicalRef.update("$tableNumber", logicalTable.id).await()
     }
 
-    suspend fun checkTable(tableNumber: Int): TableData {
+    override suspend fun checkTable(tableNumber: Int): Table {
         val logicalTableID = physicalRef.get().await().getString("$tableNumber")
 
         if (logicalTableID == null) {
@@ -46,14 +47,14 @@ object TableManager {
             .document(logicalTableID)
             .get().await().toObject(_TableData::class.java)?: throw IllegalAccessException()
 
-        return TableData(
+        return Table(
             tableNumber = tableNumber,
             menuNameList = _tableData.menuNameList?: listOf(),
             menuPriceList = _tableData.menuPriceList?: listOf()
         )
     }
 
-    suspend fun checkTables(tableNumberList: List<Int>): List<TableData> {
+    suspend fun checkTables(tableNumberList: List<Int>): List<Table> {
         val physicalTableRef = physicalRef.get().await()
         val logicalTableRef = logicalRef.collection(RepositoryPath.TABLE_LOGICAL_TABLE).get().await()
 
@@ -65,14 +66,14 @@ object TableManager {
             )
         }
 
-        val tableDataList = mutableListOf<TableData>()
+        val tableDataList = mutableListOf<Table>()
         logicalTableIDs.indices.forEach { index ->
             logicalTableRef.documents.forEach { snapshot ->
                 if (snapshot.id == logicalTableIDs[index]) {
                     val menuNameList = snapshot.getField<List<String>>("menuNameList")?: throw IllegalAccessException()
                     val menuPriceList = snapshot.getField<List<Int>>("menuPriceList")?: throw IllegalAccessException()
                     tableDataList.add(
-                        TableData(
+                        Table(
                             tableNumberList[index],
                             menuNameList,
                             menuPriceList
@@ -85,7 +86,7 @@ object TableManager {
         return tableDataList
     }
 
-    suspend fun updateMenu(tableData: TableData) {
+    override suspend fun updateMenu(tableData: Table) {
         val logicalTableID = physicalRef.get().await().getString("${tableData.tableNumber}")
 
         if (logicalTableID == null) {
@@ -103,7 +104,7 @@ object TableManager {
             ).await()
     }
     
-    suspend fun cleanTable(tableNumber: Int) {
+    override suspend fun cleanTable(tableNumber: Int) {
         val logicalTargetTableID = physicalRef.get().await().getString("$tableNumber")
 
         if (logicalTargetTableID == null) {
@@ -125,7 +126,7 @@ object TableManager {
 
     }
 
-    suspend fun mergeTable(baseTable: TableData, mergingTable: TableData) {
+    override suspend fun mergeTable(baseTable: Table, mergingTable: Table) {
         val baseLogicalTableID = physicalRef.get().await().getString("${baseTable.tableNumber}")
         val mergingLogicalTableID = physicalRef.get().await().getString("${mergingTable.tableNumber}")
 

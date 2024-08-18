@@ -16,16 +16,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.model.selling.menu.managing.MenuData
-import com.dirtfy.ppp.model.selling.recording.SalesData
+import com.dirtfy.ppp.contract.model.selling.MenuModelContract.DTO.Menu
+import com.dirtfy.ppp.contract.model.selling.SalesRecordModelContract.DTO.Sales
 import com.dirtfy.ppp.viewmodel.selling.recording.SalesViewModel
 
 @Composable
-fun SalesItem(data: SalesData) {
+fun SalesItem(data: Sales) {
     LazyRow {
         itemsIndexed(data.menuCountMap.keys.toList()) {_, item ->
             Column {
-                MenuItem(data = MenuData(
+                MenuItem(data = Menu(
                     menuID = item,
                     name = data.menuCountMap[item]!!.toString(),
                     price = data.menuPriceMap[item]!!
@@ -37,7 +37,7 @@ fun SalesItem(data: SalesData) {
 }
 
 @Composable
-fun SalesCreate(data: SalesData, onCreateButtonClick: () -> Unit) {
+fun SalesCreate(data: Sales, onCreateButtonClick: () -> Unit) {
     Column {
         SalesItem(data = data)
         Button(onClick = { onCreateButtonClick() }) {
@@ -47,7 +47,7 @@ fun SalesCreate(data: SalesData, onCreateButtonClick: () -> Unit) {
 }
 
 @Composable
-fun SalesList(dataList: List<SalesData>) {
+fun SalesList(dataList: List<Sales>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
@@ -68,11 +68,11 @@ fun SalesRecordingTest(
     var menuPrice by remember { mutableStateOf("") }
     var salesData by remember {
         mutableStateOf(
-            SalesData(
-            null,
-            mapOf("..." to 1),
-            mapOf("..." to 999),
-            null)
+            Sales(
+            salesID = null,
+            menuCountMap = mapOf("..." to 1),
+            menuPriceMap = mapOf("..." to 999),
+            pointAccountNumber = null)
         )
     }
 

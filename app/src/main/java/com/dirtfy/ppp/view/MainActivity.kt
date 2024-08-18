@@ -6,9 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.view.phone.PhoneScreen
 import com.dirtfy.ppp.view.tablet.TabletScreen
+import com.dirtfy.ppp.viewmodel.use.HomeViewModel
 
 class MainActivity: ComponentActivity() {
 
@@ -28,13 +29,13 @@ class MainActivity: ComponentActivity() {
         setContent {
             if (isTablet) {
                 TabletScreen.Main(
-                    user = DummyUser,
+                    viewModel = viewModel<HomeViewModel>(),
                     modifier = Modifier.fillMaxSize()
                 )
             }
             else {
                 PhoneScreen.Main(
-                    user = DummyUser,
+                    viewModel = viewModel<HomeViewModel>(),
                     modifier = Modifier.fillMaxSize()
                 )
             }

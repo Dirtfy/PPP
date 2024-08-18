@@ -82,6 +82,9 @@ dependencies {
     // constraint layout
     implementation(libs.androidx.constraintlayout.compose)
 
+    // Tagger
+    implementation(libs.ansroid.auto.tagger)
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)

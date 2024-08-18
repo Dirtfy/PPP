@@ -26,19 +26,21 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.view.accounting.AccountingScreenContract
-import com.dirtfy.ppp.contract.viewmodel.AccountingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyAccountingViewModel
+import com.dirtfy.ppp.common.DummyHomeViewModel
+import com.dirtfy.ppp.contract.view.accounting.AccountingViewContract
+import com.dirtfy.ppp.contract.viewmodel.HomeViewModelContract
+import com.dirtfy.ppp.contract.viewmodel.accounting.AccountingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object AccountingMainScreen: AccountingScreenContract.API {
+object AccountingMainScreen: AccountingViewContract.API {
+
     @Composable
     override fun AccountList(
-        accountList: List<AccountingContract.DTO.Account>,
-        user: User,
+        accountList: List<AccountingViewModelContract.DTO.Account>,
+        viewModel: AccountingViewModelContract.AccountList.API,
+        homeViewModel: HomeViewModelContract.NavGraph.API,
         modifier: Modifier
     ) {
         LazyVerticalGrid(
@@ -48,7 +50,8 @@ object AccountingMainScreen: AccountingScreenContract.API {
             items(accountList) {
                 Account(
                     account = it,
-                    user = user,
+                    viewModel = viewModel,
+                    homeViewModel = homeViewModel,
                     modifier = Modifier
                 )
             }
@@ -57,8 +60,9 @@ object AccountingMainScreen: AccountingScreenContract.API {
 
     @Composable
     override fun Account(
-        account: AccountingContract.DTO.Account,
-        user: User,
+        account: AccountingViewModelContract.DTO.Account,
+        viewModel: AccountingViewModelContract.AccountList.API,
+        homeViewModel: HomeViewModelContract.NavGraph.API,
         modifier: Modifier
     ) {
         Box(
@@ -89,7 +93,7 @@ object AccountingMainScreen: AccountingScreenContract.API {
     @Composable
     override fun SearchBar(
         searchClue: String,
-        user: User,
+        viewModel: AccountingViewModelContract.SearchBar.API,
         modifier: Modifier
     ) {
 
@@ -143,19 +147,20 @@ object AccountingMainScreen: AccountingScreenContract.API {
 
     @Composable
     override fun Main(
-        viewModel: AccountingContract.API,
-        user: User,
+        viewModel: AccountingViewModelContract.API,
+        homeViewModel: HomeViewModelContract.NavGraph.API,
         modifier: Modifier
     ) {
-        val accountList by viewModel.accountList.collectAsStateWithLifecycle()
-        val searchClue by viewModel.searchClue.collectAsStateWithLifecycle()
+        val accountList by viewModel.accountList
+        val searchClue by viewModel.searchClue
 
         Row(
             modifier = modifier
         ) {
             AccountList(
                 accountList = accountList,
-                user = user,
+                viewModel = viewModel,
+                homeViewModel = homeViewModel,
                 modifier = Modifier.widthIn(600.dp, 800.dp)
             )
             
@@ -163,7 +168,7 @@ object AccountingMainScreen: AccountingScreenContract.API {
 
             SearchBar(
                 searchClue = searchClue,
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier.widthIn(200.dp, 300.dp)
             )
         }
@@ -175,7 +180,7 @@ object AccountingMainScreen: AccountingScreenContract.API {
 @Composable
 fun AccountingMainScreenPreview() {
     val accountList = MutableList(10) {
-        AccountingContract.DTO.Account(
+        AccountingViewModelContract.DTO.Account(
             number = "$it",
             name = "test_$it",
             registerDate = "2024.6.${it+1}"
@@ -189,7 +194,8 @@ fun AccountingMainScreenPreview() {
         ) {
             AccountingMainScreen.AccountList(
                 accountList = accountList,
-                user = DummyUser,
+                viewModel = DummyAccountingViewModel,
+                homeViewModel = DummyHomeViewModel,
                 modifier = Modifier.widthIn(600.dp, 800.dp)
             )
 
@@ -197,7 +203,7 @@ fun AccountingMainScreenPreview() {
 
             AccountingMainScreen.SearchBar(
                 searchClue = searchClue,
-                user = DummyUser,
+                viewModel = DummyAccountingViewModel,
                 modifier = Modifier.widthIn(200.dp, 300.dp)
             )
         }

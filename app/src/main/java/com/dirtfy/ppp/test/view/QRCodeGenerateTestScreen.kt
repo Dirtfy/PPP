@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.model.accounting.accounting.AccountData
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract.DTO.Account
 import com.dirtfy.ppp.viewmodel.accounting.managing.barcoding.QRCodeViewModel
 import java.util.Calendar
 
@@ -33,7 +33,7 @@ fun QRCodeGenerateTest(
             balance = balance,
             onBalanceChanged = { balance = it }
         ) {
-            val accountData = AccountData(
+            val accountData = Account(
                 accountNumber = "test",
                 accountName = name,
                 phoneNumber = phoneNumber,

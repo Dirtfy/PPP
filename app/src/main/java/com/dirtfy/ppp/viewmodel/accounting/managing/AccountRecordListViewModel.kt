@@ -1,12 +1,12 @@
 package com.dirtfy.ppp.viewmodel.accounting.managing
 
-import com.dirtfy.ppp.model.Repository
-import com.dirtfy.ppp.model.accounting.managing.AccountRecordData
+import com.dirtfy.ppp.common.Repository
+import com.dirtfy.ppp.contract.model.accounting.AccountRecordModelContract.DTO.AccountRecord
 import com.dirtfy.ppp.model.accounting.managing.AccountRecordRepository
 import com.dirtfy.ppp.viewmodel.ListViewModel
 
-class AccountRecordListViewModel: ListViewModel<AccountRecordData>() {
+class AccountRecordListViewModel: ListViewModel<AccountRecord>() {
 
-    override val repository: Repository<AccountRecordData>
+    override val repository: Repository<AccountRecord>
         get() = AccountRecordRepository
 }

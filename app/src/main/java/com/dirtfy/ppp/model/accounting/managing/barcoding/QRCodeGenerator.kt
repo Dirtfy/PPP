@@ -2,7 +2,7 @@ package com.dirtfy.ppp.model.accounting.managing.barcoding
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import com.dirtfy.ppp.model.Generator
+import com.dirtfy.ppp.common.Generator
 import com.dirtfy.ppp.view.TestMainActivity
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder

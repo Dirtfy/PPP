@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.model.selling.menu.managing
 
-import com.dirtfy.ppp.model.Repository
+import com.dirtfy.ppp.contract.model.selling.MenuModelContract
+import com.dirtfy.ppp.contract.model.selling.MenuModelContract.DTO.Menu
 import com.dirtfy.ppp.model.RepositoryPath
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -8,14 +9,16 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
-object MenuRepository: Repository<MenuData> {
+object MenuRepository: MenuModelContract.API {
 
     private const val TAG = "MenuRepository"
 
     private val repositoryRef =
         Firebase.firestore.collection(RepositoryPath.MENU)
 
-    override suspend fun create(data: MenuData): MenuData {
+    override suspend fun create(
+        data: Menu
+    ): Menu {
         val newMenuRef = repositoryRef.document()
 
         newMenuRef.set(
@@ -28,14 +31,16 @@ object MenuRepository: Repository<MenuData> {
         return data.copy(menuID = newMenuRef.id)
     }
 
-    override suspend fun read(filter: (MenuData) -> Boolean): List<MenuData> {
-        val menuList = mutableListOf<MenuData>()
+    override suspend fun read(
+        filter: (Menu) -> Boolean
+    ): List<Menu> {
+        val menuList = mutableListOf<Menu>()
 
         repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
             if (documentSnapshot == null) return@forEach
 
             val _menu = documentSnapshot.toObject<_MenuData>()!!
-            val menu = MenuData(
+            val menu = Menu(
                 menuID = documentSnapshot.id,
                 name = _menu.name!!,
                 price =  _menu.price!!
@@ -49,12 +54,14 @@ object MenuRepository: Repository<MenuData> {
         return menuList
     }
 
-    override suspend fun update(filter: (MenuData) -> MenuData) {
+    override suspend fun update(
+        filter: (Menu) -> Menu
+    ) {
         repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
             if (documentSnapshot == null) return@forEach
 
             val _menu = documentSnapshot.toObject<_MenuData>()!!
-            val menu = MenuData(
+            val menu = Menu(
                 menuID = documentSnapshot.id,
                 name = _menu.name!!,
                 price = _menu.price!!
@@ -64,7 +71,7 @@ object MenuRepository: Repository<MenuData> {
         }
     }
 
-    override suspend fun delete(filter: (MenuData) -> Boolean) {
+    override suspend fun delete(filter: (Menu) -> Boolean) {
         TODO("Not yet implemented")
     }
 }

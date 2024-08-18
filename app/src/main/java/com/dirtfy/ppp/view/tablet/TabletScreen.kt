@@ -21,19 +21,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.dirtfy.ppp.contract.view.ScreenContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyHomeViewModel
+import com.dirtfy.ppp.contract.view.HomeViewContract
+import com.dirtfy.ppp.contract.viewmodel.HomeViewModelContract
 import com.dirtfy.ppp.view.tablet.selling.tabling.TablingMainScreenPreview
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object TabletScreen: ScreenContract.API {
+object TabletScreen: HomeViewContract.API {
     @Composable
     override fun Navigator(
-        destinationList: List<ScreenContract.DTO.Screen>,
-        nowPosition: ScreenContract.DTO.Screen,
-        user: User,
+        destinationList: List<HomeViewModelContract.DTO.Screen>,
+        nowPosition: HomeViewModelContract.DTO.Screen,
+        viewModel: HomeViewModelContract.Navigator.API,
         modifier: Modifier
     ) {
         NavigationRail {
@@ -54,12 +54,12 @@ object TabletScreen: ScreenContract.API {
         }
     }
 
-    private fun selectIcon(screen: ScreenContract.DTO.Screen): ImageVector {
+    private fun selectIcon(screen: HomeViewModelContract.DTO.Screen): ImageVector {
         return when(screen) {
-            ScreenContract.DTO.Screen.Tabling -> PPPIcons.Menu
-            ScreenContract.DTO.Screen.MenuManaging -> PPPIcons.Add
-            ScreenContract.DTO.Screen.Accounting -> PPPIcons.AccountBox
-            ScreenContract.DTO.Screen.SalesRecording -> PPPIcons.Build
+            HomeViewModelContract.DTO.Screen.Tabling -> PPPIcons.Menu
+            HomeViewModelContract.DTO.Screen.MenuManaging -> PPPIcons.Add
+            HomeViewModelContract.DTO.Screen.Accounting -> PPPIcons.AccountBox
+            HomeViewModelContract.DTO.Screen.SalesRecording -> PPPIcons.Build
             else -> PPPIcons.Close
         }
     }
@@ -67,27 +67,30 @@ object TabletScreen: ScreenContract.API {
     @Composable
     override fun NavGraph(
         navController: NavHostController,
-        startDestination: ScreenContract.DTO.Screen,
-        user: User,
+        startDestination: HomeViewModelContract.DTO.Screen,
+        viewModel: HomeViewModelContract.NavGraph.API,
         modifier: Modifier
     ) {
         NavHost(
             navController = navController,
             startDestination = startDestination.route
         ) {
-            composable(route = ScreenContract.DTO.Screen.Tabling.route) {
+            composable(route = HomeViewModelContract.DTO.Screen.Tabling.route) {
 
             }
         }
     }
 
     @Composable
-    override fun Main(user: User, modifier: Modifier) {
+    override fun Main(
+        viewModel: HomeViewModelContract.API,
+        modifier: Modifier
+    ) {
         val destinationList = listOf(
-            ScreenContract.DTO.Screen.Tabling,
-            ScreenContract.DTO.Screen.MenuManaging,
-            ScreenContract.DTO.Screen.Accounting,
-            ScreenContract.DTO.Screen.SalesRecording
+            HomeViewModelContract.DTO.Screen.Tabling,
+            HomeViewModelContract.DTO.Screen.MenuManaging,
+            HomeViewModelContract.DTO.Screen.Accounting,
+            HomeViewModelContract.DTO.Screen.SalesRecording
         )
         val navController = rememberNavController()
 
@@ -96,8 +99,8 @@ object TabletScreen: ScreenContract.API {
         ) {
             NavGraph(
                 navController = navController,
-                startDestination = ScreenContract.DTO.Screen.Tabling,
-                user = user,
+                startDestination = HomeViewModelContract.DTO.Screen.Tabling,
+                viewModel = viewModel,
                 modifier = Modifier
             )
 
@@ -105,9 +108,9 @@ object TabletScreen: ScreenContract.API {
                 destinationList = destinationList,
                 nowPosition = convertToScreen(
                     navController.currentDestination?.route?:
-                    ScreenContract.DTO.Screen.Tabling.route
+                    HomeViewModelContract.DTO.Screen.Tabling.route
                 ),
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier
             )
         }
@@ -115,9 +118,16 @@ object TabletScreen: ScreenContract.API {
 
     private fun convertToScreen(
         route: String
-    ): ScreenContract.DTO.Screen {
-        return ScreenContract.DTO.Screen.entries
-            .filter { it.route == route }[0]
+    ): HomeViewModelContract.DTO.Screen {
+        return when(route) {
+            HomeViewModelContract.DTO.Screen.MenuManaging.route ->
+                HomeViewModelContract.DTO.Screen.MenuManaging
+            HomeViewModelContract.DTO.Screen.SalesRecording.route ->
+                HomeViewModelContract.DTO.Screen.SalesRecording
+            HomeViewModelContract.DTO.Screen.Accounting.route ->
+                HomeViewModelContract.DTO.Screen.Accounting
+            else -> HomeViewModelContract.DTO.Screen.Tabling
+        }
     }
 }
 
@@ -126,10 +136,10 @@ object TabletScreen: ScreenContract.API {
 fun TabletScreenPreview() {
     PPPTheme {
         val destinationList = listOf(
-            ScreenContract.DTO.Screen.Tabling,
-            ScreenContract.DTO.Screen.MenuManaging,
-            ScreenContract.DTO.Screen.Accounting,
-            ScreenContract.DTO.Screen.SalesRecording
+            HomeViewModelContract.DTO.Screen.Tabling,
+            HomeViewModelContract.DTO.Screen.MenuManaging,
+            HomeViewModelContract.DTO.Screen.Accounting,
+            HomeViewModelContract.DTO.Screen.SalesRecording
         )
 
         Row(
@@ -141,8 +151,8 @@ fun TabletScreenPreview() {
 
             TabletScreen.Navigator(
                 destinationList = destinationList,
-                nowPosition = ScreenContract.DTO.Screen.Tabling,
-                user = DummyUser,
+                nowPosition = HomeViewModelContract.DTO.Screen.Tabling,
+                viewModel = DummyHomeViewModel,
                 modifier = Modifier
             )
         }

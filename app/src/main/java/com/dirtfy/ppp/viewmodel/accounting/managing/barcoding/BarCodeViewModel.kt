@@ -2,8 +2,8 @@ package com.dirtfy.ppp.viewmodel.accounting.managing.barcoding
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
-import com.dirtfy.ppp.model.Generator
-import com.dirtfy.ppp.model.accounting.accounting.AccountData
+import com.dirtfy.ppp.common.Generator
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract.DTO.Account
 import com.dirtfy.ppp.model.accounting.managing.barcoding.BarCodeGenerator
 import com.dirtfy.ppp.model.accounting.managing.barcoding.BarcodeData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,7 @@ class BarCodeViewModel: ViewModel(){
     val barCode: StateFlow<ImageBitmap>
         get() = _barCode
 
-    fun generate(inputData: AccountData) {
+    fun generate(inputData: Account) {
         _barCode.value = generator.generate(
             BarcodeData(
                 inputData.accountID?: "null"

@@ -23,18 +23,16 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.view.sales.recording.SalesRecordingScreenContract
-import com.dirtfy.ppp.contract.viewmodel.SalesRecordingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummySalesRecordingViewModel
+import com.dirtfy.ppp.contract.view.selling.sales.recording.SalesRecordingViewContract
+import com.dirtfy.ppp.contract.viewmodel.selling.sales.recording.SalesRecordingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object SalesRecordingScreen : SalesRecordingScreenContract.API {
+object SalesRecordingScreen : SalesRecordingViewContract.API {
     @Composable
     override fun RecordList(
-        recordList: List<SalesRecordingContract.DTO.Record>,
-        user: User,
+        recordList: List<SalesRecordingViewModelContract.DTO.Record>,
+        viewModel: SalesRecordingViewModelContract.RecordList.API,
         modifier: Modifier
     ) {
         LazyVerticalGrid(
@@ -44,7 +42,7 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
             items(recordList) {
                 RecordItem(
                     record = it,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier
                 )
             }
@@ -53,8 +51,8 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
 
     @Composable
     override fun RecordItem(
-        record: SalesRecordingContract.DTO.Record,
-        user: User,
+        record: SalesRecordingViewModelContract.DTO.Record,
+        viewModel: SalesRecordingViewModelContract.RecordList.API,
         modifier: Modifier
     ) {
         ListItem(
@@ -66,9 +64,9 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
 
     @Composable
     override fun RecordDetail(
-        record: SalesRecordingContract.DTO.Record,
-        menuList: List<SalesRecordingContract.DTO.Menu>,
-        user: User,
+        record: SalesRecordingViewModelContract.DTO.Record,
+        menuList: List<SalesRecordingViewModelContract.DTO.Menu>,
+        viewModel: SalesRecordingViewModelContract.RecordDetail.API,
         modifier: Modifier
     ) {
         Column(
@@ -121,23 +119,22 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
 
     @Composable
     override fun Main(
-        viewModel: SalesRecordingContract.API,
-        user: User,
+        viewModel: SalesRecordingViewModelContract.API,
         modifier: Modifier
     ) {
-        val recordList by viewModel.recordList.collectAsStateWithLifecycle()
+        val recordList by viewModel.recordList
 
-        val selectedRecordCollect by viewModel.selectedRecord.collectAsStateWithLifecycle()
+        val selectedRecordCollect by viewModel.selectedRecord
         val selectedRecord = selectedRecordCollect
 
-        val menuList by viewModel.selectedRecordMenuList.collectAsStateWithLifecycle()
+        val menuList by viewModel.recordDetail
 
         Row(
             modifier = modifier
         ) {
             RecordList(
                 recordList = recordList,
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier.widthIn(600.dp, 800.dp)
             )
 
@@ -147,7 +144,7 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
                 RecordDetail(
                     record = selectedRecord,
                     menuList = menuList,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier.widthIn(200.dp, 300.dp)
                 )
             }
@@ -159,20 +156,20 @@ object SalesRecordingScreen : SalesRecordingScreenContract.API {
 @Composable
 fun SalesRecordingScreenPreview() {
     val recordList = MutableList(10) {
-        SalesRecordingContract.DTO.Record(
+        SalesRecordingViewModelContract.DTO.Record(
             timestamp = "2024.07.08",
             totalPrice = "5${it},000",
             payment = "Point"
         )
     }
     val menuList = MutableList(10) {
-        SalesRecordingContract.DTO.Menu(
+        SalesRecordingViewModelContract.DTO.Menu(
             name = "test_${it}",
             count = "${it+1}",
             price = "9,500"
         )
     }
-    val selectedRecord = SalesRecordingContract.DTO.Record(
+    val selectedRecord = SalesRecordingViewModelContract.DTO.Record(
         timestamp = "2024.07.08",
         totalPrice = "154,000",
         payment = "Point"
@@ -184,7 +181,7 @@ fun SalesRecordingScreenPreview() {
         ) {
             SalesRecordingScreen.RecordList(
                 recordList = recordList,
-                user = DummyUser,
+                viewModel = DummySalesRecordingViewModel,
                 modifier = Modifier.widthIn(600.dp, 800.dp)
             )
 
@@ -193,7 +190,7 @@ fun SalesRecordingScreenPreview() {
             SalesRecordingScreen.RecordDetail(
                 record = selectedRecord,
                 menuList = menuList,
-                user = DummyUser,
+                viewModel = DummySalesRecordingViewModel,
                 modifier = Modifier.widthIn(200.dp, 300.dp)
             )
         }

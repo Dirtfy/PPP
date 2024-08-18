@@ -21,25 +21,36 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.dirtfy.ppp.contract.view.ScreenContract
-import com.dirtfy.ppp.contract.viewmodel.AccountingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyAccountingViewModel
+import com.dirtfy.ppp.common.DummyHomeViewModel
+import com.dirtfy.ppp.contract.view.HomeViewContract
+import com.dirtfy.ppp.contract.viewmodel.HomeViewModelContract
+import com.dirtfy.ppp.contract.viewmodel.accounting.AccountingViewModelContract
+import com.dirtfy.ppp.contract.viewmodel.accounting.managing.AccountManagingViewModelContract
 import com.dirtfy.ppp.view.phone.accounting.AccountingMainScreen
+import com.dirtfy.ppp.view.phone.accounting.managing.AccountManagingScreen
+import com.dirtfy.ppp.view.phone.selling.menu.managing.MenuManagingScreen
+import com.dirtfy.ppp.view.phone.selling.recording.SalesRecordingScreen
+import com.dirtfy.ppp.view.phone.selling.tabling.TablingMainScreen
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
+import com.dirtfy.ppp.viewmodel.use.accounting.AccountViewModel
+import com.dirtfy.ppp.viewmodel.use.selling.menu.managing.MenuViewModel
+import com.dirtfy.ppp.viewmodel.use.selling.recording.SalesViewModel
+import java.util.Calendar
 
-object PhoneScreen: ScreenContract.API {
+object PhoneScreen: HomeViewContract.API {
 
     @Composable
     override fun Navigator(
-        destinationList: List<ScreenContract.DTO.Screen>,
-        nowPosition: ScreenContract.DTO.Screen,
-        user: User,
+        destinationList: List<HomeViewModelContract.DTO.Screen>,
+        nowPosition: HomeViewModelContract.DTO.Screen,
+        viewModel: HomeViewModelContract.Navigator.API,
         modifier: Modifier
     ) {
         NavigationBar(
@@ -48,7 +59,7 @@ object PhoneScreen: ScreenContract.API {
             destinationList.forEach {
                 NavigationBarItem(
                     selected = (it == nowPosition),
-                    onClick = { /*TODO*/ },
+                    onClick = { viewModel.navigateTo(it) },
                     icon = {
                         val icon = selectIcon(it)
 
@@ -62,12 +73,12 @@ object PhoneScreen: ScreenContract.API {
         }
     }
 
-    private fun selectIcon(screen: ScreenContract.DTO.Screen): ImageVector {
+    private fun selectIcon(screen: HomeViewModelContract.DTO.Screen): ImageVector {
         return when(screen) {
-            ScreenContract.DTO.Screen.Tabling -> PPPIcons.Menu
-            ScreenContract.DTO.Screen.MenuManaging -> PPPIcons.Add
-            ScreenContract.DTO.Screen.Accounting -> PPPIcons.AccountBox
-            ScreenContract.DTO.Screen.SalesRecording -> PPPIcons.Build
+            HomeViewModelContract.DTO.Screen.Tabling -> PPPIcons.Menu
+            HomeViewModelContract.DTO.Screen.MenuManaging -> PPPIcons.Add
+            HomeViewModelContract.DTO.Screen.Accounting -> PPPIcons.AccountBox
+            HomeViewModelContract.DTO.Screen.SalesRecording -> PPPIcons.Build
             else -> PPPIcons.Close
         }
     }
@@ -75,48 +86,117 @@ object PhoneScreen: ScreenContract.API {
     @Composable
     override fun NavGraph(
         navController: NavHostController,
-        startDestination: ScreenContract.DTO.Screen,
-        user: User,
+        startDestination: HomeViewModelContract.DTO.Screen,
+        viewModel: HomeViewModelContract.NavGraph.API,
         modifier: Modifier
     ) {
         NavHost(
             navController = navController,
             startDestination = startDestination.route
         ) {
-            composable(route = ScreenContract.DTO.Screen.Tabling.route) {
+            composable(route = HomeViewModelContract.DTO.Screen.Tabling.route) {
+                TablingMainScreen.Main(
+                    viewModel = viewModel(),
+                    modifier = modifier
+                )
+            }
+            composable(route = HomeViewModelContract.DTO.Screen.MenuManaging.route) {
+                MenuManagingScreen.Main(
+                    viewModel = viewModel<MenuViewModel>(),
+                    modifier = modifier
+                )
+            }
+            composable(route = HomeViewModelContract.DTO.Screen.SalesRecording.route) {
+                SalesRecordingScreen.Main(
+                    viewModel = viewModel<SalesViewModel>(),
+                    modifier = modifier
+                )
+            }
+            composable(route = HomeViewModelContract.DTO.Screen.Accounting.route) {
+                AccountingMainScreen.Main(
+                    viewModel = viewModel<AccountViewModel>(),
+                    homeViewModel = viewModel,
+                    modifier = modifier
+                )
+            }
+            composable(
+                route = HomeViewModelContract.DTO.Screen.AccountManaging.routeWitchArgument,
+                arguments = HomeViewModelContract.DTO.Screen.AccountManaging.arguments
+            ) {
+                val arguments = requireNotNull(it.arguments)
 
+                val registerTimestamp = requireNotNull(
+                    arguments.getLong(
+                        HomeViewModelContract.DTO.Screen.AccountManaging.registerTimestampArg
+                    )
+                )
+                val cal = Calendar.getInstance()
+                cal.timeInMillis = registerTimestamp
+
+                val year = cal.get(Calendar.YEAR)
+                val month = cal.get(Calendar.MONTH)+1
+                val day = cal.get(Calendar.DAY_OF_MONTH)
+
+                val accountDetail =
+                    AccountManagingViewModelContract.DTO.Account(
+                        number = requireNotNull(
+                            arguments.getString(
+                                HomeViewModelContract.DTO.Screen.AccountManaging.accountNumberArg
+                            )
+                        ),
+                        name = requireNotNull(
+                            arguments.getString(
+                                HomeViewModelContract.DTO.Screen.AccountManaging.accountNameArg
+                            )
+                        ),
+                        phoneNumber = requireNotNull(
+                            arguments.getString(
+                                HomeViewModelContract.DTO.Screen.AccountManaging.phoneNumberArg
+                            )
+                        ),
+                        registerTimestamp = "$year/$month/$day",
+                        balance = requireNotNull(
+                            arguments.getInt(
+                                HomeViewModelContract.DTO.Screen.AccountManaging.balanceArg
+                            )
+                        ).toString()
+                    )
+
+                AccountManagingScreen.Main(
+                    startAccountDetail = accountDetail,
+                    viewModel = viewModel(),
+                    modifier = modifier
+                )
             }
         }
     }
 
     @Composable
-    override fun Main(user: User, modifier: Modifier) {
-        val destinationList = listOf(
-            ScreenContract.DTO.Screen.Tabling,
-            ScreenContract.DTO.Screen.MenuManaging,
-            ScreenContract.DTO.Screen.Accounting,
-            ScreenContract.DTO.Screen.SalesRecording
-        )
-        val navController = rememberNavController()
+    override fun Main(
+        viewModel: HomeViewModelContract.API,
+        modifier: Modifier
+    ) {
+        val destinationList = viewModel.destinationList
+        viewModel.setNavController(rememberNavController())
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier
         ) {
             NavGraph(
-                navController = navController,
-                startDestination = ScreenContract.DTO.Screen.Tabling,
-                user = user,
+                navController = viewModel.navController,
+                startDestination = HomeViewModelContract.DTO.Screen.Tabling,
+                viewModel = viewModel,
                 modifier = Modifier
             )
 
             Navigator(
                 destinationList = destinationList,
                 nowPosition = convertToScreen(
-                    navController.currentDestination?.route?:
-                    ScreenContract.DTO.Screen.Tabling.route
+                    viewModel.navController.currentDestination?.route?:
+                    HomeViewModelContract.DTO.Screen.Tabling.route
                 ),
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier
             )
         }
@@ -124,9 +204,16 @@ object PhoneScreen: ScreenContract.API {
 
     private fun convertToScreen(
         route: String
-    ): ScreenContract.DTO.Screen {
-        return ScreenContract.DTO.Screen.entries
-            .filter { it.route == route }[0]
+    ): HomeViewModelContract.DTO.Screen {
+        return when(route) {
+            HomeViewModelContract.DTO.Screen.MenuManaging.route ->
+                HomeViewModelContract.DTO.Screen.MenuManaging
+            HomeViewModelContract.DTO.Screen.SalesRecording.route ->
+                HomeViewModelContract.DTO.Screen.SalesRecording
+            HomeViewModelContract.DTO.Screen.Accounting.route ->
+                HomeViewModelContract.DTO.Screen.Accounting
+            else -> HomeViewModelContract.DTO.Screen.Tabling
+        }
     }
 
 }
@@ -136,14 +223,14 @@ object PhoneScreen: ScreenContract.API {
 fun TabletScreenPreview() {
     PPPTheme {
         val destinationList = listOf(
-            ScreenContract.DTO.Screen.Tabling,
-            ScreenContract.DTO.Screen.MenuManaging,
-            ScreenContract.DTO.Screen.Accounting,
-            ScreenContract.DTO.Screen.SalesRecording
+            HomeViewModelContract.DTO.Screen.Tabling,
+            HomeViewModelContract.DTO.Screen.MenuManaging,
+            HomeViewModelContract.DTO.Screen.Accounting,
+            HomeViewModelContract.DTO.Screen.SalesRecording
         )
 
         val accountList = MutableList(10) {
-            AccountingContract.DTO.Account(
+            AccountingViewModelContract.DTO.Account(
                 number = "$it",
                 name = "test_$it",
                 registerDate = "2024.6.${it+1}"
@@ -159,14 +246,15 @@ fun TabletScreenPreview() {
             ) {
                 AccountingMainScreen.SearchBar(
                     searchClue = searchClue,
-                    user = DummyUser,
+                    viewModel = DummyAccountingViewModel,
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()
                 )
                 AccountingMainScreen.AccountList(
                     accountList = accountList,
-                    user = DummyUser,
+                    viewModel = DummyAccountingViewModel,
+                    homeViewModel = DummyHomeViewModel,
                     modifier = Modifier
                 )
             }
@@ -175,8 +263,8 @@ fun TabletScreenPreview() {
 
             PhoneScreen.Navigator(
                 destinationList = destinationList,
-                nowPosition = ScreenContract.DTO.Screen.Tabling,
-                user = DummyUser,
+                nowPosition = HomeViewModelContract.DTO.Screen.Tabling,
+                viewModel = DummyHomeViewModel,
                 modifier = Modifier
             )
         }

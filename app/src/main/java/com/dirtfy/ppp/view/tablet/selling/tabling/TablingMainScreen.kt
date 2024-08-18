@@ -17,32 +17,29 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.view.tabling.TablingScreenContract
-import com.dirtfy.ppp.contract.viewmodel.TablingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyTablingViewModel
+import com.dirtfy.ppp.contract.view.selling.tabling.TablingViewContract
+import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object TablingMainScreen: TablingScreenContract.API {
+object TablingMainScreen: TablingViewContract.API {
 
     @Composable
     override fun Main(
-        viewModel: TablingContract.API,
-        modifier: Modifier,
-        user: User
+        viewModel: TablingViewModelContract.API,
+        modifier: Modifier
     ) {
-        val orderList by viewModel.orderList.collectAsStateWithLifecycle()
-        val total by viewModel.total.collectAsStateWithLifecycle()
-        val tableList by viewModel.tableList.collectAsStateWithLifecycle()
-        val menuList by viewModel.menuList.collectAsStateWithLifecycle()
+        val orderList by viewModel.orderList
+        val total by viewModel.total
+        val tableList by viewModel.tableList
+        val menuList by viewModel.menuList
 
         Row(
             modifier = modifier
         ) {
             OrderScreen.Main(
-                user = user,
+                viewModel = viewModel,
                 orderList = orderList,
                 total = total,
                 modifier = Modifier
@@ -52,12 +49,12 @@ object TablingMainScreen: TablingScreenContract.API {
             Column {
                 TableScreen.TableLayout(
                     tableList = tableList,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier.widthIn(600.dp, 800.dp)
                 )
                 MenuListScreen.MenuList(
                     menuList = menuList,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier.widthIn(600.dp, 800.dp)
                 )
             }
@@ -66,8 +63,8 @@ object TablingMainScreen: TablingScreenContract.API {
 
     @Composable
     override fun InstantMenuCreation(
-        menu: TablingContract.DTO.Menu,
-        user: User,
+        menu: TablingViewModelContract.DTO.Menu,
+        viewModel: TablingViewModelContract.MenuList.API,
         modifier: Modifier
     ) {
         Dialog(onDismissRequest = { /*TODO*/ }) {
@@ -101,7 +98,7 @@ object TablingMainScreen: TablingScreenContract.API {
 @Composable
 fun TablingMainScreenPreview() {
     val orderList = MutableList(10) {
-        TablingContract.DTO.Order(
+        TablingViewModelContract.DTO.Order(
             "test_${it}",
             "${it*1234}",
             "$it"
@@ -109,19 +106,19 @@ fun TablingMainScreenPreview() {
     }
     val totalPrice = orderList.sumOf { it.price.toInt() }
     val total =
-        TablingContract.DTO.Total("$totalPrice")
+        TablingViewModelContract.DTO.Total("$totalPrice")
 
-    val tableList: List<TablingContract.DTO.Table> =
+    val tableList: List<TablingViewModelContract.DTO.Table> =
         listOf(
             11, 10, 9, 8, 7, 6, 5, 4, 3, 0,
             0,  0, 0, 0, 0, 0, 0, 0, 0, 2,
             0,  0, 0, 0, 0, 0, 0, 0, 0, 1
         ).map {
-            TablingContract.DTO.Table("$it", Color.LightGray.value)
+            TablingViewModelContract.DTO.Table("$it", Color.LightGray.value)
         }
 
     val menuDataList = MutableList(10) {
-        TablingContract.DTO.Menu(
+        TablingViewModelContract.DTO.Menu(
             "test_${it}",
             "${it*1500}"
         )
@@ -132,7 +129,7 @@ fun TablingMainScreenPreview() {
             modifier = Modifier
         ) {
             OrderScreen.Main(
-                user = DummyUser,
+                viewModel = DummyTablingViewModel,
                 orderList = orderList,
                 total = total,
                 modifier = Modifier
@@ -142,12 +139,12 @@ fun TablingMainScreenPreview() {
             Column {
                 TableScreen.TableLayout(
                     tableList = tableList,
-                    user = DummyUser,
+                    viewModel = DummyTablingViewModel,
                     modifier = Modifier.widthIn(600.dp, 800.dp)
                 )
                 MenuListScreen.MenuList(
                     menuList = menuDataList,
-                    user = DummyUser,
+                    viewModel = DummyTablingViewModel,
                     modifier = Modifier.widthIn(600.dp, 800.dp)
                 )
             }
@@ -158,14 +155,14 @@ fun TablingMainScreenPreview() {
 @Preview(showBackground = true, device = Devices.TABLET)
 @Composable
 fun InstantMenuCreationPreview(){
-    val menu = TablingContract.DTO.Menu(
+    val menu = TablingViewModelContract.DTO.Menu(
         name = "test",
         price = "123,000"
     )
     PPPTheme {
         TablingMainScreen.InstantMenuCreation(
             menu = menu,
-            user = DummyUser,
+            viewModel = DummyTablingViewModel,
             modifier = Modifier
         )
     }

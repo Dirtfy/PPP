@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.view.phone.accounting
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,19 +27,22 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.view.accounting.AccountingScreenContract
-import com.dirtfy.ppp.contract.viewmodel.AccountingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyAccountingViewModel
+import com.dirtfy.ppp.common.DummyHomeViewModel
+import com.dirtfy.ppp.contract.view.accounting.AccountingViewContract
+import com.dirtfy.ppp.contract.viewmodel.HomeViewModelContract
+import com.dirtfy.ppp.contract.viewmodel.accounting.AccountingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
-object AccountingMainScreen: AccountingScreenContract.API {
+object AccountingMainScreen: AccountingViewContract.API {
     @Composable
     override fun AccountList(
-        accountList: List<AccountingContract.DTO.Account>,
-        user: User,
+        accountList: List<AccountingViewModelContract.DTO.Account>,
+        viewModel: AccountingViewModelContract.AccountList.API,
+        homeViewModel: HomeViewModelContract.NavGraph.API,
         modifier: Modifier
     ) {
         LazyColumn(
@@ -47,7 +51,8 @@ object AccountingMainScreen: AccountingScreenContract.API {
             items(accountList) {
                 Account(
                     account = it,
-                    user = user,
+                    viewModel = viewModel,
+                    homeViewModel = homeViewModel,
                     modifier = Modifier
                 )
             }
@@ -56,13 +61,17 @@ object AccountingMainScreen: AccountingScreenContract.API {
 
     @Composable
     override fun Account(
-        account: AccountingContract.DTO.Account,
-        user: User,
+        account: AccountingViewModelContract.DTO.Account,
+        viewModel: AccountingViewModelContract.AccountList.API,
+        homeViewModel: HomeViewModelContract.NavGraph.API,
         modifier: Modifier
     ) {
         Box(
             modifier = modifier.clickable {
-                /* TODO */
+                homeViewModel.navigateTo(
+                    HomeViewModelContract.DTO.Screen.AccountManaging,
+                    viewModel.buildAccountArgumentString(account)
+                )
             }
         ) {
             ListItem(
@@ -88,9 +97,14 @@ object AccountingMainScreen: AccountingScreenContract.API {
     @Composable
     override fun SearchBar(
         searchClue: String,
-        user: User,
+        viewModel: AccountingViewModelContract.SearchBar.API,
         modifier: Modifier
     ) {
+        val scanLauncher = rememberLauncherForActivityResult(
+            contract = ScanContract()
+        ) {
+            viewModel.clueChanged(it.contents)
+        }
 
         TextField(
             leadingIcon = {
@@ -101,7 +115,10 @@ object AccountingMainScreen: AccountingScreenContract.API {
                 )
             },
             value = searchClue,
-            onValueChange = { /*TODO*/ },
+            onValueChange = {
+                viewModel.clueChanged(it)
+                viewModel.searchByClue()
+                            },
             trailingIcon = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -113,6 +130,9 @@ object AccountingMainScreen: AccountingScreenContract.API {
                         contentDescription = barCodeIcon.name,
                         modifier = Modifier
                             .rotate(90f)
+                            .clickable {
+                                scanLauncher.launch(ScanOptions())
+                            }
                     )
 
                     Spacer(Modifier.size(10.dp))
@@ -130,26 +150,27 @@ object AccountingMainScreen: AccountingScreenContract.API {
 
     @Composable
     override fun Main(
-        viewModel: AccountingContract.API,
-        user: User,
+        viewModel: AccountingViewModelContract.API,
+        homeViewModel: HomeViewModelContract.NavGraph.API,
         modifier: Modifier
     ) {
-        val searchClue by viewModel.searchClue.collectAsStateWithLifecycle()
-        val accountList by viewModel.accountList.collectAsStateWithLifecycle()
+        val searchClue by viewModel.searchClue
+        val accountList by viewModel.accountList
 
         Column(
             modifier = modifier
         ) {
             SearchBar(
                 searchClue = searchClue,
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier
                     .padding(10.dp)
                     .fillMaxWidth()
             )
             AccountList(
                 accountList = accountList,
-                user = user,
+                viewModel = viewModel,
+                homeViewModel = homeViewModel,
                 modifier = Modifier
             )
         }
@@ -161,7 +182,7 @@ object AccountingMainScreen: AccountingScreenContract.API {
 @Composable
 fun AccountingMainScreenPreview() {
     val accountList = MutableList(10) {
-        AccountingContract.DTO.Account(
+        AccountingViewModelContract.DTO.Account(
             number = "$it",
             name = "test_$it",
             registerDate = "2024.6.${it+1}"
@@ -175,14 +196,15 @@ fun AccountingMainScreenPreview() {
         ) {
             AccountingMainScreen.SearchBar(
                 searchClue = searchClue,
-                user = DummyUser,
+                viewModel = DummyAccountingViewModel,
                 modifier = Modifier
                     .padding(10.dp)
                     .fillMaxWidth()
             )
             AccountingMainScreen.AccountList(
                 accountList = accountList,
-                user = DummyUser,
+                viewModel = DummyAccountingViewModel,
+                homeViewModel = DummyHomeViewModel,
                 modifier = Modifier
             )
         }

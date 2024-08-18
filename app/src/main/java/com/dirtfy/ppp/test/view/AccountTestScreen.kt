@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.model.accounting.accounting.AccountData
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract.DTO.Account
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 import com.dirtfy.ppp.viewmodel.accounting.accounting.AccountListViewModel
 import java.util.Calendar
@@ -64,14 +64,14 @@ fun AccountCreate(
 }
 
 @Composable
-fun AccountList(accounts: List<AccountData>) {
+fun AccountList(accounts: List<Account>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         items(
             items = accounts,
             key = { item ->
-                item.accountNumber?:""
+                item.accountNumber
             }
         ) { item ->
             AccountItem(data = item)
@@ -80,9 +80,9 @@ fun AccountList(accounts: List<AccountData>) {
 }
 
 @Composable
-fun AccountItem(data: AccountData) {
+fun AccountItem(data: Account) {
     Column{
-        Text(text = "ID: ${data.accountNumber?:"null"}")
+        Text(text = "ID: ${data.accountNumber}")
         Text(text = "Name: "+ data.accountName)
         Text(text = "Balance:" + data.balance.toString())
         Text(text = "Timestamp:" + data.registerTimestamp.toString())
@@ -115,7 +115,7 @@ fun AccountTest(
             onBalanceChanged = { balance = it }
         ) {
             accountListViewModel.insertData(
-                AccountData(
+                Account(
                     accountNumber = number,
                     accountName = name,
                     phoneNumber = phoneNumber,

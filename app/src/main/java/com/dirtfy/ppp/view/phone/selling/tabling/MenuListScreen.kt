@@ -15,19 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import com.dirtfy.ppp.contract.view.tabling.MenuListScreenContract
-import com.dirtfy.ppp.contract.viewmodel.TablingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyTablingViewModel
+import com.dirtfy.ppp.contract.view.selling.tabling.MenuListViewContract
+import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object MenuListScreen: MenuListScreenContract.API {
+object MenuListScreen: MenuListViewContract.API {
 
     @Composable
     override fun MenuList(
-        menuList: List<TablingContract.DTO.Menu>,
-        user: User,
+        menuList: List<TablingViewModelContract.DTO.Menu>,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         LazyVerticalGrid(
@@ -37,7 +36,7 @@ object MenuListScreen: MenuListScreenContract.API {
             items(menuList) {
                 this@MenuListScreen.MenuItem(
                     menu = it,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier
                 )
             }
@@ -46,8 +45,8 @@ object MenuListScreen: MenuListScreenContract.API {
 
     @Composable
     override fun MenuItem(
-        menu: TablingContract.DTO.Menu,
-        user: User,
+        menu: TablingViewModelContract.DTO.Menu,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         Column(
@@ -57,7 +56,9 @@ object MenuListScreen: MenuListScreenContract.API {
 
             Row {
                 IconButton(
-                    onClick = { /*TODO*/ }
+                    onClick = {
+                        viewModel.orderMenu(menu)
+                    }
                 ) {
                     val addIcon = PPPIcons.Add
                     Icon(
@@ -67,7 +68,9 @@ object MenuListScreen: MenuListScreenContract.API {
                 }
 
                 IconButton(
-                    onClick = { /*TODO*/ }
+                    onClick = {
+                        viewModel.cancelMenu(menu)
+                    }
                 ) {
                     val deleteIcon = PPPIcons.Close
                     Icon(
@@ -84,7 +87,7 @@ object MenuListScreen: MenuListScreenContract.API {
 @Composable
 fun MenuListPreview() {
     val menuDataList = MutableList(10) {
-        TablingContract.DTO.Menu(
+        TablingViewModelContract.DTO.Menu(
             "test_${it}",
             "${it*1500}"
         )
@@ -93,7 +96,7 @@ fun MenuListPreview() {
     PPPTheme {
         MenuListScreen.MenuList(
             menuList = menuDataList,
-            user = DummyUser,
+            viewModel = DummyTablingViewModel,
             modifier = Modifier
         )
     }

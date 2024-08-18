@@ -15,7 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.dirtfy.ppp.R
-import com.dirtfy.ppp.model.accounting.accounting.AccountData
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract.DTO.Account
 import com.dirtfy.ppp.test.view.AccountRecordTest
 import com.dirtfy.ppp.test.view.AccountTest
 import com.dirtfy.ppp.test.view.MenuTest
@@ -88,7 +88,7 @@ fun TestMainActivityScreen() {
             ) {
                 val arguments = requireNotNull(it.arguments)
                 val accountData =
-                    AccountData(
+                    Account(
                         accountNumber = requireNotNull(arguments.getString(PPPScreen.AccountRecord.accountIDArg)),
                         accountName = requireNotNull(arguments.getString(PPPScreen.AccountRecord.accountNameArg)),
                         phoneNumber = requireNotNull(arguments.getString(PPPScreen.AccountRecord.phoneNumberArg)),

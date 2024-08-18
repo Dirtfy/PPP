@@ -1,5 +1,6 @@
 [versions]
 agp = "8.3.2"
+ansroidAutoTagger = "1.0.0"
 composeBom = "2024.05.00"
 constraintlayoutCompose = "1.0.1"
 kotlin = "1.9.0"
@@ -36,6 +37,7 @@ androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx",
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+ansroid-auto-tagger = { module = "com.github.Dirtfy:ansroid-auto-tagger", version.ref = "ansroidAutoTagger" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

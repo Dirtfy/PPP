@@ -25,19 +25,17 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.contract.view.accounting.managing.AccountManagingScreenContract
-import com.dirtfy.ppp.contract.viewmodel.AccountManagingContract
-import com.dirtfy.ppp.contract.viewmodel.user.DummyUser
-import com.dirtfy.ppp.contract.viewmodel.user.User
+import com.dirtfy.ppp.common.DummyAccountManagingViewModel
+import com.dirtfy.ppp.contract.view.accounting.managing.AccountManagingViewContract
+import com.dirtfy.ppp.contract.viewmodel.accounting.managing.AccountManagingViewModelContract
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
-object AccountManagingScreen: AccountManagingScreenContract.API {
+object AccountManagingScreen: AccountManagingViewContract.API {
     @Composable
     override fun AccountDetail(
-        account: AccountManagingContract.DTO.Account,
-        user: User,
+        account: AccountManagingViewModelContract.DTO.Account,
+        viewModel: AccountManagingViewModelContract.AccountDetail.API,
         modifier: Modifier
     ) {
         ElevatedCard(
@@ -63,8 +61,8 @@ object AccountManagingScreen: AccountManagingScreenContract.API {
 
     @Composable
     override fun RecordList(
-        recordList: List<AccountManagingContract.DTO.Record>,
-        user: User,
+        recordList: List<AccountManagingViewModelContract.DTO.Record>,
+        viewModel: AccountManagingViewModelContract.RecordList.API,
         modifier: Modifier
     ) {
         LazyVerticalGrid(
@@ -74,7 +72,7 @@ object AccountManagingScreen: AccountManagingScreenContract.API {
             items(recordList) {
                 RecordItem(
                     record = it,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier
                 )
             }
@@ -83,8 +81,8 @@ object AccountManagingScreen: AccountManagingScreenContract.API {
 
     @Composable
     override fun RecordItem(
-        record: AccountManagingContract.DTO.Record,
-        user: User,
+        record: AccountManagingViewModelContract.DTO.Record,
+        viewModel: AccountManagingViewModelContract.RecordList.API,
         modifier: Modifier
     ) {
         ListItem(
@@ -97,9 +95,9 @@ object AccountManagingScreen: AccountManagingScreenContract.API {
     }
 
     @Composable
-    override fun Record(
-        record: AccountManagingContract.DTO.Record,
-        user: User,
+    override fun NewRecord(
+        record: AccountManagingViewModelContract.DTO.Record,
+        viewModel: AccountManagingViewModelContract.NewRecord.API,
         modifier: Modifier
     ) {
         ElevatedCard(
@@ -139,35 +137,35 @@ object AccountManagingScreen: AccountManagingScreenContract.API {
 
     @Composable
     override fun Main(
-        viewModel: AccountManagingContract.API,
-        user: User,
+        startAccountDetail: AccountManagingViewModelContract.DTO.Account,
+        viewModel: AccountManagingViewModelContract.API,
         modifier: Modifier
     ) {
-        val recordList by viewModel.recordList.collectAsStateWithLifecycle()
-        val currentAccount by viewModel.currentAccount.collectAsStateWithLifecycle()
-        val newRecord by viewModel.newRecord.collectAsStateWithLifecycle()
+        val recordList by viewModel.recordList
+        val currentAccount by viewModel.accountDetail
+        val newRecord by viewModel.newRecord
 
         Row(
             modifier = modifier
         ) {
             RecordList(
                 recordList = recordList,
-                user = user,
+                viewModel = viewModel,
                 modifier = Modifier.widthIn(800.dp, 1000.dp)
             )
 
             Column {
                 AccountDetail(
                     account = currentAccount,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()
                 )
 
-                Record(
+                NewRecord(
                     record = newRecord,
-                    user = user,
+                    viewModel = viewModel,
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()
@@ -181,7 +179,7 @@ object AccountManagingScreen: AccountManagingScreenContract.API {
 @Preview(showBackground = true, device = Devices.TABLET)
 @Composable
 fun AccountManagingScreenPreview() {
-    val account = AccountManagingContract.DTO.Account(
+    val account = AccountManagingViewModelContract.DTO.Account(
         number = "18049",
         name = "test",
         phoneNumber = "010-8592-1485",
@@ -189,14 +187,14 @@ fun AccountManagingScreenPreview() {
         balance = "105,300"
     )
     val recordList = MutableList(10) {
-        AccountManagingContract.DTO.Record(
+        AccountManagingViewModelContract.DTO.Record(
             timestamp = "2024.07.08",
             userName = "user_${it}",
             amount = "100,000",
             result = "105,300"
         )
     }
-    val newRecord = AccountManagingContract.DTO.Record(
+    val newRecord = AccountManagingViewModelContract.DTO.Record(
         timestamp = "2024.07.08",
         userName = "new user",
         amount = "100,000",
@@ -209,22 +207,22 @@ fun AccountManagingScreenPreview() {
         ) {
             AccountManagingScreen.RecordList(
                 recordList = recordList,
-                user = DummyUser,
+                viewModel = DummyAccountManagingViewModel,
                 modifier = Modifier.widthIn(800.dp, 1000.dp)
             )
 
             Column {
                 AccountManagingScreen.AccountDetail(
                     account = account,
-                    user = DummyUser,
+                    viewModel = DummyAccountManagingViewModel,
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()
                 )
 
-                AccountManagingScreen.Record(
+                AccountManagingScreen.NewRecord(
                     record = newRecord,
-                    user = DummyUser,
+                    viewModel = DummyAccountManagingViewModel,
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()

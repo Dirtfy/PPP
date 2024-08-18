@@ -19,8 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.model.accounting.accounting.AccountData
-import com.dirtfy.ppp.model.accounting.managing.AccountRecordData
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract.DTO.Account
+import com.dirtfy.ppp.contract.model.accounting.AccountRecordModelContract.DTO.AccountRecord
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 import com.dirtfy.ppp.viewmodel.accounting.accounting.AccountViewModel
 import com.dirtfy.ppp.viewmodel.accounting.managing.AccountRecordListViewModel
@@ -33,7 +33,7 @@ object AccountRecordTestScreen{
 
 
 @Composable
-fun AccountRecordList(accountRecords: List<AccountRecordData>) {
+fun AccountRecordList(accountRecords: List<AccountRecord>) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
@@ -49,7 +49,7 @@ fun AccountRecordList(accountRecords: List<AccountRecordData>) {
 }
 
 @Composable
-fun AccountRecordItem(data: AccountRecordData) {
+fun AccountRecordItem(data: AccountRecord) {
     Column{
         Text(text = "ID: ${data.recordID?:"null"}")
         Text(text = "Account ID: ${data.accountNumber}")
@@ -62,7 +62,7 @@ fun AccountRecordItem(data: AccountRecordData) {
 
 @Composable
 fun AccountRecordTest(
-    arrivedAccountData: AccountData,
+    arrivedAccountData: Account,
     accountViewModel: AccountViewModel = viewModel(),
     accountRecordListViewModel: AccountRecordListViewModel = viewModel()
 ) {
@@ -110,9 +110,9 @@ fun AccountRecordTest(
                 Button(onClick = {
                     // TODO: record insert 와 account update 가 둘다 동시에 성공하도록 구성해야함
                     accountRecordListViewModel.insertData(
-                        AccountRecordData(
+                        AccountRecord(
                             recordID = null,
-                            accountNumber = accountData.accountNumber?:"error!!",
+                            accountNumber = accountData.accountNumber,
                             timestamp = Timestamp(Date()),
                             userName = userName,
                             amount = amount.toInt(),
@@ -149,6 +149,6 @@ fun AccountRecordTest(
 @Composable
 fun AccountRecordTestPreview() {
     PPPTheme {
-        AccountRecordTest(AccountData())
+        AccountRecordTest(Account())
     }
 }
