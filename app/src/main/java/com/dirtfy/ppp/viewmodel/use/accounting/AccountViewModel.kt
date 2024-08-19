@@ -39,6 +39,27 @@ class AccountViewModel: ViewModel(), AccountingViewModelContract.API, Tagger {
         _accountList.value = newList
     }
 
+    private val _isCreatingAccount: MutableState<Boolean>
+            = mutableStateOf(false)
+    override val isCreatingAccount: State<Boolean>
+        get() = _isCreatingAccount
+
+    override fun setIsCreatingAccount(value: Boolean) {
+        _isCreatingAccount.value = value
+    }
+
+    override fun addAccount(account: Account, phoneNumber: String) {
+        viewModelScope.launch {
+            accountModel.create(
+                AccountModelContract.DTO.Account(
+                    accountNumber = account.number,
+                    accountName = account.name,
+                    phoneNumber = phoneNumber
+                )
+            )
+        }
+    }
+
     private val _rawAccountList: MutableList<AccountModelContract.DTO.Account>
     = mutableListOf()
     private val _accountList: MutableState<List<Account>>
@@ -51,7 +72,7 @@ class AccountViewModel: ViewModel(), AccountingViewModelContract.API, Tagger {
         cal.timeInMillis = timestamp
 
         val year = cal.get(Calendar.YEAR)
-        val month = cal.get(Calendar.MONTH)
+        val month = cal.get(Calendar.MONTH)+1
         val day = cal.get(Calendar.DAY_OF_MONTH)
 
         return "$year/$month/$day"

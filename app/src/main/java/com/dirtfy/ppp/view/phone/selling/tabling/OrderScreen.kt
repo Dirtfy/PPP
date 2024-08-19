@@ -98,26 +98,9 @@ object OrderScreen: OrderViewContract.API {
         viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
-        Row(
+        Column(
             modifier = modifier
         ) {
-            Column {
-                var pointAccountNumber by remember{ mutableStateOf("") }
-                Button(onClick = {
-                    viewModel.payTable(
-                        TablingViewModelContract.DTO.Payment.Point,
-                        pointAccountNumber
-                    )
-                }) {
-                    Text(text = "Point")
-                }
-                TextField(
-                    value = pointAccountNumber,
-                    onValueChange = {
-                        pointAccountNumber = it
-                    })
-            }
-
             Button(onClick = {
                 viewModel.payTable(
                     TablingViewModelContract.DTO.Payment.Card,
@@ -134,6 +117,23 @@ object OrderScreen: OrderViewContract.API {
                 )
             }) {
                 Text(text = "cash")
+            }
+
+            Column {
+                var pointAccountNumber by remember{ mutableStateOf("") }
+                Button(onClick = {
+                    viewModel.payTable(
+                        TablingViewModelContract.DTO.Payment.Point,
+                        pointAccountNumber
+                    )
+                }) {
+                    Text(text = "Point")
+                }
+                TextField(
+                    value = pointAccountNumber,
+                    onValueChange = {
+                        pointAccountNumber = it
+                    })
             }
         }
     }

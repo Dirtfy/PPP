@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,6 +18,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,11 +57,26 @@ object MenuManagingScreen : MenuManagingViewContract.API {
         viewModel: MenuManagingViewModelContract.MenuList.API,
         modifier: Modifier
     ) {
-        ListItem(
-            headlineContent = { Text(text = menu.name) },
-            supportingContent = { Text(text = menu.price) },
+        Row(
             modifier = modifier
-        )
+        ) {
+            ListItem(
+                headlineContent = { Text(text = menu.name) },
+                supportingContent = { Text(text = menu.price) },
+                trailingContent = {
+                    IconButton(onClick = {
+                        viewModel.deleteMenu(menu)
+                    }) {
+                        val deleteIcon = PPPIcons.Close
+                        Icon(
+                            imageVector = deleteIcon,
+                            contentDescription = deleteIcon.name
+                        )
+                    }
+                }
+            )
+        }
+
     }
 
     @Composable
@@ -79,19 +96,31 @@ object MenuManagingScreen : MenuManagingViewContract.API {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     TextField(
+                        label = { Text(text = "menu name")},
                         value = menu.name,
-                        onValueChange = { /*TODO*/ }
+                        onValueChange = {
+                            viewModel.setNewMenu(
+                                menu.copy(name = it)
+                            )
+                        }
                     )
 
                     Spacer(Modifier.size(10.dp))
 
                     TextField(
+                        label = { Text(text = "menu price")},
                         value = menu.price,
-                        onValueChange = { /*TODO*/ }
+                        onValueChange = {
+                            viewModel.setNewMenu(
+                                menu.copy(price = it)
+                            )
+                        }
                     )
                 }
 
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = {
+                    viewModel.addMenu()
+                }) {
                     val addIcon = PPPIcons.Add
                     Icon(
                         imageVector = addIcon,
@@ -110,6 +139,10 @@ object MenuManagingScreen : MenuManagingViewContract.API {
     ) {
         val newMenu by viewModel.newMenu
         val menuList by viewModel.menuList
+        
+        LaunchedEffect(key1 = viewModel) {
+            viewModel.checkMenuList()
+        }
 
         Column(
             modifier = modifier

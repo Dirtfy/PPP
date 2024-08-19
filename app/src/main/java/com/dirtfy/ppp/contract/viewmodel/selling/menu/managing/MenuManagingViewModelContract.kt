@@ -16,6 +16,7 @@ object MenuManagingViewModelContract {
             val newMenu: State<DTO.Menu>
 
             fun addMenu()
+            fun setNewMenu(data: DTO.Menu)
         }
     }
 

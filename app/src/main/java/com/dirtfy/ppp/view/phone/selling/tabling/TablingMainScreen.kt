@@ -1,9 +1,12 @@
 package com.dirtfy.ppp.view.phone.selling.tabling
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.rounded.Add
@@ -12,13 +15,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.dirtfy.ppp.common.DummyTablingViewModel
 import com.dirtfy.ppp.contract.view.selling.tabling.TablingViewContract
 import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
@@ -38,11 +45,19 @@ object TablingMainScreen: TablingViewContract.API {
         val tableList by viewModel.tableList
         val menuList by viewModel.menuList
 
-        Column {
+        LaunchedEffect(key1 = viewModel) {
+            viewModel.checkMenu()
+            viewModel.checkTables()
+            viewModel.checkOrder()
+        }
+
+        Column(
+            modifier = modifier
+        ) {
             TableScreen.TableLayout(
                 tableList = tableList,
                 viewModel = viewModel,
-                modifier = Modifier.widthIn(600.dp, 800.dp)
+                modifier = Modifier.wrapContentHeight()
             )
 
             HorizontalPager(
@@ -50,20 +65,21 @@ object TablingMainScreen: TablingViewContract.API {
             ) { page ->
                 when(page) {
                     1 ->  {
+                        viewModel.checkOrder()
                         OrderScreen.Main(
                             viewModel = viewModel,
                             orderList = orderList,
                             total = total,
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .widthIn(200.dp, 300.dp)
                         )
                     }
                     else -> {
                         MenuListScreen.MenuList(
                             menuList = menuList,
                             viewModel = viewModel,
-                            modifier = Modifier.widthIn(600.dp, 800.dp)
+                            modifier = Modifier
+                                .fillMaxHeight()
                         )
                     }
                 }

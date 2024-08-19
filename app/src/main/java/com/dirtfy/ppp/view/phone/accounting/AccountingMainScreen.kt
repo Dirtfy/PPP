@@ -9,24 +9,34 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.dirtfy.ppp.common.DummyAccountingViewModel
 import com.dirtfy.ppp.common.DummyHomeViewModel
 import com.dirtfy.ppp.contract.view.accounting.AccountingViewContract
@@ -97,13 +107,14 @@ object AccountingMainScreen: AccountingViewContract.API {
     @Composable
     override fun SearchBar(
         searchClue: String,
-        viewModel: AccountingViewModelContract.SearchBar.API,
+        viewModel: AccountingViewModelContract.API,
         modifier: Modifier
     ) {
         val scanLauncher = rememberLauncherForActivityResult(
             contract = ScanContract()
         ) {
             viewModel.clueChanged(it.contents)
+            viewModel.searchByClue()
         }
 
         TextField(
@@ -114,11 +125,12 @@ object AccountingMainScreen: AccountingViewContract.API {
                     contentDescription = searchIcon.name
                 )
             },
+            label = { Text(text = "account number") },
             value = searchClue,
             onValueChange = {
                 viewModel.clueChanged(it)
                 viewModel.searchByClue()
-                            },
+            },
             trailingIcon = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -140,12 +152,95 @@ object AccountingMainScreen: AccountingViewContract.API {
                     val addIcon = PPPIcons.AccountCircle
                     Icon(
                         imageVector = addIcon,
-                        contentDescription = addIcon.name
+                        contentDescription = addIcon.name,
+                        modifier = Modifier
+                            .clickable {
+                                viewModel.setIsCreatingAccount(true)
+                            }
                     )
                 }
             },
             modifier = modifier
         )
+    }
+
+    @Composable
+    override fun NewAccountDialog(
+        viewModel: AccountingViewModelContract.API
+    ) {
+        var newAccount by remember {
+            mutableStateOf(
+                AccountingViewModelContract
+                    .DTO.Account("","","")
+            )
+        }
+        var phoneNumber by remember { mutableStateOf("") }
+
+        Dialog(
+            onDismissRequest = {
+//                viewModel.checkAccountList()
+                viewModel.setIsCreatingAccount(false)
+            }
+        ) {
+            Surface(
+                modifier = Modifier.wrapContentHeight(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TextField(
+                        value = newAccount.number,
+                        onValueChange = {
+                            newAccount = newAccount.copy(number = it)
+                        },
+                        placeholder = { Text(text = "number") }
+                    )
+                    TextField(
+                        value = newAccount.name,
+                        onValueChange = {
+                            newAccount = newAccount.copy(name = it)
+                        },
+                        placeholder = { Text(text = "name") }
+                    )
+                    TextField(
+                        value = phoneNumber,
+                        onValueChange = {
+                            phoneNumber = it
+                        },
+                        placeholder = { Text(text = "phone number") }
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val closeIcon = PPPIcons.Close
+                        Icon(
+                            imageVector = closeIcon,
+                            contentDescription = closeIcon.name,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        val addIcon = PPPIcons.Add
+                        Icon(
+                            imageVector = addIcon,
+                            contentDescription = addIcon.name,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable {
+                                    viewModel.addAccount(
+                                        newAccount,
+                                        phoneNumber
+                                    )
+                                    viewModel.setIsCreatingAccount(false)
+                                }
+                        )
+                    }
+
+                }
+            }
+
+        }
     }
 
     @Composable
@@ -156,6 +251,11 @@ object AccountingMainScreen: AccountingViewContract.API {
     ) {
         val searchClue by viewModel.searchClue
         val accountList by viewModel.accountList
+        val isCreatingAccount by viewModel.isCreatingAccount
+
+        LaunchedEffect(key1 = viewModel) {
+            viewModel.checkAccountList()
+        }
 
         Column(
             modifier = modifier
@@ -173,6 +273,10 @@ object AccountingMainScreen: AccountingViewContract.API {
                 homeViewModel = homeViewModel,
                 modifier = Modifier
             )
+        }
+
+        if (isCreatingAccount) {
+            NewAccountDialog(viewModel = viewModel)
         }
     }
 }
@@ -208,5 +312,15 @@ fun AccountingMainScreenPreview() {
                 modifier = Modifier
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NewAccountDialogPreview() {
+    PPPTheme {
+        AccountingMainScreen.NewAccountDialog(
+            viewModel = DummyAccountingViewModel
+        )
     }
 }

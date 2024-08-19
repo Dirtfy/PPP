@@ -93,7 +93,7 @@ object AccountingMainScreen: AccountingViewContract.API {
     @Composable
     override fun SearchBar(
         searchClue: String,
-        viewModel: AccountingViewModelContract.SearchBar.API,
+        viewModel: AccountingViewModelContract.API,
         modifier: Modifier
     ) {
 
@@ -143,6 +143,11 @@ object AccountingMainScreen: AccountingViewContract.API {
         }
 
 
+    }
+
+    @Composable
+    override fun NewAccountDialog(viewModel: AccountingViewModelContract.API) {
+        TODO("Not yet implemented")
     }
 
     @Composable

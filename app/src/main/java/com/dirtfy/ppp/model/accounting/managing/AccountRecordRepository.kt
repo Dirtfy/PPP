@@ -1,5 +1,8 @@
 package com.dirtfy.ppp.model.accounting.managing
 
+import com.dirtfy.ppp.common.Util.convertToCalendar
+import com.dirtfy.ppp.common.Util.convertToLong
+import com.dirtfy.ppp.common.Util.convertToTimestamp
 import com.dirtfy.ppp.contract.model.accounting.AccountRecordModelContract
 import com.dirtfy.ppp.contract.model.accounting.AccountRecordModelContract.DTO.AccountRecord
 import com.dirtfy.ppp.model.RepositoryPath
@@ -21,7 +24,7 @@ object AccountRecordRepository: AccountRecordModelContract.API {
 
         newAccountRecordRef.set(
             _AccountRecordData(
-                timestamp = data.timestamp,
+                timestamp = data.timestamp.convertToTimestamp(),
                 accountNumber = data.accountNumber,
                 userName = data.userName,
                 amount = data.amount,
@@ -43,7 +46,7 @@ object AccountRecordRepository: AccountRecordModelContract.API {
             val _accountRecord = documentSnapshot.toObject<_AccountRecordData>()!!
             val accountRecord = AccountRecord(
                 recordID = documentSnapshot.id,
-                timestamp = _accountRecord.timestamp!!,
+                timestamp = _accountRecord.timestamp!!.convertToLong(),
                 accountNumber = _accountRecord.accountNumber!!,
                 userName = _accountRecord.userName!!,
                 amount = _accountRecord.amount!!,

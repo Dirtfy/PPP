@@ -4,12 +4,14 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract
 import com.dirtfy.tagger.Tagger
 import com.dirtfy.ppp.contract.model.selling.SalesRecordModelContract
 import com.dirtfy.ppp.contract.model.selling.TableModelContract
 import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
 import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract.DTO.Order
 import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract.DTO.Total
+import com.dirtfy.ppp.model.accounting.accounting.AccountRepository
 import com.dirtfy.ppp.model.selling.recording.SalesRecordRepository
 import com.dirtfy.ppp.model.selling.tabling.TableManager
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +22,7 @@ class TablingOrderListViewModel: TablingViewModelContract.OrderList.API, Tagger 
 
     private val tableModel: TableModelContract.API = TableManager
     private val salesModel: SalesRecordModelContract.API = SalesRecordRepository
+    private val accountModel: AccountModelContract.API = AccountRepository
 
     private val _orderList: MutableState<List<Order>>
     = mutableStateOf(listOf())
@@ -66,6 +69,8 @@ class TablingOrderListViewModel: TablingViewModelContract.OrderList.API, Tagger 
             }
 
             _orderList.value = orderList
+
+            Log.d(TAG, "check order end")
         }
     }
 
@@ -121,6 +126,14 @@ class TablingOrderListViewModel: TablingViewModelContract.OrderList.API, Tagger 
                     menuPriceMap = priceMap,
                     menuCountMap = countMap
             ))
+
+            accountModel.update {
+                if (it.accountNumber == pointAccountNumber) {
+                    it.copy(balance = it.balance - total.value.price.toInt())
+                } else {
+                    it
+                }
+            }
         }
     }
 }

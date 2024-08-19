@@ -1,17 +1,20 @@
 package com.dirtfy.ppp.model.accounting.accounting
 
+import android.util.Log
+import com.dirtfy.ppp.common.Util.convertToCalendar
+import com.dirtfy.ppp.common.Util.convertToLong
+import com.dirtfy.ppp.common.Util.convertToTimestamp
 import com.dirtfy.ppp.contract.model.accounting.AccountModelContract
 import com.dirtfy.ppp.contract.model.accounting.AccountModelContract.DTO.Account
 import com.dirtfy.ppp.model.RepositoryPath
+import com.dirtfy.tagger.Tagger
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
-object AccountRepository: AccountModelContract.API {
-
-    private const val TAG = "AccountRepository"
+object AccountRepository: AccountModelContract.API, Tagger {
 
     private val repositoryRef =
         Firebase.firestore.collection(RepositoryPath.ACCOUNT)
@@ -21,12 +24,14 @@ object AccountRepository: AccountModelContract.API {
     ): Account {
         val newAccountRef = repositoryRef.document()
 
+        Log.d(TAG, newAccountRef.id)
+
         newAccountRef.set(
             _AccountData(
                 data.accountNumber,
                 data.accountName,
                 data.phoneNumber,
-                data.registerTimestamp,
+                data.registerTimestamp.convertToTimestamp(),
                 data.balance
             )
         )
@@ -39,8 +44,12 @@ object AccountRepository: AccountModelContract.API {
     ): List<Account> {
         val accountList = mutableListOf<Account>()
 
+        Log.d(TAG, "start")
+
         repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
             if (documentSnapshot == null) return@forEach
+
+            Log.d(TAG, "$documentSnapshot")
 
             val _account = documentSnapshot.toObject<_AccountData>()!!
             val account = Account(
@@ -48,7 +57,7 @@ object AccountRepository: AccountModelContract.API {
                 _account.accountNumber!!,
                 _account.accountName!!,
                 _account.phoneNumber!!,
-                _account.registerTimestamp!!,
+                _account.registerTimestamp!!.convertToLong(),
                 _account.balance!!
             )
 
@@ -72,7 +81,7 @@ object AccountRepository: AccountModelContract.API {
                 _account.accountNumber!!,
                 _account.accountName!!,
                 _account.phoneNumber!!,
-                _account.registerTimestamp!!,
+                _account.registerTimestamp!!.convertToLong(),
                 _account.balance!!
             )
 
@@ -83,7 +92,7 @@ object AccountRepository: AccountModelContract.API {
                     updatedAccount.accountNumber,
                     updatedAccount.accountName,
                     updatedAccount.phoneNumber,
-                    updatedAccount.registerTimestamp,
+                    updatedAccount.registerTimestamp.convertToTimestamp(),
                     updatedAccount.balance
                 )
             )

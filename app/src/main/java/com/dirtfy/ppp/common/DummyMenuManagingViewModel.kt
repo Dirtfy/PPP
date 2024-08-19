@@ -11,6 +11,10 @@ object DummyMenuManagingViewModel: MenuManagingViewModelContract.API {
         TODO("Not yet implemented")
     }
 
+    override fun setNewMenu(data: MenuManagingViewModelContract.DTO.Menu) {
+        TODO("Not yet implemented")
+    }
+
     override val menuList: State<List<MenuManagingViewModelContract.DTO.Menu>>
         get() = TODO("Not yet implemented")
 

@@ -48,6 +48,8 @@ class TablingMenuListViewModel: TablingViewModelContract.MenuList.API, Tagger {
             _rawMenuList.addAll(menuModel.read { true })
 
             _menuList.value = _rawMenuList.map { it.convertToViewModelMenu() }
+
+            Log.d(TAG, "check menu end")
         }
     }
 

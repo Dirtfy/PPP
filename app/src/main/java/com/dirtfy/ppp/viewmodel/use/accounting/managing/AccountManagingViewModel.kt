@@ -5,10 +5,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dirtfy.ppp.contract.model.accounting.AccountModelContract
 import com.dirtfy.ppp.contract.model.accounting.AccountRecordModelContract
 import com.dirtfy.ppp.contract.viewmodel.accounting.managing.AccountManagingViewModelContract
 import com.dirtfy.ppp.contract.viewmodel.accounting.managing.AccountManagingViewModelContract.DTO.Account
 import com.dirtfy.ppp.contract.viewmodel.accounting.managing.AccountManagingViewModelContract.DTO.Record
+import com.dirtfy.ppp.model.accounting.accounting.AccountRepository
 import com.dirtfy.ppp.model.accounting.managing.AccountRecordRepository
 import com.google.firebase.Timestamp
 import kotlinx.coroutines.launch
@@ -16,6 +18,7 @@ import java.util.Calendar
 
 class AccountManagingViewModel: ViewModel(), AccountManagingViewModelContract.API {
 
+    private val accountModel: AccountModelContract.API = AccountRepository
     private val accountRecordModel: AccountRecordModelContract.API = AccountRecordRepository
 
     private val _accountDetail: MutableState<Account>
@@ -36,12 +39,12 @@ class AccountManagingViewModel: ViewModel(), AccountManagingViewModelContract.AP
     override val recordList: State<List<Record>>
         get() = _recordList
 
-    private fun timestampFormatting(timestamp: Timestamp): String {
+    private fun timestampFormatting(timestamp: Long): String {
         val cal = Calendar.getInstance()
-        cal.timeInMillis = timestamp.seconds
+        cal.timeInMillis = timestamp
 
         val year = cal.get(Calendar.YEAR)
-        val month = cal.get(Calendar.MONTH)
+        val month = cal.get(Calendar.MONTH)+1
         val day = cal.get(Calendar.DAY_OF_MONTH)
         val hour = cal.get(Calendar.HOUR_OF_DAY)
         val minute = cal.get(Calendar.MINUTE)
@@ -68,7 +71,9 @@ class AccountManagingViewModel: ViewModel(), AccountManagingViewModelContract.AP
         viewModelScope.launch {
             _rawRecordList.clear()
 
-            _rawRecordList.addAll(accountRecordModel.read { true })
+            _rawRecordList.addAll(accountRecordModel.read {
+                it.accountNumber == _accountDetail.value.number
+            })
 
             _recordList.value = _rawRecordList.map { it.convertToRecord() }
         }
@@ -76,9 +81,31 @@ class AccountManagingViewModel: ViewModel(), AccountManagingViewModelContract.AP
 
     override fun addRecord() {
         viewModelScope.launch {
-            accountRecordModel.create(_newRecord.value.convertToModelRecord())
+            val nowNewRecord =_newRecord.value
+            val userName = nowNewRecord.userName
+            val amount = nowNewRecord.amount.toInt()
+            val result = _accountDetail.value.balance.toInt() + amount
 
-            _rawRecordList.add(_newRecord.value.convertToModelRecord())
+            val rawRecord = AccountRecordModelContract.DTO.AccountRecord(
+                accountNumber = _accountDetail.value.number,
+                userName = userName,
+                amount = amount,
+                result = result
+            )
+
+            _accountDetail.value = _accountDetail.value.copy(balance = result.toString())
+
+            accountModel.update {
+                if (it.accountNumber == _accountDetail.value.number) {
+                    it.copy(balance = result)
+                } else {
+                    it
+                }
+            }
+
+            val newRawRecord = accountRecordModel.create(rawRecord)
+
+            _rawRecordList.add(newRawRecord)
             _recordList.value = _rawRecordList.map { it.convertToRecord() }
         }
     }

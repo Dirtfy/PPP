@@ -25,6 +25,7 @@ import com.dirtfy.ppp.view.ui.theme.PPPTheme
 import com.dirtfy.ppp.viewmodel.accounting.accounting.AccountViewModel
 import com.dirtfy.ppp.viewmodel.accounting.managing.AccountRecordListViewModel
 import com.google.firebase.Timestamp
+import java.util.Calendar
 import java.util.Date
 
 object AccountRecordTestScreen{
@@ -113,7 +114,7 @@ fun AccountRecordTest(
                         AccountRecord(
                             recordID = null,
                             accountNumber = accountData.accountNumber,
-                            timestamp = Timestamp(Date()),
+                            timestamp = Calendar.getInstance().timeInMillis,
                             userName = userName,
                             amount = amount.toInt(),
                             result = amount.toInt()+accountData.balance

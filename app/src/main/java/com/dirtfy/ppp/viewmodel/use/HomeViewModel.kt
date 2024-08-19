@@ -28,12 +28,14 @@ class HomeViewModel(
         screen: HomeViewModelContract.DTO.Screen
     ) {
         navController.navigate(route = screen.route)
+        _nowPosition.value = screen
     }
     override fun navigateTo(
         screen: HomeViewModelContract.DTO.Screen,
         argumentString: String
     ) {
         navController.navigate(route = screen.route+"/$argumentString")
+        _nowPosition.value = screen
     }
 
     override val startDestination: HomeViewModelContract.DTO.Screen

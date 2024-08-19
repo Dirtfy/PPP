@@ -41,7 +41,7 @@ object TableManager: TableModelContract.API, Tagger {
             throw IllegalAccessException()
         }
 
-        Log.d(TAG, logicalTableID)
+        Log.d(TAG, "$logicalTableID - $tableNumber")
 
         val _tableData = logicalRef.collection(RepositoryPath.TABLE_LOGICAL_TABLE)
             .document(logicalTableID)

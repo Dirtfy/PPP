@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.view.phone.accounting.managing
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,11 +8,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.dirtfy.ppp.common.DummyAccountManagingViewModel
 import com.dirtfy.ppp.contract.view.accounting.managing.AccountManagingViewContract
 import com.dirtfy.ppp.contract.viewmodel.accounting.managing.AccountManagingViewModelContract
+import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 
 object AccountManagingScreen: AccountManagingViewContract.API {
@@ -102,7 +107,11 @@ object AccountManagingScreen: AccountManagingViewContract.API {
                 TextField(
                     label = { Text(text = "user name") },
                     value = record.userName,
-                    onValueChange = { /*TODO*/ }
+                    onValueChange = {
+                        viewModel.setNewRecord(
+                            record.copy(userName = it)
+                        )
+                    }
                 )
 
                 Spacer(Modifier.size(10.dp))
@@ -110,7 +119,23 @@ object AccountManagingScreen: AccountManagingViewContract.API {
                 TextField(
                     label = { Text(text = "amount") },
                     value = record.amount,
-                    onValueChange = { /*TODO*/ }
+                    onValueChange = {
+                        viewModel.setNewRecord(
+                            record.copy(amount = it)
+                        )
+                    }
+                )
+
+                Spacer(Modifier.size(10.dp))
+
+                val addIcon = PPPIcons.Add
+                Icon(
+                    imageVector = addIcon,
+                    contentDescription = addIcon.name,
+                    modifier = Modifier
+                        .clickable {
+                            viewModel.addRecord()
+                        }
                 )
             }
         }
@@ -126,7 +151,10 @@ object AccountManagingScreen: AccountManagingViewContract.API {
         val newRecord by viewModel.newRecord
         val recordList by viewModel.recordList
 
-        viewModel.setAccountDetail(startAccountDetail)
+        LaunchedEffect(key1 = startAccountDetail) {
+            viewModel.setAccountDetail(startAccountDetail)
+            viewModel.checkAccountRecordList()
+        }
 
         Column(
             modifier = modifier

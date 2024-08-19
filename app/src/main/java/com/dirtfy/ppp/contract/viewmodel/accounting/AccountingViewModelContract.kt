@@ -18,6 +18,7 @@ object AccountingViewModelContract {
 
             fun clueChanged(now: String)
             fun searchByClue()
+            fun addAccount(account: DTO.Account, phoneNumber: String)
         }
     }
 
@@ -31,5 +32,9 @@ object AccountingViewModelContract {
         }
     }
 
-    interface API: SearchBar.API, AccountList.API
+    interface API: SearchBar.API, AccountList.API {
+        val isCreatingAccount: State<Boolean>
+
+        fun setIsCreatingAccount(value: Boolean)
+    }
 }

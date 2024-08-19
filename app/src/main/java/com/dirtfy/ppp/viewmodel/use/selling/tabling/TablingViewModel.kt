@@ -1,6 +1,9 @@
 package com.dirtfy.ppp.viewmodel.use.selling.tabling
 
+import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
 
@@ -52,6 +55,7 @@ class TablingViewModel: ViewModel(), TablingViewModelContract.API {
     }
 
     override fun selectTable(tableNumber: Int) {
+        Log.d(TAG, "$tableNumber selected")
         tableListViewModel.selectTable(tableNumber)
     }
 

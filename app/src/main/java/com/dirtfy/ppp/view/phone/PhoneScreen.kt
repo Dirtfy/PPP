@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.view.phone
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,12 +16,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension.Companion.fillToConstraints
+import androidx.constraintlayout.compose.Dimension.Companion.wrapContent
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -40,8 +46,10 @@ import com.dirtfy.ppp.view.phone.selling.tabling.TablingMainScreen
 import com.dirtfy.ppp.view.ui.theme.PPPIcons
 import com.dirtfy.ppp.view.ui.theme.PPPTheme
 import com.dirtfy.ppp.viewmodel.use.accounting.AccountViewModel
+import com.dirtfy.ppp.viewmodel.use.accounting.managing.AccountManagingViewModel
 import com.dirtfy.ppp.viewmodel.use.selling.menu.managing.MenuViewModel
 import com.dirtfy.ppp.viewmodel.use.selling.recording.SalesViewModel
+import com.dirtfy.ppp.viewmodel.use.selling.tabling.TablingViewModel
 import java.util.Calendar
 
 object PhoneScreen: HomeViewContract.API {
@@ -96,7 +104,7 @@ object PhoneScreen: HomeViewContract.API {
         ) {
             composable(route = HomeViewModelContract.DTO.Screen.Tabling.route) {
                 TablingMainScreen.Main(
-                    viewModel = viewModel(),
+                    viewModel = viewModel<TablingViewModel>(),
                     modifier = modifier
                 )
             }
@@ -164,7 +172,7 @@ object PhoneScreen: HomeViewContract.API {
 
                 AccountManagingScreen.Main(
                     startAccountDetail = accountDetail,
-                    viewModel = viewModel(),
+                    viewModel = viewModel<AccountManagingViewModel>(),
                     modifier = modifier
                 )
             }
@@ -176,46 +184,48 @@ object PhoneScreen: HomeViewContract.API {
         viewModel: HomeViewModelContract.API,
         modifier: Modifier
     ) {
-        val destinationList = viewModel.destinationList
         viewModel.setNavController(rememberNavController())
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        ConstraintLayout(
             modifier = modifier
         ) {
-            NavGraph(
-                navController = viewModel.navController,
-                startDestination = HomeViewModelContract.DTO.Screen.Tabling,
-                viewModel = viewModel,
-                modifier = Modifier
-            )
+            val (graph, navigator) = createRefs()
 
-            Navigator(
-                destinationList = destinationList,
-                nowPosition = convertToScreen(
-                    viewModel.navController.currentDestination?.route?:
-                    HomeViewModelContract.DTO.Screen.Tabling.route
-                ),
-                viewModel = viewModel,
-                modifier = Modifier
-            )
+            Box(
+                modifier = Modifier.constrainAs(graph) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(navigator.top)
+                    height = fillToConstraints
+                }
+            ) {
+                NavGraph(
+                    navController = viewModel.navController,
+                    startDestination = HomeViewModelContract.DTO.Screen.Tabling,
+                    viewModel = viewModel,
+                    modifier = Modifier
+                )
+            }
+
+            Box(
+                modifier = Modifier.constrainAs(navigator) {
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    height = wrapContent
+                }
+            ) {
+                val nowPosition by viewModel.nowPosition
+                Navigator(
+                    destinationList = viewModel.destinationList,
+                    nowPosition = nowPosition,
+                    viewModel = viewModel,
+                    modifier = Modifier
+                )
+            }
         }
     }
-
-    private fun convertToScreen(
-        route: String
-    ): HomeViewModelContract.DTO.Screen {
-        return when(route) {
-            HomeViewModelContract.DTO.Screen.MenuManaging.route ->
-                HomeViewModelContract.DTO.Screen.MenuManaging
-            HomeViewModelContract.DTO.Screen.SalesRecording.route ->
-                HomeViewModelContract.DTO.Screen.SalesRecording
-            HomeViewModelContract.DTO.Screen.Accounting.route ->
-                HomeViewModelContract.DTO.Screen.Accounting
-            else -> HomeViewModelContract.DTO.Screen.Tabling
-        }
-    }
-
 }
 
 @Preview(showBackground = true, device = Devices.PHONE)

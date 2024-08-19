@@ -28,8 +28,13 @@ object AccountingViewContract {
         @Composable
         fun SearchBar(
             searchClue: String,
-            viewModel: AccountingViewModelContract.SearchBar.API,
+            viewModel: AccountingViewModelContract.API,
             modifier: Modifier
+        )
+
+        @Composable
+        fun NewAccountDialog(
+            viewModel: AccountingViewModelContract.API
         )
 
         @Composable

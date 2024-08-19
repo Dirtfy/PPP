@@ -1,6 +1,8 @@
 package com.dirtfy.ppp.contract.viewmodel.selling.tabling
 
+import android.util.Log
 import androidx.compose.runtime.State
+import com.dirtfy.tagger.Tagger
 
 object TablingViewModelContract {
 
@@ -77,8 +79,10 @@ object TablingViewModelContract {
         }
     }
 
-    interface API: MenuList.API, OrderList.API, TableList.API {
+    interface API: MenuList.API, OrderList.API, TableList.API, Tagger {
+
         fun orderMenu(menu: DTO.Menu) {
+            Log.d(TAG, "${selectedTableNumber.value}")
             orderMenu(menu, selectedTableNumber.value)
         }
 

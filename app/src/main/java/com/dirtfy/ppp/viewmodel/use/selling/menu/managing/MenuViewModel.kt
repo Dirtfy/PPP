@@ -49,6 +49,10 @@ class MenuViewModel: ViewModel(), MenuManagingViewModelContract.API {
         }
     }
 
+    override fun setNewMenu(data: Menu) {
+        _newMenu.value = data
+    }
+
     private val _rawMenuList: MutableList<MenuModelContract.DTO.Menu>
     = mutableListOf()
     private val _menuList: MutableState<List<Menu>>

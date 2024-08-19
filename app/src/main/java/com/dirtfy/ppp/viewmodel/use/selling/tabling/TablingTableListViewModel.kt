@@ -79,7 +79,7 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
                     red = nowColor.red,
                     blue = nowColor.blue,
                     green = nowColor.green,
-                    alpha = nowColor.alpha*0.5f
+                    alpha = 0.5f
                 )
 
                 it.copy(color = newColor.value)
@@ -107,7 +107,7 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
                     red = nowColor.red,
                     blue = nowColor.blue,
                     green = nowColor.green,
-                    alpha = nowColor.alpha*2f
+                    alpha = 1f
                 )
 
                 it.copy(color = newColor.value)

@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.contract.model.accounting
 
 import com.dirtfy.ppp.common.Repository
+import java.util.Calendar
 
 object AccountModelContract {
 
@@ -10,7 +11,7 @@ object AccountModelContract {
             val accountNumber: String = "...",
             val accountName: String = "loading..",
             val phoneNumber: String = "...",
-            val registerTimestamp: Long = 0L,
+            val registerTimestamp: Long = Calendar.getInstance().timeInMillis,
             val balance: Int = 0
         )
     }
