@@ -62,16 +62,53 @@ object AccountRecordRepository: AccountRecordModelContract.API {
     }
 
     override suspend fun update(
-        filter: (AccountRecord)
-        -> AccountRecord
+        filter: (AccountRecord) -> AccountRecord
     ) {
-        TODO("Not yet implemented")
+        repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
+            if (documentSnapshot == null) return@forEach
+
+            val _accountRecord = documentSnapshot.toObject<_AccountRecordData>()!!
+            val accountRecord = AccountRecord(
+                recordID = documentSnapshot.id,
+                timestamp = _accountRecord.timestamp!!.convertToLong(),
+                accountNumber = _accountRecord.accountNumber!!,
+                userName = _accountRecord.userName!!,
+                amount = _accountRecord.amount!!,
+                result = _accountRecord.result!!
+            )
+
+            val updatedData = filter(accountRecord)
+
+            repositoryRef.document(documentSnapshot.id).set(
+                _AccountRecordData(
+                    timestamp = updatedData.timestamp.convertToTimestamp(),
+                    accountNumber = updatedData.accountNumber,
+                    userName = updatedData.userName,
+                    amount = updatedData.amount,
+                    result = updatedData.result
+                )
+            )
+        }
     }
 
     override suspend fun delete(
         filter: (AccountRecord) -> Boolean
     ) {
-        TODO("Not yet implemented")
+        repositoryRef.get().await().documents.forEach {
+            val _accountRecord = it.toObject<_AccountRecordData>()!!
+            val accountRecord = AccountRecord(
+                recordID = it.id,
+                timestamp = _accountRecord.timestamp!!.convertToLong(),
+                accountNumber = _accountRecord.accountNumber!!,
+                userName = _accountRecord.userName!!,
+                amount = _accountRecord.amount!!,
+                result = _accountRecord.result!!
+            )
+
+            if (!filter(accountRecord)) return@forEach
+
+            repositoryRef.document(it.id).delete().await()
+        }
     }
 
 }

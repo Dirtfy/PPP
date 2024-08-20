@@ -100,7 +100,29 @@ object AccountRepository: AccountModelContract.API, Tagger {
     }
 
     override suspend fun delete(filter: (Account) -> Boolean) {
-        TODO("Not yet implemented")
+        val targetList = mutableListOf<String>()
+
+        repositoryRef.get().await().documents.forEach { documentSnapshot: DocumentSnapshot? ->
+            if (documentSnapshot == null) return@forEach
+
+            val _account = documentSnapshot.toObject<_AccountData>()!!
+            val account = Account(
+                documentSnapshot.id,
+                _account.accountNumber!!,
+                _account.accountName!!,
+                _account.phoneNumber!!,
+                _account.registerTimestamp!!.convertToLong(),
+                _account.balance!!
+            )
+
+            if (!filter(account)) return@forEach
+
+            targetList.add(documentSnapshot.id)
+        }
+
+        targetList.forEach {
+            repositoryRef.document(it).delete().await()
+        }
     }
 
 

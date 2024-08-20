@@ -34,9 +34,9 @@ class SalesViewModel: ViewModel(), SalesRecordingViewModelContract.API, Tagger {
     override val selectedRecord: State<Record?>
         get() = _selectedRecord
 
-    private fun timestampFormatting(timestamp: Timestamp): String {
+    private fun timestampFormatting(timestamp: Long): String {
         val cal = Calendar.getInstance()
-        cal.timeInMillis = timestamp.seconds
+        cal.timeInMillis = timestamp*1000L
 
         val year = cal.get(Calendar.YEAR)
         val month = cal.get(Calendar.MONTH)
@@ -86,6 +86,8 @@ class SalesViewModel: ViewModel(), SalesRecordingViewModelContract.API, Tagger {
 
     override fun clickRecord(record: Record) {
         _rawSelectedRecord = _rawRecordList[_recordList.value.indexOf(record)]
+        _selectedRecord.value = _rawSelectedRecord!!.convertToRecord()
+        Log.d(TAG, "$record")
     }
 
     private val _recordDetail: MutableState<List<Menu>>
@@ -115,5 +117,7 @@ class SalesViewModel: ViewModel(), SalesRecordingViewModelContract.API, Tagger {
         }
 
         _recordDetail.value = menuList
+
+        Log.d(TAG, "${_recordDetail.value}")
     }
 }

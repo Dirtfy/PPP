@@ -11,14 +11,14 @@ object SalesRecordingViewContract {
         @Composable
         fun RecordList(
             recordList: List<SalesRecordingViewModelContract.DTO.Record>,
-            viewModel: SalesRecordingViewModelContract.RecordList.API,
+            viewModel: SalesRecordingViewModelContract.API,
             modifier: Modifier
         )
 
         @Composable
         fun RecordItem(
             record: SalesRecordingViewModelContract.DTO.Record,
-            viewModel: SalesRecordingViewModelContract.RecordList.API,
+            viewModel: SalesRecordingViewModelContract.API,
             modifier: Modifier
         )
 
@@ -26,7 +26,7 @@ object SalesRecordingViewContract {
         fun RecordDetail(
             record: SalesRecordingViewModelContract.DTO.Record,
             menuList: List<SalesRecordingViewModelContract.DTO.Menu>,
-            viewModel: SalesRecordingViewModelContract.RecordDetail.API,
+            viewModel: SalesRecordingViewModelContract.API,
             modifier: Modifier
         )
 

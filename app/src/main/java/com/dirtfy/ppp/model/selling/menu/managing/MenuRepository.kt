@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.model.selling.menu.managing
 
+import android.util.Log
 import com.dirtfy.ppp.contract.model.selling.MenuModelContract
 import com.dirtfy.ppp.contract.model.selling.MenuModelContract.DTO.Menu
 import com.dirtfy.ppp.model.RepositoryPath
@@ -72,6 +73,21 @@ object MenuRepository: MenuModelContract.API {
     }
 
     override suspend fun delete(filter: (Menu) -> Boolean) {
-        TODO("Not yet implemented")
+        repositoryRef.get().await().documents.forEach {
+            val _menu = it.toObject<_MenuData>()!!
+            val menu = Menu(
+                menuID = it.id,
+                name = _menu.name!!,
+                price = _menu.price!!
+            )
+
+            Log.d(TAG, it.id)
+
+            if (!filter(menu)) return@forEach
+
+            Log.d(TAG, "$menu")
+
+            repositoryRef.document(it.id).delete().await()
+        }
     }
 }

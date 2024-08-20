@@ -17,7 +17,7 @@ object TablingViewContract {
         @Composable
         fun InstantMenuCreation(
             menu: TablingViewModelContract.DTO.Menu,
-            viewModel: TablingViewModelContract.MenuList.API,
+            viewModel: TablingViewModelContract.API,
             modifier: Modifier
         )
 

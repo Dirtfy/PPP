@@ -32,7 +32,7 @@ object SalesRecordingScreen : SalesRecordingViewContract.API {
     @Composable
     override fun RecordList(
         recordList: List<SalesRecordingViewModelContract.DTO.Record>,
-        viewModel: SalesRecordingViewModelContract.RecordList.API,
+        viewModel: SalesRecordingViewModelContract.API,
         modifier: Modifier
     ) {
         LazyVerticalGrid(
@@ -52,7 +52,7 @@ object SalesRecordingScreen : SalesRecordingViewContract.API {
     @Composable
     override fun RecordItem(
         record: SalesRecordingViewModelContract.DTO.Record,
-        viewModel: SalesRecordingViewModelContract.RecordList.API,
+        viewModel: SalesRecordingViewModelContract.API,
         modifier: Modifier
     ) {
         ListItem(
@@ -66,7 +66,7 @@ object SalesRecordingScreen : SalesRecordingViewContract.API {
     override fun RecordDetail(
         record: SalesRecordingViewModelContract.DTO.Record,
         menuList: List<SalesRecordingViewModelContract.DTO.Menu>,
-        viewModel: SalesRecordingViewModelContract.RecordDetail.API,
+        viewModel: SalesRecordingViewModelContract.API,
         modifier: Modifier
     ) {
         Column(

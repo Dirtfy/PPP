@@ -1,8 +1,6 @@
 package com.dirtfy.ppp.view.phone.selling.tabling
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.widthIn
@@ -19,13 +17,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import com.dirtfy.ppp.common.DummyTablingViewModel
 import com.dirtfy.ppp.contract.view.selling.tabling.TablingViewContract
 import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
@@ -90,7 +85,7 @@ object TablingMainScreen: TablingViewContract.API {
     @Composable
     override fun InstantMenuCreation(
         menu: TablingViewModelContract.DTO.Menu,
-        viewModel: TablingViewModelContract.MenuList.API,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         Dialog(onDismissRequest = { /*TODO*/ }) {
@@ -100,7 +95,9 @@ object TablingMainScreen: TablingViewContract.API {
                 Column {
                     TextField(
                         value = menu.name,
-                        onValueChange = { /*TODO*/ }
+                        onValueChange = {
+
+                        }
                     )
                     TextField(
                         value = menu.price,

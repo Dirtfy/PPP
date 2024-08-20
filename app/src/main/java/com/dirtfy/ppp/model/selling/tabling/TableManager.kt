@@ -5,7 +5,7 @@ import com.dirtfy.tagger.Tagger
 import com.dirtfy.ppp.contract.model.selling.TableModelContract
 import com.dirtfy.ppp.contract.model.selling.TableModelContract.DTO.Table
 import com.dirtfy.ppp.model.RepositoryPath
-import com.google.firebase.firestore.getField
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
@@ -22,7 +22,38 @@ object TableManager: TableModelContract.API, Tagger {
     override suspend fun isSetup(tableNumber: Int): Boolean {
         val target = physicalRef.get().await().getString("$tableNumber")
 
-        return target != null && target != ""
+        if (target == null || target == "") return false
+
+        logicalRef.collection(RepositoryPath.TABLE_LOGICAL_TABLE)
+            .get().await().documents.forEach {
+                if (it.id == target) return true
+            }
+
+        return false
+    }
+
+    override suspend fun isSetup(tableNumberList: List<Int>): List<Boolean> {
+        val physicalRefCapture = physicalRef.get().await()
+        val logicalTableRefCapture = logicalRef
+            .collection(RepositoryPath.TABLE_LOGICAL_TABLE).get().await()
+
+        val resultList = mutableListOf<Boolean>()
+        tableNumberList.forEach { tableNumber ->
+            val target = physicalRefCapture.getString("$tableNumber")
+
+            if (target == null || target == "") {
+                resultList.add(false)
+                return@forEach
+            }
+
+            val targetDocument = logicalTableRefCapture.documents.find { document ->
+                document.id == target
+            }
+
+            resultList.add(targetDocument != null)
+        }
+
+        return resultList
     }
 
     override suspend fun setupTable(tableNumber: Int) {
@@ -31,10 +62,13 @@ object TableManager: TableModelContract.API, Tagger {
         logicalTable.set(_TableData()).await()
 
         physicalRef.update("$tableNumber", logicalTable.id).await()
+
+        Log.d(TAG, "${logicalTable.id} - $tableNumber")
     }
 
     override suspend fun checkTable(tableNumber: Int): Table {
-        val logicalTableID = physicalRef.get().await().getString("$tableNumber")
+        val physicalRefCapture = physicalRef.get().await()
+        val logicalTableID = physicalRefCapture.getString("$tableNumber")
 
         if (logicalTableID == null) {
             Log.d(TAG, "logical table lost!")
@@ -47,40 +81,50 @@ object TableManager: TableModelContract.API, Tagger {
             .document(logicalTableID)
             .get().await().toObject(_TableData::class.java)?: throw IllegalAccessException()
 
+        var actualTableNumber = 0
+        (1..11).forEach {
+            val logicalID = physicalRefCapture.getString("$it")
+
+            if (logicalID == logicalTableID) {
+                actualTableNumber = it
+            }
+        }
+
         return Table(
-            tableNumber = tableNumber,
+            tableNumber = actualTableNumber,
             menuNameList = _tableData.menuNameList?: listOf(),
             menuPriceList = _tableData.menuPriceList?: listOf()
         )
     }
 
-    suspend fun checkTables(tableNumberList: List<Int>): List<Table> {
+    // TODO: 속도개선을 위해 필요할듯
+    override suspend fun checkTables(tableNumberList: List<Int>): List<Table> {
         val physicalTableRef = physicalRef.get().await()
         val logicalTableRef = logicalRef.collection(RepositoryPath.TABLE_LOGICAL_TABLE).get().await()
 
-        val logicalTableIDs = mutableListOf<String>()
-        tableNumberList.forEach {
-            logicalTableIDs.add(
-                physicalTableRef.getString("$it")?:
-                throw IllegalAccessException()
-            )
+        val documentMap = mutableMapOf<String, DocumentSnapshot>()
+        logicalTableRef.documents.forEach {
+            documentMap[it.id] = it
+        }
+
+        val actualNumberMap = mutableMapOf<String, Int>()
+        (0..11).forEach {
+            val key = physicalTableRef.getString("$it")!!
+            actualNumberMap[key] = it
         }
 
         val tableDataList = mutableListOf<Table>()
-        logicalTableIDs.indices.forEach { index ->
-            logicalTableRef.documents.forEach { snapshot ->
-                if (snapshot.id == logicalTableIDs[index]) {
-                    val menuNameList = snapshot.getField<List<String>>("menuNameList")?: throw IllegalAccessException()
-                    val menuPriceList = snapshot.getField<List<Int>>("menuPriceList")?: throw IllegalAccessException()
-                    tableDataList.add(
-                        Table(
-                            tableNumberList[index],
-                            menuNameList,
-                            menuPriceList
-                        )
-                    )
-                }
-            }
+        tableNumberList.forEach {
+            val logicalID = physicalTableRef.getString("$it")
+            val _tableData = documentMap[logicalID]!!.toObject(_TableData::class.java)!!
+
+            tableDataList.add(
+                Table(
+                    tableNumber = actualNumberMap[logicalID]!!,
+                    menuNameList = _tableData.menuNameList?: listOf(),
+                    menuPriceList = _tableData.menuPriceList?: listOf()
+                )
+            )
         }
 
         return tableDataList
@@ -105,7 +149,8 @@ object TableManager: TableModelContract.API, Tagger {
     }
     
     override suspend fun cleanTable(tableNumber: Int) {
-        val logicalTargetTableID = physicalRef.get().await().getString("$tableNumber")
+        val physicalRefCapture = physicalRef.get().await()
+        val logicalTargetTableID = physicalRefCapture.getString("$tableNumber")
 
         if (logicalTargetTableID == null) {
             Log.d(TAG, "logical table lost!")
@@ -116,19 +161,20 @@ object TableManager: TableModelContract.API, Tagger {
             .document(logicalTargetTableID)
             .delete().await()
 
-        (0..10).forEach {
-            val logicalTableID = physicalRef.get().await().getString("$it")
+        (1..11).forEach {
+            val logicalTableID = physicalRefCapture.getString("$it")
 
             if (logicalTableID == logicalTargetTableID) {
-                physicalRef.update("$it", "").await()
+                setupTable(it)
             }
         }
 
     }
 
     override suspend fun mergeTable(baseTable: Table, mergingTable: Table) {
-        val baseLogicalTableID = physicalRef.get().await().getString("${baseTable.tableNumber}")
-        val mergingLogicalTableID = physicalRef.get().await().getString("${mergingTable.tableNumber}")
+        val physicalRefCapture = physicalRef.get().await()
+        val baseLogicalTableID = physicalRefCapture.getString("${baseTable.tableNumber}")
+        val mergingLogicalTableID = physicalRefCapture.getString("${mergingTable.tableNumber}")
 
         if (baseLogicalTableID == null || mergingLogicalTableID == null) {
             Log.d(TAG, "logical table lost!")
@@ -148,8 +194,10 @@ object TableManager: TableModelContract.API, Tagger {
             .document(baseLogicalTableID)
             .set(_mergedTableData).await()
 
-        physicalRef.update("${mergingTable.tableNumber}", baseLogicalTableID).await()
-
+        (1..11).forEach {
+            if (physicalRefCapture.getString("$it") == mergingLogicalTableID)
+                physicalRef.update("$it", baseLogicalTableID).await()
+        }
     }
     
 }

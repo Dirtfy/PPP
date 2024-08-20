@@ -29,8 +29,6 @@ class TablingOrderListViewModel: TablingViewModelContract.OrderList.API, Tagger 
     override val orderList: State<List<Order>>
         get() = _orderList
 
-    private val _total: MutableState<Total>
-    = mutableStateOf(Total("0"))
     override val total: State<Total>
         get() {
             var sum = 0
@@ -66,11 +64,13 @@ class TablingOrderListViewModel: TablingViewModelContract.OrderList.API, Tagger 
                         }
                     }
                 }
+
+                Log.d(TAG, "$menuName, $menuPrice, $orderList")
             }
 
             _orderList.value = orderList
 
-            Log.d(TAG, "check order end")
+            Log.d(TAG, "check order end: ${_orderList.value}")
         }
     }
 
@@ -100,6 +100,15 @@ class TablingOrderListViewModel: TablingViewModelContract.OrderList.API, Tagger 
         }
 
         _orderList.value = nowList
+    }
+
+    private fun <K> MutableMap<K, Int>.count(key: K) {
+        if (this[key] == null) {
+            this[key] = 0
+        }
+        else {
+            this[key] = this[key]!! + 1
+        }
     }
 
     override fun payTable(

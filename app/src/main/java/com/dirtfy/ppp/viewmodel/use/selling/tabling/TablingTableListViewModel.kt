@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.viewmodel.use.selling.tabling
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
@@ -9,12 +10,13 @@ import com.dirtfy.ppp.contract.model.selling.TableModelContract
 import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract
 import com.dirtfy.ppp.contract.viewmodel.selling.tabling.TablingViewModelContract.DTO.Table
 import com.dirtfy.ppp.model.selling.tabling.TableManager
+import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-class TablingTableListViewModel: TablingViewModelContract.TableList.API {
+class TablingTableListViewModel: TablingViewModelContract.TableList.API, Tagger {
 
     private val tableModel: TableModelContract.API = TableManager
 
@@ -31,6 +33,26 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
     private val mergedSet: MutableList<MutableSet<Int>>
     = mutableListOf()
 
+    private fun getRandomColor(): ULong {
+        var newColor = Color(
+            red = Random.nextInt(256),
+            blue = Random.nextInt(256),
+            green = Random.nextInt(256),
+            alpha = 255
+        )
+
+        while(newColor.run { red + green + blue } < 2) {
+            newColor = Color(
+                red = Random.nextInt(256),
+                blue = Random.nextInt(256),
+                green = Random.nextInt(256),
+                alpha = 255
+            )
+        }
+
+        return newColor.value
+    }
+
     override fun checkTables() {
         CoroutineScope(Dispatchers.Default).launch {
             val tableFormationList = listOf(
@@ -39,26 +61,63 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
                 0,  0, 0, 0, 0, 0, 0, 0, 0, 1
             )
 
+            mergedSet.clear()
+
             val currentTableList = mutableListOf<Table>()
-            for (number in tableFormationList) {
-                if (!tableModel.isSetup(number))
-                    tableModel.setupTable(number)
 
-                val newTable = if (number == 0) {
-                    Table(
-                        number = "0",
-                        color = 0UL
-                    )
-                } else {
-                    val checkedTable = tableModel.checkTable(number)
+            (0..11).let {
+                val resultList = tableModel.isSetup(it.toList())
 
-                    Table(
-                        number = checkedTable.tableNumber.toString(),
-                        color = Color.LightGray.value
-                    )
+                resultList.zip(it).forEach { pair ->
+                    if (!pair.first)
+                        tableModel.setupTable(pair.second)
                 }
 
-                currentTableList.add(newTable)
+                Log.d(TAG, "table $it is set")
+            }
+
+            Log.d(TAG, "start checking")
+
+            val checkedTableList = tableModel.checkTables(tableFormationList)
+            checkedTableList.zip(tableFormationList).forEach { pair ->
+                val checkedTable = pair.first
+                val actualNumber = checkedTable.tableNumber
+                val number = pair.second
+
+                if (actualNumber != number) {
+                    val set = mergedSet.find { it.contains(actualNumber) }
+                    if (set == null)
+                        mergedSet.add(mutableSetOf(actualNumber, number))
+                    else
+                        set.add(number)
+                }
+
+                currentTableList.add(
+                    when(number) {
+                        0 -> Table(number = "0", color = 0UL)
+                        else -> {
+                            Table(
+                                number = number.toString(),
+                                color = Color.LightGray.value
+                            )
+                        }
+                    }
+                )
+            }
+
+            Log.d(TAG, "color group")
+
+            mergedSet.forEach { set ->
+                val newColor = getRandomColor()
+
+                set.forEach {
+                    currentTableList.replaceAll { table ->
+                        if (table.number.toInt() == it)
+                            table.copy(color = newColor)
+                        else
+                            table
+                    }
+                }
             }
 
             _tableList.value = currentTableList
@@ -77,8 +136,8 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
 
                 val newColor = Color(
                     red = nowColor.red,
-                    blue = nowColor.blue,
                     green = nowColor.green,
+                    blue = nowColor.blue,
                     alpha = 0.5f
                 )
 
@@ -105,8 +164,8 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
 
                 val newColor = Color(
                     red = nowColor.red,
-                    blue = nowColor.blue,
                     green = nowColor.green,
+                    blue = nowColor.blue,
                     alpha = 1f
                 )
 
@@ -130,25 +189,10 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
 
             val nowList = _tableList.value.toMutableList()
 
-            val newColor = Color(
-                red = Random.nextInt(256),
-                blue = Random.nextInt(256),
-                green = Random.nextInt(256),
-                alpha = 255
-            )
-
-            nowList.replaceAll {
-                if (it.number.toInt() == baseTableNumber ||
-                    it.number.toInt() == mergedTableNumber) {
-                    it.copy(color = newColor.value)
-                } else {
-                    it
-                }
-            }
-
             val target = mergedSet.find {
                 it.contains(baseTableNumber) || it.contains(mergedTableNumber)
             }
+            val set = mutableSetOf(baseTableNumber, mergedTableNumber)
             if (target == null) {
                 mergedSet.add(
                     mutableSetOf(baseTableNumber, mergedTableNumber)
@@ -165,6 +209,7 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
                     mergedSet.forEach {
                         if (it.contains(mergedTableNumber)) {
                             it.add(baseTableNumber)
+                            set.addAll(it)
                         }
                     }
                 }
@@ -172,6 +217,7 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
                     mergedSet.forEach {
                         if (it.contains(baseTableNumber)) {
                             it.add(mergedTableNumber)
+                            set.addAll(it)
                         }
                     }
                 }
@@ -182,12 +228,21 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
                     mergedSet.add(
                         (base + merged) as MutableSet<Int>
                     )
+                    set.addAll(base + merged)
+                }
+            }
+
+            val newColor = getRandomColor()
+            nowList.replaceAll {
+                if (it.number.toInt() in set) {
+                    it.copy(color = newColor)
+                } else {
+                    it
                 }
             }
 
             _tableList.value = nowList
         }
-
     }
 
     override fun cleanTable(tableNumber: Int) {
@@ -206,6 +261,8 @@ class TablingTableListViewModel: TablingViewModelContract.TableList.API {
                     it
                 }
             }
+
+            mergedSet.removeIf { it.contains(tableNumber) }
 
             _tableList.value = nowList
         }

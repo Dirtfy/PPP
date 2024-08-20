@@ -64,7 +64,7 @@ object TablingMainScreen: TablingViewContract.API {
     @Composable
     override fun InstantMenuCreation(
         menu: TablingViewModelContract.DTO.Menu,
-        viewModel: TablingViewModelContract.MenuList.API,
+        viewModel: TablingViewModelContract.API,
         modifier: Modifier
     ) {
         Dialog(onDismissRequest = { /*TODO*/ }) {

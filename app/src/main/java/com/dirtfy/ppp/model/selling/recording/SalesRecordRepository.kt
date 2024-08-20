@@ -3,11 +3,13 @@ package com.dirtfy.ppp.model.selling.recording
 import com.dirtfy.ppp.contract.model.selling.SalesRecordModelContract
 import com.dirtfy.ppp.contract.model.selling.SalesRecordModelContract.DTO.Sales
 import com.dirtfy.ppp.model.RepositoryPath
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 
 object SalesRecordRepository: SalesRecordModelContract.API {
 
@@ -17,13 +19,22 @@ object SalesRecordRepository: SalesRecordModelContract.API {
         Firebase.firestore.collection(RepositoryPath.SALES_RECORD)
 
     private fun Sales.convertToInternalData(): _SalesData {
-        val menuNameList = menuCountMap.keys.toList()
+        val menuNameList = mutableListOf<String>()
+        menuCountMap.keys.forEach {
+            for (i in 1 .. menuCountMap[it]!!) {
+                menuNameList.add(it)
+            }
+        }
         val menuPriceList = menuNameList.map { menuPriceMap[it]!! }
+
+
+
 
         return _SalesData(
             menuNameList = ArrayList(menuNameList),
             menuPriceList = ArrayList(menuPriceList),
-            pointAccountNumber = pointAccountNumber
+            pointAccountNumber = pointAccountNumber,
+            timestamp = Timestamp(Date(timestamp))
         )
     }
 
@@ -46,7 +57,8 @@ object SalesRecordRepository: SalesRecordModelContract.API {
             salesID = null,
             menuCountMap = countMap,
             menuPriceMap = priceMap,
-            pointAccountNumber = pointAccountNumber
+            pointAccountNumber = pointAccountNumber,
+            timestamp = timestamp!!.seconds
         )
     }
 
@@ -77,10 +89,26 @@ object SalesRecordRepository: SalesRecordModelContract.API {
     }
 
     override suspend fun update(filter: (Sales) -> Sales) {
-        TODO("Not yet implemented")
+        repositoryRef.get().await().documents.forEach {
+            val _salesData = it.toObject<_SalesData>()!!
+            val salesData = _salesData
+                .convertToExternalData().copy(salesID = it.id)
+
+            repositoryRef.document(it.id).set(
+                filter(salesData).convertToInternalData()
+            )
+        }
     }
 
     override suspend fun delete(filter: (Sales) -> Boolean) {
-        TODO("Not yet implemented")
+        repositoryRef.get().await().documents.forEach {
+            val _salesData = it.toObject<_SalesData>()!!
+            val salesData = _salesData
+                .convertToExternalData().copy(salesID = it.id)
+
+            if (!filter(salesData)) return@forEach
+
+            repositoryRef.document(it.id).delete().await()
+        }
     }
 }

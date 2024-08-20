@@ -1,7 +1,9 @@
 package com.dirtfy.ppp.view.phone.accounting
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,6 +71,7 @@ object AccountingMainScreen: AccountingViewContract.API {
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     override fun Account(
         account: AccountingViewModelContract.DTO.Account,
@@ -77,12 +80,14 @@ object AccountingMainScreen: AccountingViewContract.API {
         modifier: Modifier
     ) {
         Box(
-            modifier = modifier.clickable {
-                homeViewModel.navigateTo(
-                    HomeViewModelContract.DTO.Screen.AccountManaging,
-                    viewModel.buildAccountArgumentString(account)
-                )
-            }
+            modifier = modifier.combinedClickable(
+                onClick = {
+                    homeViewModel.navigateTo(
+                        HomeViewModelContract.DTO.Screen.AccountManaging,
+                        viewModel.buildAccountArgumentString(account)
+                    )
+                }
+            )
         ) {
             ListItem(
                 overlineContent = {
