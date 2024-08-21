@@ -14,13 +14,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.AnimBuilder
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.rememberNavController
-import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
 import com.dirtfy.ppp.ui.view.phone.PhoneScreen
-import com.dirtfy.ppp.ui.view.phone.menu.MenuScreen
 
 class MainActivity: ComponentActivity() {
 

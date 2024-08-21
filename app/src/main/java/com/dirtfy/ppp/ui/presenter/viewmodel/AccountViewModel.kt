@@ -13,7 +13,6 @@ import com.dirtfy.ppp.ui.presenter.controller.account.ControllerAccountRecord.Co
 import com.dirtfy.ppp.ui.presenter.controller.account.ControllerNewAccount
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
 

@@ -1,8 +1,5 @@
 package com.dirtfy.ppp.data.source.repository.menu
 
-import com.dirtfy.ppp.common.FlowState
-import kotlinx.coroutines.flow.Flow
-
 interface MenuRepository {
 
     suspend fun create(menu: RepositoryMenu): RepositoryMenu

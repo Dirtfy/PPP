@@ -2,7 +2,6 @@ package com.dirtfy.ppp.ui.presenter.controller.menu
 
 import com.dirtfy.ppp.data.logic.menu.ServiceMenu
 import com.dirtfy.ppp.ui.presenter.controller.Utils
-import java.text.DecimalFormat
 
 data class ControllerMenu(
     val name: String,

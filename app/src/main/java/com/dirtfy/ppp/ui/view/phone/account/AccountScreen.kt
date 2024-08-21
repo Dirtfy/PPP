@@ -44,7 +44,6 @@ import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import com.dirtfy.ppp.ui.presenter.controller.account.ControllerAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.ControllerNewAccount
 import com.dirtfy.ppp.ui.presenter.viewmodel.AccountViewModel
-import com.google.zxing.integration.android.IntentIntegrator
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 
