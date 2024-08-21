@@ -1,10 +1,14 @@
-package com.dirtfy.ppp.data.source
+package com.dirtfy.ppp.data.source.firestore
 
 object FireStorePath {
 
-    const val ACCOUNT: String = "account"
+    const val CONSTANT: String = "constant"
 
-    const val ACCOUNT_RECORD: String = "account record"
+    const val MAX_ACCOUNT_NUMBER: String = "$CONSTANT/MAX_ACCOUNT_NUMBER"
+
+    const val ACCOUNT: String = "account_exp"
+
+    const val ACCOUNT_RECORD: String = "account record_exp"
 
     const val MENU: String = "menu"
 

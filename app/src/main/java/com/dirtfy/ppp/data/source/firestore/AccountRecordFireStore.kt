@@ -1,10 +1,8 @@
-package com.dirtfy.ppp.data.source
+package com.dirtfy.ppp.data.source.firestore
 
 import com.dirtfy.ppp.data.source.repository.account.record.AccountRecordRepository
 import com.dirtfy.ppp.data.source.repository.account.record.RepositoryAccountRecord
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 

@@ -1,51 +1,20 @@
 package com.dirtfy.ppp.data.logic.account
 
 import com.dirtfy.ppp.data.logic.Service
+import com.dirtfy.ppp.data.logic.account.ServiceAccount.Companion.convertToServiceAccount
+import com.dirtfy.ppp.data.logic.account.ServiceAccountRecord.Companion.convertToServiceAccountRecord
 import com.dirtfy.ppp.data.source.repository.account.AccountRepository
-import com.dirtfy.ppp.data.source.repository.account.RepositoryAccount
 import com.dirtfy.ppp.data.source.repository.account.record.AccountRecordRepository
-import com.dirtfy.ppp.data.source.repository.account.record.RepositoryAccountRecord
+import kotlin.random.Random
 
 class AccountService(
     val accountRepository: AccountRepository,
     val accountRecordRepository: AccountRecordRepository
 ): Service {
 
-    private fun RepositoryAccount.convertToServiceAccount(): ServiceAccount {
-        return ServiceAccount(
-            number = number?: throw AccountException.NumberLoss(),
-            name = name?: throw AccountException.NameLoss(),
-            phoneNumber = phoneNumber?: throw AccountException.PhoneNumberLoss(),
-            balance = balance?: throw AccountException.BalanceLoss(),
-            registerTimestamp = registerTimestamp?: throw AccountException.RegisterTimestampLoss()
-        )
-    }
-
-    private fun ServiceAccount.convertToRepositoryAccount(): RepositoryAccount {
-        return RepositoryAccount(
-            number = number,
-            name = name,
-            phoneNumber = phoneNumber,
-            balance = balance,
-            registerTimestamp = registerTimestamp
-        )
-    }
-
-    private fun RepositoryAccountRecord.convertToServiceAccountRecord(): ServiceAccountRecord {
-        return ServiceAccountRecord(
-            issuedName = issuedName?: throw AccountException.RecordIssuedNameLoss(),
-            difference = difference?: throw AccountException.RecordAmountLoss(),
-            result = result?: throw AccountException.RecordResultLoss(),
-            timestamp = timestamp?: throw AccountException.RecordTimestampLoss()
-        )
-    }
-    private fun ServiceAccountRecord.convertToRepositoryAccountRecord(): RepositoryAccountRecord {
-        return RepositoryAccountRecord(
-            issuedName = issuedName,
-            difference = difference,
-            result = result,
-            timestamp = timestamp
-        )
+    private fun isValidPhoneNumber(phoneNumber: String): Boolean {
+        val regex = Regex("""^010-\d{3,4}-\d{4}$""")
+        return regex.matches(phoneNumber)
     }
 
     fun createAccount(
@@ -57,8 +26,10 @@ class AccountService(
             if (it.isSameNumberExist(number))
                 throw AccountException.NonUniqueNumber()
 
-            val regex = Regex("""^010-\d{3,4}-\d{4}$""")
-            if (!regex.matches(phoneNumber))
+            if (number !in 0 until it.getMaxAccountNumber())
+                throw AccountException.InvalidNumber()
+
+            if (!isValidPhoneNumber(phoneNumber))
                 throw AccountException.InvalidPhoneNumber()
 
             it.create(
@@ -71,22 +42,38 @@ class AccountService(
         }
     }
 
-    fun readAccount() = asFlow {
+    fun createAccountNumber() = asFlow {
+        val maxAccountNumber = accountRepository.getMaxAccountNumber()
+        var candidate = Random.nextInt(maxAccountNumber)
+        while(accountRepository.isSameNumberExist(candidate)) {
+            candidate = Random.nextInt(maxAccountNumber)
+        }
+        candidate
+    }
+
+    fun readAllAccounts() = asFlow {
         accountRepository.readAll().map {
             it.convertToServiceAccount()
         }
     }
 
-    fun updateAccount(account: ServiceAccount) = asFlow {
+    fun updateAccount(
+        number: Int,
+        name: String,
+        phoneNumber: String
+    ) = asFlow {
         accountRepository.let {
-            if (!it.isNumberExist(account.number))
+            if (!it.isNumberExist(number))
                 throw AccountException.InvalidNumber()
 
-            if (account.balance < 0)
-                throw AccountException.InvalidBalance()
+            if (isValidPhoneNumber(phoneNumber))
+                throw AccountException.InvalidPhoneNumber()
 
             it.update(
-                account.convertToRepositoryAccount()
+                accountRepository.find(number).copy(
+                    name = name,
+                    phoneNumber = phoneNumber
+                )
             ).convertToServiceAccount()
         }
     }
@@ -121,6 +108,7 @@ class AccountService(
 
         val createdRecord = accountRecordRepository.create(
             ServiceAccountRecord(
+                accountNumber = accountNumber,
                 issuedName = issuedName,
                 difference = difference,
                 result = result

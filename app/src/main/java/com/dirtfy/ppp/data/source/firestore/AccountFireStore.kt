@@ -1,5 +1,6 @@
-package com.dirtfy.ppp.data.source
+package com.dirtfy.ppp.data.source.firestore
 
+import com.dirtfy.ppp.data.source.firestore.FireStoreAccount.Companion.convertToFireStoreAccount
 import com.dirtfy.ppp.data.source.repository.account.AccountRepository
 import com.dirtfy.ppp.data.source.repository.account.RepositoryAccount
 import com.google.firebase.firestore.ktx.firestore
@@ -13,14 +14,14 @@ class AccountFireStore: AccountRepository {
     override suspend fun create(account: RepositoryAccount): RepositoryAccount {
         val newAccount = ref.document()
 
-        newAccount.set(account).await()
+        newAccount.set(account.convertToFireStoreAccount()).await()
 
         return account
     }
 
     override suspend fun readAll(): List<RepositoryAccount> {
         return ref.get().await().documents.map {
-            it.toObject(RepositoryAccount::class.java)!!
+            it.toObject(FireStoreAccount::class.java)!!.convertToRepositoryAccount()
         }
     }
 
@@ -28,14 +29,14 @@ class AccountFireStore: AccountRepository {
         val query = ref.whereEqualTo("number", accountNumber)
         val document = query.get().await().documents[0]
 
-        return document.toObject(RepositoryAccount::class.java)!!
+        return document.toObject(FireStoreAccount::class.java)!!.convertToRepositoryAccount()
     }
 
     override suspend fun update(account: RepositoryAccount): RepositoryAccount {
         val query = ref.whereEqualTo("number", account.number)
         val document = query.get().await().documents[0]
 
-        ref.document(document.id).set(account).await()
+        ref.document(document.id).set(account.convertToFireStoreAccount()).await()
 
         return account
     }
@@ -52,5 +53,10 @@ class AccountFireStore: AccountRepository {
         val matchedDocumentList = query.get().await().documents
 
         return matchedDocumentList.size >= 1
+    }
+
+    override suspend fun getMaxAccountNumber(): Int {
+        return Firebase.firestore.document(FireStorePath.MAX_ACCOUNT_NUMBER).get().await()
+            .getLong("number")!!.toInt()
     }
 }

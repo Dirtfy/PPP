@@ -9,4 +9,5 @@ interface AccountRepository {
 
     suspend fun isSameNumberExist(accountNumber: Int): Boolean
     suspend fun isNumberExist(accountNumber: Int): Boolean
+    suspend fun getMaxAccountNumber(): Int
 }

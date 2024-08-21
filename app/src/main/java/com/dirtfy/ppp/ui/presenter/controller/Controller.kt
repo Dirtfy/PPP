@@ -1,10 +1,8 @@
-package com.dirtfy.ppp.ui.holder
+package com.dirtfy.ppp.ui.presenter.controller
 
-import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.FlowState
-import kotlinx.coroutines.launch
 
-interface DataHolder {
+interface Controller {
 
     fun <T, U> FlowState<T>.passMap(dataTransform: (data: T) -> U): FlowState<U> {
         return when(this) {
@@ -14,6 +12,15 @@ interface DataHolder {
             }
             is FlowState.Success -> {
                 FlowState.success(dataTransform(this.data))
+            }
+        }
+    }
+
+    fun <T, U> FlowState<T>.ignoreMap(dataTransform: (data: T) -> U): U? {
+        return when(this) {
+            is FlowState.Loading, is FlowState.Failed -> { null }
+            is FlowState.Success -> {
+                dataTransform(this.data)
             }
         }
     }

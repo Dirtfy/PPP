@@ -10,6 +10,7 @@ sealed class AccountException(
     class InvalidBalance: AccountException("it's invalid balance")
     class InvalidPhoneNumber: AccountException("it's invalid phone number")
 
+    class RecordAccountNumberLoss: AccountException("record account number is not found")
     class RecordIssuedNameLoss: AccountException("record issued name is not found")
     class RecordAmountLoss: AccountException("record amount is not found")
     class RecordResultLoss: AccountException("record result is not found")

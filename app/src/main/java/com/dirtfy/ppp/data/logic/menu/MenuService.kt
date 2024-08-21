@@ -1,19 +1,13 @@
 package com.dirtfy.ppp.data.logic.menu
 
 import com.dirtfy.ppp.data.logic.Service
+import com.dirtfy.ppp.data.logic.menu.ServiceMenu.Companion.convertToServiceMenu
 import com.dirtfy.ppp.data.source.repository.menu.MenuRepository
 import com.dirtfy.ppp.data.source.repository.menu.RepositoryMenu
 
 class MenuService(
     val menuRepository: MenuRepository
 ): Service {
-
-    private fun RepositoryMenu.convertToServiceMenu(): ServiceMenu {
-        return ServiceMenu(
-            name = name?: throw MenuException.NameLoss(),
-            price = price?: throw MenuException.PriceLoss()
-        )
-    }
 
     fun createMenu(menu: ServiceMenu) = asFlow {
         menuRepository.let {
