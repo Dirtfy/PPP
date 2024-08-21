@@ -16,8 +16,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.holder.MenuViewModel
+import com.dirtfy.ppp.ui.holder.menu.HolderMenu
+import com.dirtfy.ppp.ui.presenter.menu.MenuTestScreen
 
 class MainActivity: ComponentActivity() {
 
@@ -25,44 +28,9 @@ class MainActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            Main(
-                viewModel = MenuViewModel()
+            MenuTestScreen.Main(
+                holder = viewModel<MenuViewModel>()
             )
-        }
-    }
-
-    @Composable
-    fun Main(
-        viewModel: MenuViewModel
-    ) {
-        val menuListState by viewModel.menuList.collectAsStateWithLifecycle()
-
-        LaunchedEffect(key1 = viewModel) {
-            viewModel.updateMenuList()
-        }
-
-        when(menuListState) {
-            is FlowState.Loading -> {
-                Surface {
-                    Text(text = "loading..")
-                }
-            }
-            is FlowState.Success -> {
-                val menuList = (menuListState as FlowState.Success<List<MenuViewModel.Menu>>).data
-
-                LazyColumn {
-                    items(menuList) {
-                        Row {
-                            Text(text = it.name)
-                            Spacer(modifier = Modifier.size(10.dp))
-                            Text(text = it.price)
-                        }
-                    }
-                }
-            }
-            is FlowState.Failed -> {
-
-            }
         }
     }
 }

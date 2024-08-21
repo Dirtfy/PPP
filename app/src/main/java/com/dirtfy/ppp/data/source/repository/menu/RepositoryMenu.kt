@@ -1,6 +1,6 @@
 package com.dirtfy.ppp.data.source.repository.menu
 
-data class Menu(
+data class RepositoryMenu(
     val name: String?,
     val price: Int?
 ) {
