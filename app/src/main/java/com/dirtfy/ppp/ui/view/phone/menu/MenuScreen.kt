@@ -31,9 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.presenter.controller.menu.ControllerMenu
-import com.dirtfy.ppp.ui.presenter.controller.menu.MenuController
+import com.dirtfy.ppp.ui.dto.UiMenu
+import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
+import com.dirtfy.ppp.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger
 
 object MenuScreen: Tagger {
@@ -53,19 +54,31 @@ object MenuScreen: Tagger {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            NewMenu(
-                newMenu = newMenu,
-                onMenuChanged = { controller.request { updateNewMenu(it) } },
-                onMenuAdd = { controller.request { createMenu(it) } }
+//            NewMenu(
+//                newMenu = newMenu,
+//                onMenuChanged = { controller.request { updateNewMenu(it) } },
+//                onMenuAdd = { controller.request { createMenu(it) } }
+//            )
+
+            Component.InputCard(
+                dataList = listOf(newMenu.name, newMenu.price),
+                labelNameList = listOf("menu name", "menu price"),
+                onDataChangedList = listOf(
+                    { controller.request { updateNewMenu(newMenu.copy(name = it)) }},
+                    { controller.request { updateNewMenu(newMenu.copy(price = it)) }},
+                ),
+                onAddButtonClicked = {
+                    controller.request { createMenu(newMenu.copy(name = it[0], price = it[0])) }
+                }
             )
 
             Spacer(modifier = Modifier.size(10.dp))
 
             when(menuListState) {
                 is FlowState.Success -> {
-                    val menuList = (menuListState as FlowState.Success<List<ControllerMenu>>).data
+                    val menuList = (menuListState as FlowState.Success<List<UiMenu>>).data
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
+                        columns = GridCells.Adaptive(150.dp),
                         contentPadding = PaddingValues(10.dp)
                     ) {
                         items(
@@ -97,7 +110,7 @@ object MenuScreen: Tagger {
                     )
                 }
                 is FlowState.Failed -> {
-                    val throwable = (menuListState as FlowState.Failed<List<ControllerMenu>>).throwable
+                    val throwable = (menuListState as FlowState.Failed<List<UiMenu>>).throwable
 
                     AlertDialog(
                         onDismissRequest = { },
@@ -117,9 +130,9 @@ object MenuScreen: Tagger {
 
     @Composable
     fun NewMenu(
-        newMenu: ControllerMenu,
-        onMenuChanged: (ControllerMenu) -> Unit,
-        onMenuAdd: (ControllerMenu) -> Unit
+        newMenu: UiMenu,
+        onMenuChanged: (UiMenu) -> Unit,
+        onMenuAdd: (UiMenu) -> Unit
     ) {
         Box {
             Card(
@@ -159,4 +172,6 @@ object MenuScreen: Tagger {
             }
         }
     }
+
+
 }

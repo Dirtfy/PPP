@@ -1,38 +1,31 @@
 package com.dirtfy.ppp.ui.presenter.controller.account
 
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.presenter.controller.Controller
+import com.dirtfy.ppp.ui.dto.UiAccount
+import com.dirtfy.ppp.ui.dto.UiNewAccount
+import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
 interface AccountController: Controller {
 
-    val accountList: StateFlow<FlowState<List<ControllerAccount>>>
+    val accountList: StateFlow<FlowState<List<UiAccount>>>
 
     val searchClue: StateFlow<String>
-    val newAccount: StateFlow<ControllerNewAccount>
+
+    val nowAccount: StateFlow<UiAccount>
 
     val isAccountCreateMode: StateFlow<Boolean>
+    val isAccountUpdateMode: StateFlow<Boolean>
+    val isAccountDetailMode: StateFlow<Boolean>
 
     suspend fun updateAccountList()
-    suspend fun updateNewAccount(
-        newAccountData: ControllerNewAccount
-    )
+    suspend fun updateNowAccount(account: UiAccount)
     suspend fun updateSearchClue(clue: String)
 
-    suspend fun addAccount(
-        newAccountData: ControllerNewAccount
-    )
-    suspend fun setRandomValidAccountNumberToNewAccount()
     suspend fun setAccountCreateMode(mode: Boolean)
-    suspend fun updateAccount(
-        newAccountData: ControllerNewAccount
-    )
+    suspend fun setAccountUpdateMode(mode: Boolean)
+    suspend fun setAccountDetailMode(mode: Boolean)
 
-    suspend fun addRecord(
-        accountNumber: Int,
-        issuedName: String,
-        difference: Int
-    )
 
     fun request(job: suspend AccountController.() -> Unit)
 

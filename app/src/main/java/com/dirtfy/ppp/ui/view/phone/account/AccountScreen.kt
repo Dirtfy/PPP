@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Menu
@@ -25,6 +31,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -36,14 +43,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.ui.dto.UiAccount
+import com.dirtfy.ppp.ui.dto.UiAccountRecord
+import com.dirtfy.ppp.ui.presenter.controller.account.AccountAddController
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
-import com.dirtfy.ppp.ui.presenter.controller.account.ControllerAccount
-import com.dirtfy.ppp.ui.presenter.controller.account.ControllerNewAccount
-import com.dirtfy.ppp.ui.presenter.viewmodel.AccountViewModel
+import com.dirtfy.ppp.ui.presenter.controller.account.AccountDetailController
+import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountAddViewModel
+import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountDetailViewModel
+import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountViewModel
+import com.dirtfy.ppp.ui.view.phone.Component
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 
@@ -55,9 +68,12 @@ object AccountScreen {
     ) {
         val searchClue by controller.searchClue.collectAsStateWithLifecycle()
         val accountListState by controller.accountList.collectAsStateWithLifecycle()
-        val newAccount by controller.newAccount.collectAsStateWithLifecycle()
+
+        val nowAccount by controller.nowAccount.collectAsStateWithLifecycle()
 
         val isAccountCreateMode by controller.isAccountCreateMode.collectAsStateWithLifecycle()
+        val isAccountUpdateMode by controller.isAccountUpdateMode.collectAsStateWithLifecycle()
+        val isAccountDetailMode by controller.isAccountDetailMode.collectAsStateWithLifecycle()
 
         val scanLauncher = rememberLauncherForActivityResult(
             contract = ScanContract()
@@ -88,8 +104,8 @@ object AccountScreen {
 
             when(accountListState) {
                 is FlowState.Success -> {
-                    val accountList = (accountListState as FlowState.Success<List<ControllerAccount>>).data
-                    LazyColumn {
+                    val accountList = (accountListState as FlowState.Success<List<UiAccount>>).data
+                    LazyVerticalGrid(columns = GridCells.Adaptive(150.dp)) {
                         val moreIcon = Icons.Filled.MoreVert
                         items(accountList) {
                             ListItem(
@@ -101,6 +117,12 @@ object AccountScreen {
                                         imageVector = moreIcon,
                                         contentDescription = moreIcon.name
                                     )
+                                },
+                                modifier = Modifier.clickable {
+                                    controller.request {
+                                        updateNowAccount(it)
+                                        setAccountDetailMode(true)
+                                    }
                                 }
                             )
                         }
@@ -112,38 +134,55 @@ object AccountScreen {
                     )
                 }
                 is FlowState.Failed -> {
-                    val throwable = (accountListState as FlowState.Failed<List<ControllerAccount>>).throwable
+                    val throwable = (accountListState as FlowState.Failed<List<UiAccount>>).throwable
 
-                    AlertDialog(
-                        onDismissRequest = { },
-                        confirmButton = {
-                            Button(onClick = { controller.request { updateAccountList() } }) {
-                                Text(text = "OK")
-                            }
-                        },
-                        title = { Text(text = throwable.message?: "unknown error") }
-                    )
+                    FailDialog(throwable = throwable) {
+                        controller.request { updateAccountList() }
+                    }
                 }
             }
             
             if (isAccountCreateMode) {
-                AccountCreateDialog(
-                    newAccount = newAccount,
-                    onNewAccountChanged = { controller.request { updateNewAccount(it) } },
-                    onAccountNumberRandomIconClick = {
-                        controller.request { setRandomValidAccountNumberToNewAccount() }
-                    },
-                    onAddButtonClick = { controller.request { addAccount(it) } },
-                    onDismissRequest = {
-                        controller.request {
-                            setAccountCreateMode(false)
-                            updateNewAccount(ControllerNewAccount())
-                        }
-                    }
-                )
+                AccountCreateDialog(onDismissRequest = {
+                    controller.request { setAccountCreateMode(false) }
+                })
             }
+            if (isAccountUpdateMode) {
+
+            }
+            if (isAccountDetailMode) {
+                AccountDetailDialog(
+                    account = nowAccount,
+                    onDismissRequest = {
+                    controller.request { setAccountDetailMode(false) }
+                })
+            }
+
         }
 
+    }
+
+    @Composable
+    fun Loading() {
+        CircularProgressIndicator(
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    @Composable
+    fun FailDialog(
+        throwable: Throwable,
+        onOk: () -> Unit
+    ) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = {
+                Button(onClick = onOk) {
+                    Text(text = "OK")
+                }
+            },
+            title = { Text(text = throwable.message?: "unknown error") }
+        )
     }
 
     @Composable
@@ -208,12 +247,11 @@ object AccountScreen {
     
     @Composable
     fun AccountCreateDialog(
-        newAccount: ControllerNewAccount,
-        onNewAccountChanged: (ControllerNewAccount) -> Unit,
-        onAccountNumberRandomIconClick: () -> Unit,
-        onAddButtonClick: (ControllerNewAccount) -> Unit,
-        onDismissRequest: () -> Unit
+        onDismissRequest: () -> Unit,
+        controller: AccountAddController = viewModel<AccountAddViewModel>()
     ) {
+        val newAccount by controller.newAccount.collectAsStateWithLifecycle()
+
         Dialog(onDismissRequest = onDismissRequest) {
             Card {
                 Box(
@@ -227,7 +265,9 @@ object AccountScreen {
                             label = { Text(text = "account number") },
                             value = newAccount.number,
                             onValueChange = {
-                                onNewAccountChanged(newAccount.copy(number = it))
+                                controller.request {
+                                    updateNewAccount(newAccount.copy(number = it))
+                                }
                             },
                             trailingIcon = {
                                 val randomIcon = Icons.Filled.Refresh
@@ -235,7 +275,9 @@ object AccountScreen {
                                     imageVector = randomIcon,
                                     contentDescription = randomIcon.name,
                                     modifier = Modifier.clickable {
-                                        onAccountNumberRandomIconClick()
+                                        controller.request {
+                                            setRandomValidAccountNumberToNewAccount()
+                                        }
                                     }
                                 )
                             },
@@ -246,7 +288,9 @@ object AccountScreen {
                             label = { Text(text = "account name") },
                             value = newAccount.name,
                             onValueChange = {
-                                onNewAccountChanged(newAccount.copy(name = it))
+                                controller.request {
+                                    updateNewAccount(newAccount.copy(name = it))
+                                }
                             }
                         )
                         Spacer(modifier = Modifier.size(10.dp))
@@ -255,20 +299,130 @@ object AccountScreen {
                             label = { Text(text = "phone number") },
                             value = newAccount.phoneNumber,
                             onValueChange = {
-                                onNewAccountChanged(newAccount.copy(phoneNumber = it))
+                                controller.request {
+                                    updateNewAccount(newAccount.copy(phoneNumber = it))
+                                }
                             }
                         )
                         Spacer(modifier = Modifier.size(10.dp))
 
                         Button(
                             onClick = {
-                                onAddButtonClick(newAccount)
-                                onDismissRequest()
+                                controller.request {
+                                    addAccount(newAccount)
+                                    onDismissRequest()
+                                }
                             }
                         ) {
                             Text(text = "add")
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun AccountDetailDialog(
+        account: UiAccount,
+        onDismissRequest: () -> Unit,
+        controller: AccountDetailController = viewModel<AccountDetailViewModel>()
+    ) {
+        val nowAccount by controller.nowAccount.collectAsStateWithLifecycle()
+        val newRecord by controller.newAccountRecord.collectAsStateWithLifecycle()
+        val recordListState by controller.accountRecordList.collectAsStateWithLifecycle()
+
+        LaunchedEffect(key1 = controller) {
+            controller.request {
+                updateNowAccount(account)
+            }
+        }
+
+        Dialog(onDismissRequest = onDismissRequest) {
+            Surface(
+                modifier = Modifier
+                    .heightIn(800.dp, 1000.dp)
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(5.dp)
+            ) {
+                Box(
+                    modifier = Modifier.padding(15.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column {
+                        Card {
+                            Column {
+                                Text(text = nowAccount.number)
+                                Text(text = nowAccount.registerTimestamp)
+                            }
+
+                            Spacer(Modifier.size(35.dp))
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(text = nowAccount.name)
+                                Text(text = nowAccount.balance, fontSize = 35.sp)
+                                Text(text = nowAccount.phoneNumber)
+                            }
+                        }
+
+                        Component.InputCard(
+                            dataList = listOf(newRecord.issuedName, newRecord.difference),
+                            labelNameList = listOf("issued name", "difference"),
+                            onDataChangedList = listOf(
+                                {
+                                    controller.request { updateNewAccountRecord(
+                                        newRecord.copy(issuedName = it)
+                                    ) }
+                                },
+                                {
+                                    controller.request { updateNewAccountRecord(
+                                        newRecord.copy(difference = it)
+                                    ) }
+                                },
+                            ),
+                            onAddButtonClicked = {
+                                controller.request {
+                                    addRecord(
+                                        accountNumber = nowAccount.number.toInt(),
+                                        issuedName = it[0],
+                                        difference = it[1].toInt()
+                                    )
+                                }
+                            }
+                        )
+                    }
+
+                    when(recordListState) {
+                        is FlowState.Success -> {
+                            val recordList = (recordListState as FlowState.Success<List<UiAccountRecord>>).data
+                            LazyColumn {
+                                items(recordList) {
+                                    ListItem(
+                                        overlineContent = { Text(text = it.timestamp) },
+                                        headlineContent = { Text(text = it.difference) },
+                                        supportingContent = { Text(text = it.result) },
+                                        trailingContent = { Text(text = it.issuedName) }
+                                    )
+                                }
+                            }
+                        }
+                        is FlowState.Loading -> {
+                            Loading()
+                        }
+                        is FlowState.Failed -> {
+                            val throwable = (recordListState as FlowState.Failed<List<UiAccountRecord>>).throwable
+                            FailDialog(throwable = throwable) {
+                                controller.request {
+                                    updateAccountRecordList(nowAccount.number.toInt())
+                                }
+                            }
+                        }
+                    }
+
+
                 }
             }
         }

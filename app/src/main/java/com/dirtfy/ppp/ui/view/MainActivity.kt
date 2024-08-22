@@ -70,7 +70,11 @@ class MainActivity: ComponentActivity() {
                     selectedIndex = selectedIndex,
                     onNavigatorItemClick = {
                         selectedIndex = it
-                        navController.navigate(destinationList[it].first)
+                        navController.navigate(destinationList[it].first) {
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                        }
                     }
                 )
             }

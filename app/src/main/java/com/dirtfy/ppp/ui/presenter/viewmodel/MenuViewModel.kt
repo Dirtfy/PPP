@@ -3,12 +3,12 @@ package com.dirtfy.ppp.ui.presenter.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.data.logic.menu.MenuException
-import com.dirtfy.ppp.data.logic.menu.MenuService
-import com.dirtfy.ppp.data.source.firestore.MenuFireStore
-import com.dirtfy.ppp.ui.presenter.controller.menu.ControllerMenu
-import com.dirtfy.ppp.ui.presenter.controller.menu.ControllerMenu.Companion.convertToControllerMenu
-import com.dirtfy.ppp.ui.presenter.controller.menu.MenuController
+import com.dirtfy.ppp.common.exception.MenuException
+import com.dirtfy.ppp.data.logic.MenuService
+import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
+import com.dirtfy.ppp.ui.dto.UiMenu
+import com.dirtfy.ppp.ui.dto.UiMenu.Companion.convertToUiMenu
+import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
@@ -18,16 +18,16 @@ class MenuViewModel: ViewModel(), MenuController {
 
     private val menuService = MenuService(MenuFireStore())
 
-    private val _menuList: MutableStateFlow<FlowState<List<ControllerMenu>>>
+    private val _menuList: MutableStateFlow<FlowState<List<UiMenu>>>
     = MutableStateFlow(FlowState.loading())
-    private var _menuListLastValue: List<ControllerMenu>
+    private var _menuListLastValue: List<UiMenu>
     = emptyList()
-    override val menuList: StateFlow<FlowState<List<ControllerMenu>>>
+    override val menuList: StateFlow<FlowState<List<UiMenu>>>
         get() =_menuList
 
-    private val _newMenu: MutableStateFlow<ControllerMenu>
-    = MutableStateFlow(ControllerMenu("", ""))
-    override val newMenu: StateFlow<ControllerMenu>
+    private val _newMenu: MutableStateFlow<UiMenu>
+    = MutableStateFlow(UiMenu("", ""))
+    override val newMenu: StateFlow<UiMenu>
         get() = _newMenu
 
 
@@ -35,7 +35,7 @@ class MenuViewModel: ViewModel(), MenuController {
     override suspend fun updateMenuList() {
         menuService.readMenu().conflate().collect {
             _menuList.value = it.passMap { data ->
-                val newValue = data.map { menu -> menu.convertToControllerMenu() }
+                val newValue = data.map { menu -> menu.convertToUiMenu() }
 
                 _menuListLastValue = newValue
                 newValue
@@ -43,11 +43,11 @@ class MenuViewModel: ViewModel(), MenuController {
         }
     }
 
-    override suspend fun updateNewMenu(menu: ControllerMenu) {
+    override suspend fun updateNewMenu(menu: UiMenu) {
         _newMenu.value = menu
     }
 
-    override suspend fun createMenu(menu: ControllerMenu) {
+    override suspend fun createMenu(menu: UiMenu) {
         if (menu.name == "") {
             _menuList.value = FlowState.failed(MenuException.BlankName())
             return
@@ -58,12 +58,12 @@ class MenuViewModel: ViewModel(), MenuController {
         }
 
         menuService.createMenu(
-            menu.convertToServiceMenu()
+            menu.convertToDataMenu()
         ).conflate().collect {
             _menuList.value = it.passMap { newData ->
                 val nowList = _menuListLastValue.toMutableList()
 
-                nowList.add(newData.convertToControllerMenu())
+                nowList.add(newData.convertToUiMenu())
 
                 _menuListLastValue = nowList
                 nowList
@@ -72,14 +72,14 @@ class MenuViewModel: ViewModel(), MenuController {
         }
     }
 
-    override suspend fun deleteMenu(menu: ControllerMenu) {
+    override suspend fun deleteMenu(menu: UiMenu) {
         menuService.deleteMenu(
-            menu.convertToServiceMenu()
+            menu.convertToDataMenu()
         ).conflate().collect {
             _menuList.value = it.passMap { data ->
                 val nowList = _menuListLastValue.toMutableList()
                 nowList.removeIf { target ->
-                    target == data.convertToControllerMenu()
+                    target == data.convertToUiMenu()
                 }
 
                 _menuListLastValue = nowList
