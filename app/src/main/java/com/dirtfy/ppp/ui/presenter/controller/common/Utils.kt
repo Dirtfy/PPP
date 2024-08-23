@@ -44,4 +44,20 @@ object Utils {
 
         return simpleDateFormat.parse(time)?.time ?: -1L
     }
+
+    fun timestampFormatting_YMDHmms(time: Long): String {
+        val dateFormat = "yyyy.MM.dd HH:mm"
+        val date = Date(time)
+        val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
+
+        return simpleDateFormat.format(date) + time.toString().substring(8)
+    }
+
+    fun timestampReformatting_YMDHmms(time: String): Long {
+        val dateFormat = "yyyy.MM.dd HH:mm"
+        val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
+        val underMinute = time.substring(16).toLong()
+
+        return simpleDateFormat.parse(time.substring(0, 16))?.time?.plus(underMinute) ?: -1L
+    }
 }

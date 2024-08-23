@@ -6,12 +6,12 @@ import com.dirtfy.ppp.data.logic.AccountService
 import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
 import com.dirtfy.ppp.ui.dto.UiAccount.Companion.convertToUiAccount
 import com.dirtfy.ppp.ui.dto.UiNewAccount
-import com.dirtfy.ppp.ui.presenter.controller.account.AccountAddController
+import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
 
-class AccountAddViewModel: ViewModel(), AccountAddController {
+class AccountCreateViewModel: ViewModel(), AccountCreateController {
 
     private val accountService = AccountService(AccountFireStore())
 
@@ -20,11 +20,14 @@ class AccountAddViewModel: ViewModel(), AccountAddController {
     override val newAccount: StateFlow<UiNewAccount>
         get() = bubbles.newAccount.get()
 
-    override suspend fun updateNewAccount(newAccountData: UiNewAccount) {
+    private fun _updateNewAccount(newAccountData: UiNewAccount) {
         bubbles.newAccount.set(newAccountData)
     }
+    override fun updateNewAccount(newAccountData: UiNewAccount) = request {
+        _updateNewAccount(newAccountData)
+    }
 
-    override suspend fun addAccount(newAccountData: UiNewAccount) {
+    private suspend fun _addAccount(newAccountData: UiNewAccount) {
         val (number, name, phoneNumber) = newAccountData
 
         accountService.createAccount(
@@ -32,8 +35,8 @@ class AccountAddViewModel: ViewModel(), AccountAddController {
             name = name,
             phoneNumber = phoneNumber
         ).conflate().collect {
-            bubbles.accountList.let { bubble ->
-                bubble.set(it.passMap { data ->
+            bubbles.accountList.let { bubble -> // TODO newAccount로 바꾸기
+                bubble.set(it.passMap { data -> // TODO FlowState 반영되도록
                     val newList = bubble.value.toMutableList()
                     newList.add(data.convertToUiAccount())
                     newList
@@ -41,8 +44,11 @@ class AccountAddViewModel: ViewModel(), AccountAddController {
             }
         }
     }
+    override fun addAccount(newAccountData: UiNewAccount) = request {
+        _addAccount(newAccountData)
+    }
 
-    override suspend fun setRandomValidAccountNumberToNewAccount() {
+    suspend fun _setRandomValidAccountNumberToNewAccount() {
         accountService.createAccountNumber()
             .conflate().collect {
                 bubbles.newAccount.let { newAccount ->
@@ -54,8 +60,11 @@ class AccountAddViewModel: ViewModel(), AccountAddController {
                 }
             }
     }
+    override fun setRandomValidAccountNumberToNewAccount() = request {
+        _setRandomValidAccountNumberToNewAccount()
+    }
 
-    override fun request(job: suspend AccountAddController.() -> Unit) {
+    override fun request(job: suspend AccountCreateController.() -> Unit) {
         viewModelScope.launch {
             job()
         }

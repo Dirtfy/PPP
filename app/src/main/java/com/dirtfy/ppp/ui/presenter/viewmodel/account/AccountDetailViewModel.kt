@@ -27,7 +27,8 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController {
     override val newAccountRecord: StateFlow<UiNewAccountRecord>
         get() = bubbles.newAccountRecord.get()
 
-    override suspend fun updateAccountRecordList(accountNumber: Int) {
+    override suspend fun updateAccountRecordList() {
+        val accountNumber = nowAccount.value.number.toInt()
         accountService.readAccountRecord(accountNumber)
             .conflate().collect {
                 bubbles.accountRecordList.set(
@@ -48,15 +49,13 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController {
         bubbles.newAccountRecord.set(newAccountRecord)
     }
 
-    override suspend fun addRecord(
-        accountNumber: Int,
-        issuedName: String,
-        difference: Int
-    ) {
+    override suspend fun addRecord(newAccountRecord: UiNewAccountRecord) {
+        val accountNumber = nowAccount.value.number.toInt()
+        val (issuedName, difference) = newAccountRecord
         accountService.addAccountRecord(
             accountNumber = accountNumber,
             issuedName = issuedName,
-            difference = difference
+            difference = difference.toInt()
         ).conflate().collect {
             bubbles.accountRecordList.let { bubble ->
                 bubble.set(it.passMap { data ->

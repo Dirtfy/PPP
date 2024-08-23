@@ -44,6 +44,7 @@ object MenuScreen: Tagger {
         controller: MenuController = viewModel<MenuViewModel>()
     ) {
         val menuListState by controller.menuList.collectAsStateWithLifecycle()
+        val searchClue by controller.searchClue.collectAsStateWithLifecycle()
         val newMenu by controller.newMenu.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
@@ -54,22 +55,17 @@ object MenuScreen: Tagger {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-//            NewMenu(
-//                newMenu = newMenu,
-//                onMenuChanged = { controller.request { updateNewMenu(it) } },
-//                onMenuAdd = { controller.request { createMenu(it) } }
-//            )
-
-            Component.InputCard(
-                dataList = listOf(newMenu.name, newMenu.price),
-                labelNameList = listOf("menu name", "menu price"),
-                onDataChangedList = listOf(
-                    { controller.request { updateNewMenu(newMenu.copy(name = it)) }},
-                    { controller.request { updateNewMenu(newMenu.copy(price = it)) }},
-                ),
-                onAddButtonClicked = {
-                    controller.request { createMenu(newMenu.copy(name = it[0], price = it[0])) }
-                }
+            Component.SearchBar(
+                searchClue = searchClue, onClueChanged = {
+                    controller.request { updateSearchClue(it) }
+                },
+                placeholder = "menu name"
+            )
+            
+            NewMenu(
+                newMenu = newMenu,
+                onMenuChanged = {controller.request { updateNewMenu(it) }},
+                onMenuAdd = { controller.request { createMenu(it) } }
             )
 
             Spacer(modifier = Modifier.size(10.dp))

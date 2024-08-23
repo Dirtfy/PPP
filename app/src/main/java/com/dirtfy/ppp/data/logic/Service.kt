@@ -13,5 +13,6 @@ interface Service {
         emit(FlowState.success(func()))
     }.catch {
         emit(FlowState.failed(it))
+        println(it.message)
     }.flowOn(Dispatchers.Default)
 }

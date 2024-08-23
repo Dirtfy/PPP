@@ -7,10 +7,7 @@ import com.dirtfy.ppp.data.logic.AccountService
 import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
 import com.dirtfy.ppp.ui.dto.UiAccount
 import com.dirtfy.ppp.ui.dto.UiAccount.Companion.convertToUiAccount
-import com.dirtfy.ppp.ui.dto.UiAccountRecord
-import com.dirtfy.ppp.ui.dto.UiAccountRecord.Companion.convertToUiAccountRecord
-import com.dirtfy.ppp.ui.dto.UiNewAccount
-import com.dirtfy.ppp.ui.dto.UiNewAccountRecord
+import com.dirtfy.ppp.ui.dto.UiAccountMode
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
@@ -29,12 +26,9 @@ class AccountViewModel: ViewModel(), AccountController {
         get() = bubbles.searchClue.get()
     override val nowAccount: StateFlow<UiAccount>
         get() = bubbles.nowAccount.get()
-    override val isAccountCreateMode: StateFlow<Boolean>
-        get() = bubbles.isAccountCreateMode.get()
-    override val isAccountUpdateMode: StateFlow<Boolean>
-        get() = bubbles.isAccountUpdateMode.get()
-    override val isAccountDetailMode: StateFlow<Boolean>
-        get() = bubbles.isAccountDetailMode.get()
+    override val mode: StateFlow<UiAccountMode>
+        get() = bubbles.mode.get()
+
 
     override suspend fun updateAccountList() {
         accountService.readAllAccounts().conflate().collect {
@@ -66,16 +60,8 @@ class AccountViewModel: ViewModel(), AccountController {
             }
     }
 
-    override suspend fun setAccountCreateMode(mode: Boolean) {
-        bubbles.isAccountCreateMode.set(mode)
-    }
-
-    override suspend fun setAccountUpdateMode(mode: Boolean) {
-        bubbles.isAccountUpdateMode.set(mode)
-    }
-
-    override suspend fun setAccountDetailMode(mode: Boolean) {
-        bubbles.isAccountDetailMode.set(mode)
+    override suspend fun setMode(mode: UiAccountMode) {
+        bubbles.mode.set(mode)
     }
 
     override fun request(job: suspend AccountController.() -> Unit) {

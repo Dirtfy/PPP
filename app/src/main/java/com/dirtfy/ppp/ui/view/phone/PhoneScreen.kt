@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import com.dirtfy.ppp.ui.view.MainActivity
 import com.dirtfy.ppp.ui.view.phone.account.AccountScreen
 import com.dirtfy.ppp.ui.view.phone.menu.MenuScreen
+import com.dirtfy.ppp.ui.view.phone.record.RecordScreen
 
 object PhoneScreen {
 
@@ -45,7 +46,7 @@ object PhoneScreen {
                     MenuScreen.Main()
                 }
                 composable(route = MainActivity.Companion.Destination.Sales.name) {
-
+                    RecordScreen.Main()
                 }
                 composable(route = MainActivity.Companion.Destination.Account.name) {
                     AccountScreen.Main()

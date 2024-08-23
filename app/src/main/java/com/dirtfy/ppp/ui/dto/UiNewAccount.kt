@@ -8,6 +8,16 @@ data class UiNewAccount(
     val name: String = "",
     val phoneNumber: String = ""
 ) {
+
+    companion object {
+        fun UiAccount.convertToUiNewAccount(): UiNewAccount {
+            return UiNewAccount(
+                number = number,
+                name = name,
+                phoneNumber = phoneNumber
+            )
+        }
+    }
     fun convertToUiAccount(): UiAccount {
         return DataAccount(
             number = number.toInt(),

@@ -25,6 +25,11 @@ class MenuViewModel: ViewModel(), MenuController {
     override val menuList: StateFlow<FlowState<List<UiMenu>>>
         get() =_menuList
 
+    private val _searchClue: MutableStateFlow<String>
+    = MutableStateFlow("")
+    override val searchClue: StateFlow<String>
+        get() = _searchClue
+
     private val _newMenu: MutableStateFlow<UiMenu>
     = MutableStateFlow(UiMenu("", ""))
     override val newMenu: StateFlow<UiMenu>
@@ -39,6 +44,20 @@ class MenuViewModel: ViewModel(), MenuController {
 
                 _menuListLastValue = newValue
                 newValue
+            }
+        }
+    }
+
+    override suspend fun updateSearchClue(clue: String) {
+        _searchClue.value = clue
+        menuService.readMenu().conflate().collect {
+            _menuList.value = it.passMap { data ->
+                val newValue = data.map { menu -> menu.convertToUiMenu() }
+
+                val filteredList = newValue.filter { menu -> menu.name.contains(clue) }
+
+                _menuListLastValue = filteredList
+                filteredList
             }
         }
     }

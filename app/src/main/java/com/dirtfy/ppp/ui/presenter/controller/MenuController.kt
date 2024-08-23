@@ -8,9 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 interface MenuController: Controller {
     val menuList: StateFlow<FlowState<List<UiMenu>>>
 
+    val searchClue: StateFlow<String>
+
     val newMenu: StateFlow<UiMenu>
 
     suspend fun updateMenuList()
+    suspend fun updateSearchClue(clue: String)
 
     suspend fun updateNewMenu(menu: UiMenu)
 

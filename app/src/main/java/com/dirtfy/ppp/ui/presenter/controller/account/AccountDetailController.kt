@@ -14,15 +14,11 @@ interface AccountDetailController: Controller {
     val nowAccount: StateFlow<UiAccount>
     val newAccountRecord: StateFlow<UiNewAccountRecord>
 
-    suspend fun updateAccountRecordList(accountNumber: Int)
+    suspend fun updateAccountRecordList()
     suspend fun updateNowAccount(account: UiAccount)
     suspend fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord)
 
-    suspend fun addRecord(
-        accountNumber: Int,
-        issuedName: String,
-        difference: Int
-    )
+    suspend fun addRecord(newAccountRecord: UiNewAccountRecord)
 
     fun request(job: suspend AccountDetailController.() -> Unit)
 }

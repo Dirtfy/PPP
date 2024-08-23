@@ -13,11 +13,13 @@ class MenuFireStore: MenuRepository {
     private val ref = Firebase.firestore.collection(FireStorePath.MENU)
 
     override suspend fun create(menu: DataMenu): DataMenu {
-        val newMenu = ref.document()
+        Firebase.firestore.runTransaction {
+            val newMenu = ref.document()
 
-        newMenu.set(
-            menu.convertToFireStoreMenu()
-        ).await()
+            newMenu.set(
+                menu.convertToFireStoreMenu()
+            )
+        }
 
         return menu
     }
@@ -33,7 +35,9 @@ class MenuFireStore: MenuRepository {
             .whereEqualTo("price", menu.price)
         val document = query.get().await().documents[0]
 
-        ref.document(document.id).delete().await()
+        Firebase.firestore.runTransaction {
+            ref.document(document.id).delete()
+        }.await()
 
         return menu
     }

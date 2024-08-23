@@ -78,7 +78,7 @@ class AccountService(
         if (!accountRepository.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()
 
-        accountRepository.readAllRecord(accountNumber)
+        accountRepository.readAllRecord(accountNumber).sortedBy { -it.timestamp }
     }
 
     fun addAccountRecord(

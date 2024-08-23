@@ -4,20 +4,17 @@ import android.util.Log
 import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.data.dto.DataAccount
 import com.dirtfy.ppp.data.dto.DataAccountRecord
-import com.dirtfy.ppp.data.dto.DataRecord
 import com.dirtfy.ppp.data.dto.DataRecordType
 import com.dirtfy.ppp.data.source.firestore.FireStorePath
 import com.dirtfy.ppp.data.source.firestore.account.FireStoreAccount.Companion.convertToFireStoreAccount
-import com.dirtfy.ppp.data.source.firestore.account.FireStoreAccountRecord.Companion.convertToFireStoreAccountRecord
 import com.dirtfy.ppp.data.source.firestore.record.FireStoreRecord
-import com.dirtfy.ppp.data.source.firestore.record.FireStoreRecordDetail
 import com.dirtfy.ppp.data.source.repository.AccountRepository
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
+import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import java.util.Date
@@ -28,9 +25,13 @@ class AccountFireStore: AccountRepository, Tagger {
     private val recordRef = Firebase.firestore.collection(FireStorePath.RECORD)
 
     override suspend fun create(account: DataAccount): DataAccount {
-        val newAccount = accountRef.document()
+        Firebase.firestore.runTransaction {
+            val newAccount = accountRef.document()
 
-        newAccount.set(account.convertToFireStoreAccount()).await()
+            newAccount.set(
+                account.convertToFireStoreAccount()
+            )
+        }.await()
 
         return account
     }
@@ -39,24 +40,31 @@ class AccountFireStore: AccountRepository, Tagger {
         accountNumber: Int,
         record: DataAccountRecord
     ): DataAccountRecord {
-        val newRecord = recordRef.document()
+        Firebase.firestore.runTransaction {
+            val newRecord = recordRef.document()
 
-        Log.d(TAG, "$record")
+            Log.d(TAG, "$record")
 
-        newRecord.set(
-            FireStoreRecord(
-                timestamp = Timestamp(Date(record.timestamp)),
-                amount = record.difference,
-                type = accountNumber.toString(),
-                issuedName = record.issuedName
+            newRecord.set(
+                FireStoreRecord(
+                    timestamp = Timestamp(Date(record.timestamp)),
+                    millisecond = record.timestamp,
+                    amount = record.difference,
+                    type = accountNumber.toString(),
+                    issuedName = record.issuedName
+                )
             )
-        ).await()
+        }.await()
 
         return record
     }
 
     override suspend fun readAllAccount(): List<DataAccount> {
-        val cap = recordRef.whereNotIn("type", DataRecordType.entries.map { it.name }).get().await()
+        val cap = recordRef
+            .whereNotIn(
+                "type",
+                DataRecordType.entries.map { it.name }
+            ).get().await()
 
         return accountRef.get().await().documents.map {
             it.toObject(FireStoreAccount::class.java)!!
@@ -71,7 +79,7 @@ class AccountFireStore: AccountRepository, Tagger {
                 .sumOf {
                     it.amount!!
                 }
-            account.convertToDataAccount(balance)
+            account.convertToDataAccount(balance) // TODO balance를 왜 미리 계산하지?
         }
     }
 
@@ -83,7 +91,7 @@ class AccountFireStore: AccountRepository, Tagger {
 
         Log.d(TAG, "$result\n$value")
 
-        return (value as Int)
+        return (value as Long).toInt()
     }
 
     override suspend fun find(accountNumber: Int): DataAccount {
@@ -116,7 +124,10 @@ class AccountFireStore: AccountRepository, Tagger {
         val query = accountRef.whereEqualTo("number", account.number)
         val document = query.get().await().documents[0]
 
-        accountRef.document(document.id).set(account.convertToFireStoreAccount()).await()
+        Firebase.firestore.runTransaction {
+            accountRef.document(document.id)
+                .set(account.convertToFireStoreAccount())
+        }.await()
 
         return account
     }
