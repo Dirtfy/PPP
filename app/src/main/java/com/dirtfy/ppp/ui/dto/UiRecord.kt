@@ -7,34 +7,47 @@ import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 data class UiRecord(
     val timestamp: String,
     val income: String,
-    val type: String,
-    val millisecond: Long
+    val type: String
 ) {
 
     companion object {
-        fun DataRecord.convertToUiRecord(): UiRecord {
+        fun DataRecord.convertToRawUiRecord(): UiRecord {
             return UiRecord(
                 timestamp = Utils.timestampFormatting_YMDHmms(timestamp),
                 income = Utils.currencyFormatting(income),
-                type = if (type in listOf(DataRecordType.Card, DataRecordType.Cash)) {
-                    type.name
+                type = "$type - $issuedBy"
+            )
+        }
+
+        fun DataRecord.convertToUiRecord(): UiRecord {
+            return UiRecord(
+                timestamp = Utils.timestampFormatting_YMDHm(timestamp),
+                income = Utils.currencyFormatting(income),
+                type = if (type == DataRecordType.Cash.name
+                    || type == DataRecordType.Card.name) {
+                    type
                 } else {
                     DataRecordType.Point.name
-                },
-                millisecond = timestamp
+                }
             )
         }
     }
 
     fun convertToDataRecord(): DataRecord {
         return DataRecord(
-            timestamp = millisecond,
+            timestamp = Utils.timestampReformatting_YMDHm(timestamp),
             income = Utils.currencyReformatting(income),
-            type = if (type in DataRecordType.entries.map{ it.name}) {
-                DataRecordType.entries.filter { it.name == type }[0]
-            } else {
-                DataRecordType.Card
-            }
+            type = type.split("-")[0],
+            issuedBy = type.split("-")[1]
+        )
+    }
+
+    fun convertToDataRecordFromRaw(): DataRecord {
+        return DataRecord(
+            timestamp = Utils.timestampReformatting_YMDHmms(timestamp),
+            income = Utils.currencyReformatting(income),
+            type = type.split("-")[0],
+            issuedBy = type.split("-")[1]
         )
     }
 }

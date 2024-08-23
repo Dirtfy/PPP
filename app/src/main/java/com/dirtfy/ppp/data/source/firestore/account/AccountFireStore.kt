@@ -13,7 +13,6 @@ import com.dirtfy.tagger.Tagger
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
-import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
@@ -48,10 +47,9 @@ class AccountFireStore: AccountRepository, Tagger {
             newRecord.set(
                 FireStoreRecord(
                     timestamp = Timestamp(Date(record.timestamp)),
-                    millisecond = record.timestamp,
                     amount = record.difference,
                     type = accountNumber.toString(),
-                    issuedName = record.issuedName
+                    issuedName = record.issuedName,
                 )
             )
         }.await()
@@ -115,7 +113,7 @@ class AccountFireStore: AccountRepository, Tagger {
             it.toObject(FireStoreRecord::class.java)!!
         }.map {
             Log.d(TAG, "$result - ${it.timestamp}")
-            result += it.amount?: throw RecordException.DifferenceLoss()
+            result += it.amount ?: throw RecordException.DifferenceLoss()
             it.convertToDataAccountRecord(result = result)
         }
     }

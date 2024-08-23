@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,13 +41,17 @@ object RecordDetailScreen {
 
     @Composable
     fun Main(
-        nowRecord: UiRecord,
+        firstRecord: UiRecord,
         controller: RecordDetailController = viewModel<RecordDetailViewModel>()
     ) {
         val recordDetailListState by controller.recordDetailList.collectAsStateWithLifecycle()
+        val nowRecord by controller.nowRecord.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
-            controller.updateRecordDetailList(nowRecord)
+            controller.run {
+                updateRecordDetailList(firstRecord)
+                updateNowRecord(firstRecord)
+            }
         }
 
         ScreenContent(
@@ -75,7 +80,6 @@ object RecordDetailScreen {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     RecordDetailHead(nowRecord = nowRecord)
-                    Spacer(modifier = Modifier.size(10.dp))
                     RecordDetailListState(
                         recordDetailListState = recordDetailListState,
                         onRetryClick = onRetryClick
@@ -101,7 +105,7 @@ object RecordDetailScreen {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = nowRecord.timestamp.substring(0, 16))
+                    Text(text = nowRecord.timestamp)
                     Spacer(modifier = Modifier.size(5.dp))
                     Text(text = nowRecord.income, fontSize = 25.sp)
                     Spacer(modifier = Modifier.size(5.dp))
@@ -119,7 +123,8 @@ object RecordDetailScreen {
         when(recordDetailListState) {
             is FlowState.Success -> {
                 val recordDetailList = recordDetailListState.data
-                RecordDetailList(recordDetailList = recordDetailList)
+                if (recordDetailList.isNotEmpty())
+                    RecordDetailList(recordDetailList = recordDetailList)
             }
             is FlowState.Loading -> {
                 RecordDetailListLoading()

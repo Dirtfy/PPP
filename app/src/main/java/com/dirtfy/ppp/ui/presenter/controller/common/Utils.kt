@@ -50,7 +50,12 @@ object Utils {
         val date = Date(time)
         val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
 
-        return simpleDateFormat.format(date) + time.toString().substring(8)
+        val formed = simpleDateFormat.let {
+            it.parse(it.format(date))?.time!!
+        }
+        val sec = time - formed
+
+        return simpleDateFormat.format(date) + sec.toString()
     }
 
     fun timestampReformatting_YMDHmms(time: String): Long {

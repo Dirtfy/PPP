@@ -178,7 +178,7 @@ object RecordScreen {
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            RecordDetailScreen.Main(nowRecord = nowAccount)
+            RecordDetailScreen.Main(firstRecord = nowAccount)
         }
     }
 }

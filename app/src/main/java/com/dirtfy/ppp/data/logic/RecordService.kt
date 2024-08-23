@@ -12,6 +12,6 @@ class RecordService(
     }
 
     fun readRecordDetail(record: DataRecord) = asFlow {
-        repository.readDetail(record)
+        repository.readDetail(record) // TODO record timestamp로 하는게 나을듯?
     }
 }

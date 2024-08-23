@@ -13,7 +13,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
-import java.util.Calendar
 import java.util.Date
 
 class RecordFireStore: RecordRepository, Tagger {
@@ -54,7 +53,7 @@ class RecordFireStore: RecordRepository, Tagger {
 
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
         val query = recordRef
-            .whereEqualTo("millisecond", record.timestamp)
+            .whereEqualTo("timestamp", Timestamp(Date(record.timestamp)))
         val document = query.get().await().documents
         Log.d(TAG, "${record.timestamp}")
 

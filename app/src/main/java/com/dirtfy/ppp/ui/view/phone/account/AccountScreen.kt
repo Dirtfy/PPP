@@ -288,7 +288,7 @@ object AccountScreen {
     fun AccountDetailDialog(
         account: UiAccount,
         onDismissRequest: () -> Unit
-    ) {
+    ) { //TODO maxHeight 설정?
         Dialog(onDismissRequest = onDismissRequest) {
             AccountDetailScreen.Main(account = account)
         }

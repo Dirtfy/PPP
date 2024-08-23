@@ -10,6 +10,9 @@ interface RecordDetailController: Controller {
 
     val recordDetailList: StateFlow<FlowState<List<UiRecordDetail>>>
 
+    val nowRecord: StateFlow<UiRecord>
+
     fun updateRecordDetailList(record: UiRecord)
+    fun updateNowRecord(record: UiRecord)
 
 }

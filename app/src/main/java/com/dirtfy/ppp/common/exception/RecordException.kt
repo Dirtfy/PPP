@@ -6,6 +6,7 @@ sealed class RecordException(
 
     class IssuedNameLoss: RecordException("issued name is not found")
     class IncomeLoss: RecordException("income is not found")
+    class TypeLoss: RecordException("type is not found")
     class DifferenceLoss: RecordException("difference is not found")
     class TimestampLoss: RecordException("time stamp is not found")
 
