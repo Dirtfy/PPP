@@ -43,10 +43,10 @@ data class FireStoreRecord(
 
     fun convertToDataRecord(): DataRecord {
         return DataRecord(
-            timestamp = timestamp?.convertToMilliseconds()?: throw RecordException.TimestampLoss(),
             income = amount ?: throw RecordException.IncomeLoss(),
             type = type?: throw RecordException.TypeLoss(),
-            issuedBy = issuedName?: throw RecordException.IssuedNameLoss()
+            issuedBy = issuedName?: throw RecordException.IssuedNameLoss(),
+            timestamp = timestamp?.convertToMilliseconds()?: throw RecordException.TimestampLoss()
         )
     }
 

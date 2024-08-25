@@ -1,8 +1,10 @@
 package com.dirtfy.ppp.data.dto
 
+import java.util.Calendar
+
 data class DataRecord(
-    val timestamp: Long,
     val income: Int,
     val type: String,
-    val issuedBy: String = "custom"
+    val issuedBy: String = "custom",
+    val timestamp: Long = Calendar.getInstance().timeInMillis
 )

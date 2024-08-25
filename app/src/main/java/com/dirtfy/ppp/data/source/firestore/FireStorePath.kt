@@ -13,10 +13,12 @@ object FireStorePath {
     const val RECORD: String = "record_exp"
     const val RECORD_DETAIL: String = "detail"
 
-    const val TABLE: String = "table"
-    const val TABLE_PHYSICAL: String = "physical"
-    const val TABLE_LOGICAL: String = "logical"
-    const val TABLE_LOGICAL_TABLE = "table"
+    const val TABLE: String = "table_exp"
+    const val TABLE_MAPPING: String = "mapping"
+    const val TABLE_NUMBER: String = "number"
+    const val TABLE_GROUP: String = "group"
+    const val TABLE_NUMBER_FIELD: String = "group"
+    const val TABLE_GROUP_FIELD: String = "member"
 
 
 }

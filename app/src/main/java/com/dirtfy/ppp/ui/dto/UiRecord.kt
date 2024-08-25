@@ -35,19 +35,19 @@ data class UiRecord(
 
     fun convertToDataRecord(): DataRecord {
         return DataRecord(
-            timestamp = Utils.timestampReformatting_YMDHm(timestamp),
             income = Utils.currencyReformatting(income),
             type = type.split("-")[0],
-            issuedBy = type.split("-")[1]
+            issuedBy = type.split("-")[1],
+            timestamp = Utils.timestampReformatting_YMDHm(timestamp)
         )
     }
 
     fun convertToDataRecordFromRaw(): DataRecord {
         return DataRecord(
-            timestamp = Utils.timestampReformatting_YMDHmms(timestamp),
             income = Utils.currencyReformatting(income),
             type = type.split("-")[0],
-            issuedBy = type.split("-")[1]
+            issuedBy = type.split("-")[1],
+            timestamp = Utils.timestampReformatting_YMDHmms(timestamp)
         )
     }
 }
