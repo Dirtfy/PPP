@@ -15,6 +15,7 @@ import com.dirtfy.ppp.ui.view.MainActivity
 import com.dirtfy.ppp.ui.view.phone.account.AccountScreen
 import com.dirtfy.ppp.ui.view.phone.menu.MenuScreen
 import com.dirtfy.ppp.ui.view.phone.record.RecordScreen
+import com.dirtfy.ppp.ui.view.phone.table.TableScreen
 
 object PhoneScreen {
 
@@ -36,11 +37,11 @@ object PhoneScreen {
         ) {
             NavHost(
                 navController = navController,
-                startDestination = MainActivity.Companion.Destination.Menu.name,
+                startDestination = MainActivity.Companion.Destination.Table.name,
                 modifier = Modifier.padding(it)
             ) {
                 composable(route = MainActivity.Companion.Destination.Table.name) {
-
+                    TableScreen.Main()
                 }
                 composable(route = MainActivity.Companion.Destination.Menu.name) {
                     MenuScreen.Main()

@@ -4,11 +4,10 @@ import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.DataTable
 import com.dirtfy.ppp.data.dto.DataTableOrder
 import com.dirtfy.ppp.data.source.firestore.FireStorePath
-import com.dirtfy.ppp.data.source.firestore.table.FireStoreTable.Companion.convertToFireStoreTable
+import com.dirtfy.ppp.data.source.firestore.table.FireStoreTableOrder.Companion.convertToFireStoreTableOrder
 import com.dirtfy.ppp.data.source.repository.TableRepository
-import com.google.firebase.firestore.getField
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
@@ -16,164 +15,161 @@ class TableFireStore: TableRepository {
 
     private val tableRef = Firebase.firestore.collection(FireStorePath.TABLE)
 
-    override suspend fun readTables(): List<DataTable> {
-        val documents = tableRef
-            .document(FireStorePath.TABLE_MAPPING)
-            .collection(FireStorePath.TABLE_NUMBER)
-            .get().await().documents
+    private suspend fun readGroup(tableNumber: Int): Int {
+        val query = tableRef.whereArrayContains("member", tableNumber)
+        val documents = query.get().await().documents
 
-        return documents.map {
-            it.toObject(FireStoreTable::class.java)!!
-        }.map {
-            it.convertToDataTable()
+        return when (documents.size) {
+            1 -> documents[0].id.toInt()
+            0 -> throw TableException.GroupLoss()
+            else -> throw TableException.NonUniqueGroup()
         }
+    }
+    private suspend fun readGroupMember(group: Int): List<Int> {
+        val query = tableRef.document("$group")
+        val result = query.get().await()
+            .toObject(FireStoreGroup::class.java)!!
+
+        return result.member?: emptyList()
+    }
+
+    override suspend fun readTable(tableNumber: Int): DataTable {
+        val group = readGroup(tableNumber)
+
+        return DataTable(
+            number = tableNumber,
+            group = group
+        )
+    }
+
+    override suspend fun readAllTable(): List<DataTable> {
+        val resultList = mutableListOf<DataTable>()
+        tableRef.get().await().documents.forEach { document ->
+            val group = document.toObject(FireStoreGroup::class.java)!!
+            val memberList = group.member ?: throw TableException.MemberLoss()
+
+            memberList.forEach { member ->
+                resultList.add(
+                    DataTable(
+                        number = member,
+                        group = document.id.toInt()
+                    )
+                )
+            }
+        }
+
+        return resultList
     }
 
     override suspend fun updateTable(table: DataTable) {
-        // number -> group update
-        val mappingRef = tableRef.document(FireStorePath.TABLE_MAPPING)
+        val nowGroup = readGroup(table.number)
 
-        val groupRef = mappingRef
-            .collection(FireStorePath.TABLE_NUMBER)
+        val targetGroupMember = readGroupMember(table.group)
+        tableRef.document("${table.group}").set(
+            FireStoreGroup(member = targetGroupMember + table.number)
+        ).await()
 
-        val groupQuery = groupRef
-            .whereEqualTo("number", table.number)
-
-        val documents = groupQuery.get().await().documents
-
-        val documentID = when(documents.size) {
-            0 -> throw TableException.GroupLoss()
-            1 -> documents[0].id
-            else -> throw TableException.NonUniqueGroup()
-        }
-
-        groupRef.document(documentID).set(
-            table.convertToFireStoreTable()
-        )
-
-        // group -> number delete
-        val originalGroupRef = mappingRef
-            .collection(FireStorePath.TABLE_GROUP)
-
-        val originalGroupQuery = originalGroupRef
-            .whereArrayContains("memberList", table.number)
-
-        val originalGroupDocuments = originalGroupQuery.get().await().documents
-
-        val originalGroupDocumentID: String
-        val originalGroup = when(originalGroupDocuments.size) {
-            0 -> throw TableException.GroupLoss()
-            1 -> {
-                originalGroupDocumentID = documents[0].id
-                documents[0].toObject(FireStoreGroup::class.java)!!
-            }
-            else -> throw TableException.NonUniqueGroup()
-        }
-
-        originalGroupRef.document(originalGroupDocumentID)
-            .set(originalGroup.copy(
-                memberList = originalGroup.memberList?.filter { it == table.number }
-            ))
-
-        // group -> number add
-        val newGroupRef = mappingRef
-            .collection(FireStorePath.TABLE_GROUP)
-
-        val newGroupQuery = newGroupRef
-            .whereEqualTo("group", table.group)
-
-        val newGroupDocuments = newGroupQuery.get().await().documents
-
-        val newGroupDocumentID: String
-        val newGroup = when(newGroupDocuments.size) {
-            0 -> throw TableException.GroupLoss()
-            1 -> {
-                newGroupDocumentID = documents[0].id
-                documents[0].toObject(FireStoreGroup::class.java)!!
-            }
-            else -> throw TableException.NonUniqueGroup()
-        }
-
-        newGroupRef.document(newGroupDocumentID)
-            .set(newGroup.copy(
-                memberList = newGroup.memberList?.plus(table.number)
-            ))
+        val nowGroupMember = readGroupMember(nowGroup)
+        tableRef.document("$nowGroup").set(
+            FireStoreGroup(member = nowGroupMember.filter { it == table.number })
+        ).await()
     }
 
-    override suspend fun mergeGroup(baseGroup: Int, mergingGroup: Int) {
-        // TODO
-        val baseGroupRef = tableRef
-            .document(FireStorePath.TABLE_MAPPING)
-            .collection(FireStorePath.TABLE_GROUP)
-            .document("$baseGroup")
+    private fun getOrderRef(tableNumber: Int): CollectionReference {
+        return tableRef
+            .document("$tableNumber")
+            .collection(FireStorePath.TABLE_ORDER)
+    }
 
-        val mergingGroupRef = tableRef
-            .document(FireStorePath.TABLE_MAPPING)
-            .collection(FireStorePath.TABLE_GROUP)
-            .document("$mergingGroup")
+    private suspend fun getOrderID(tableNumber: Int, menuName: String): String? {
+        val orderRef = getOrderRef(tableNumber)
+        val query = orderRef.whereEqualTo("name", menuName)
+        val documents = query.get().await().documents
 
-        val mergingMemberList = mergingGroupRef.get().await()
-            .get(FireStorePath.TABLE_GROUP_FIELD) as List<*>
+        return when (documents.size) {
+            1 -> documents[0].id
+            0 -> null
+            else -> throw TableException.NonUniqueOrderName()
+        }
+    }
+    private suspend fun setOrder(tableNumber: Int, order: FireStoreTableOrder) {
+        val orderID = getOrderID(tableNumber, order.name!!)
 
-        mergingGroupRef.update(FireStorePath.TABLE_GROUP_FIELD, emptyList<Int>())
+        val orderRef = tableRef
+            .document("$tableNumber")
+            .collection(FireStorePath.TABLE_ORDER)
 
-        val baseMemberList = baseGroupRef.get().await()
-            .get(FireStorePath.TABLE_GROUP_FIELD) as List<*>
-
-        baseGroupRef.update(
-            FireStorePath.TABLE_GROUP_FIELD,
-            baseMemberList + mergingMemberList
-        )
+        if (orderID == null)
+            orderRef.document().set(order).await()
+        else
+            orderRef.document(orderID).set(order).await()
     }
 
     override suspend fun createOrder(tableNumber: Int, menuName: String, menuPrice: Int) {
-        // TODO
+        val orderRef = getOrderRef(tableNumber)
+
+        orderRef.document().set(
+            FireStoreTableOrder(
+                name = menuName,
+                price = menuPrice,
+                count = 1
+            )
+        ).await()
     }
 
-    override suspend fun readOrders(group: Int): List<DataTableOrder> {
-        TODO("Not yet implemented")
+    override suspend fun readOrder(tableNumber: Int, menuName: String): DataTableOrder {
+        val orderID = getOrderID(tableNumber, menuName)
+            ?: throw TableException.InvalidOrderName()
+
+        val order = getOrderRef(tableNumber)
+            .document(orderID)
+            .get().await()
+            .toObject(DataTableOrder::class.java)!!
+
+        return DataTableOrder(
+            name = menuName,
+            price = order.price,
+            count = order.count
+        )
+    }
+
+    override suspend fun readAllOrder(tableNumber: Int): List<DataTableOrder> {
+        return getOrderRef(tableNumber)
+            .get().await()
+            .documents
+            .map { it.toObject(FireStoreTableOrder::class.java)!! }
+            .map { it.convertToDataTableOrder() }
     }
 
     override suspend fun updateOrder(tableNumber: Int, order: DataTableOrder) {
-        TODO("Not yet implemented")
+        getOrderID(tableNumber, order.name)
+            ?: throw TableException.InvalidOrderName()
+
+        setOrder(tableNumber, order.convertToFireStoreTableOrder())
     }
 
     override suspend fun deleteOrder(tableNumber: Int, menuName: String) {
-        TODO("Not yet implemented")
+        val orderID = getOrderID(tableNumber, menuName)
+            ?: throw TableException.InvalidOrderName()
+
+        getOrderRef(tableNumber)
+            .document(orderID)
+            .delete()
+            .await()
     }
 
     override suspend fun deleteAllOrder(tableNumber: Int) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getGroupNumber(tableNumber: Int): Int {
-        // TODO
-        var found = false
-        var group = 0
-
-        val document = tableRef.document(FireStorePath.TABLE_MAPPING).get().await()
-        (1..11).forEach { groupNumber ->
-            val groupList = document.get("$groupNumber") as? List<*>
-                ?: throw TableException.GroupLoss()
-
-            if (groupList.map { it as Int }.contains(tableNumber)) {
-                if (found) throw TableException.InValidGroupState()
-                group = groupNumber
-                found = true
+        val orderRef = getOrderRef(tableNumber)
+        orderRef
+            .get().await()
+            .documents
+            .forEach {
+                orderRef.document(it.id).delete().await()
             }
-        }
-
-        if (!found) throw TableException.InValidGroupState()
-
-        return group
     }
 
-    override suspend fun getMemberTableNumbers(group: Int): List<Int> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getMenuCount(group: Int, menuName: String): Int {
-        TODO("Not yet implemented")
+    override suspend fun isOrderExist(tableNumber: Int, menuName: String): Boolean {
+        return getOrderID(tableNumber, menuName) != null
     }
 
 }

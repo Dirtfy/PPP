@@ -4,14 +4,13 @@ import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.DataRecord
 import com.dirtfy.ppp.data.dto.DataRecordDetail
 import com.dirtfy.ppp.data.dto.DataRecordType
-import com.dirtfy.ppp.data.dto.DataTable
 import com.dirtfy.ppp.data.dto.DataTableOrder
 import com.dirtfy.ppp.data.source.repository.RecordRepository
 import com.dirtfy.ppp.data.source.repository.TableRepository
 
 class TableService(
-    val tableRepository: TableRepository,
-    val recordRepository: RecordRepository
+    private val tableRepository: TableRepository,
+    private val recordRepository: RecordRepository
 ): Service {
 
     private fun isInValidTableNumber(tableNumber: Int): Boolean {
@@ -19,16 +18,16 @@ class TableService(
     }
 
     fun readTables() = asFlow {
-        tableRepository.readTables()
+        tableRepository.readAllTable()
     }
 
     fun readOrders(tableNumber: Int) = asFlow {
         if (isInValidTableNumber(tableNumber))
             throw TableException.InvalidTableNumber()
 
-        val group = tableRepository.getGroupNumber(tableNumber)
+        val group = tableRepository.readTable(tableNumber).group
 
-        tableRepository.readOrders(group)
+        tableRepository.readAllOrder(group)
     }
 
     fun mergeTables(tableNumberList: List<Int>) = asFlow {
@@ -40,139 +39,209 @@ class TableService(
                 throw TableException.InvalidTableNumber()
         }
 
-        val groupUniqueList = tableNumberList.map {
-            tableRepository.getGroupNumber(it)
+        val tableList = tableNumberList.map {
+            tableRepository.readTable(it)
+        }
+
+        val groupUniqueList = tableList.map {
+            it.group
         }.toSet().toList()
 
-        val groupAndMemberPairList = groupUniqueList
-            .map {
-                tableRepository.getMemberTableNumbers(it)
-            }
-            .zip(groupUniqueList)
+        val orderCombineList = mutableListOf<DataTableOrder>()
+        groupUniqueList.map {
+            tableRepository.readAllOrder(it)
+        }.forEach { list ->
+            list.forEach { order ->
+                val hasSameMenu = orderCombineList
+                    .find { added -> added.name == order.name } != null
 
-        val baseGroup = groupAndMemberPairList
-            .maxByOrNull {
-                it.first.size
-            }?.second?: throw TableException.GroupLoss()
+                if (hasSameMenu) {
+                    orderCombineList.replaceAll { added ->
+                        if (added.name == order.name)
+                            added.copy(count = added.count + order.count)
+                        else
+                            added
+                    }
+                }
+                else {
+                    orderCombineList.add(order)
+                }
+            }
+        }
 
-        groupUniqueList
-            .filter {
-                it != baseGroup
-            }
-            .forEach {
-                tableRepository.mergeGroup(baseGroup, it)
-            }
+        groupUniqueList.forEach {
+            tableRepository.deleteAllOrder(it)
+        }
+
+        val baseGroup = groupUniqueList[0]
+
+        orderCombineList.forEach {
+            tableRepository.createOrder(baseGroup, it.name, it.price)
+            tableRepository.updateOrder(baseGroup, it)
+        }
+
+        tableList.filter {
+            it.group == baseGroup
+        }.forEach {
+            tableRepository.updateTable(it.copy(group = baseGroup))
+        }
     }
 
     private suspend fun cleanGroup(group: Int) {
-        val memberList = tableRepository.getMemberTableNumbers(group)
-        memberList.forEach {
-            tableRepository.deleteAllOrder(it)
-            tableRepository.updateTable(DataTable(
-                number = it,
-                group = it
-            ))
+        tableRepository.apply {
+            deleteAllOrder(group)
+            readAllTable()
+                .filter { it.group == group }
+                .forEach {
+                    tableRepository.updateTable(
+                        it.copy(group = it.number)
+                    )
+                }
         }
     }
 
     private fun List<DataTableOrder>.calcTotalPrice(): Int {
         return this.sumOf { it.count * it.price }
     }
-    private fun List<DataTableOrder>.convertToRecordDetailList(): List<DataRecordDetail> {
-        return this.map {
-            DataRecordDetail(
-                name = it.name,
-                amount = it.price,
-                count = it.count
-            )
-        }
+    private fun DataTableOrder.convertToRecordDetail(): DataRecordDetail {
+        return DataRecordDetail(
+            name = name,
+            amount = price,
+            count = count
+        )
     }
 
     fun payTableWithCash(
-        tableNumber: Int,
-        orderList: List<DataTableOrder>
+        tableNumber: Int
     ) = asFlow {
+        val group = tableRepository.readTable(tableNumber).group
+
+        val orderList = tableRepository.readAllOrder(group)
+
         recordRepository.create(
             record = DataRecord(
                 income = orderList.calcTotalPrice(),
                 type = DataRecordType.Cash.name
             ),
-            detailList = orderList.convertToRecordDetailList()
+            detailList = orderList.map{ it.convertToRecordDetail() }
         )
         // TODO 다른 DB간 transaction 처리
-        val group = tableRepository.getGroupNumber(tableNumber)
+
         cleanGroup(group)
     }
     fun payTableWithCard(
-        tableNumber: Int,
-        orderList: List<DataTableOrder>
+        tableNumber: Int
     ) = asFlow {
+        val group = tableRepository.readTable(tableNumber).group
+
+        val orderList = tableRepository.readAllOrder(group)
+
         recordRepository.create(
             record = DataRecord(
                 income = orderList.calcTotalPrice(),
                 type = DataRecordType.Card.name
             ),
-            detailList = orderList.convertToRecordDetailList()
+            detailList = orderList.map{ it.convertToRecordDetail() }
         )
         // TODO 다른 DB간 transaction 처리
-        val group = tableRepository.getGroupNumber(tableNumber)
+
         cleanGroup(group)
     }
     fun payTableWithPoint(
         tableNumber: Int,
-        orderList: List<DataTableOrder>,
         accountNumber: Int,
         issuedName: String
     ) = asFlow {
+        val group = tableRepository.readTable(tableNumber).group
+
+        val orderList = tableRepository.readAllOrder(group)
+
         recordRepository.create(
             record = DataRecord(
                 income = orderList.calcTotalPrice(),
                 type = accountNumber.toString(),
                 issuedBy = issuedName
             ),
-            detailList = orderList.convertToRecordDetailList()
+            detailList = orderList.map{ it.convertToRecordDetail() }
         )
         // TODO 다른 DB간 transaction 처리
-        val group = tableRepository.getGroupNumber(tableNumber)
+
         cleanGroup(group)
     }
 
     fun addOrder(
         tableNumber: Int,
-        order: DataTableOrder
+        menuName: String,
+        menuPrice: Int
     ) = asFlow {
-        val group = tableRepository.getGroupNumber(tableNumber)
-        val menuCount = tableRepository.getMenuCount(group, order.name)
+        tableRepository.run {
+            val group = readTable(tableNumber).group
 
-        if (menuCount == 0) {
-            tableRepository.createOrder(
-                tableNumber,
-                order.name,
-                order.price
-            )
-        } else {
-            tableRepository.updateOrder(
-                tableNumber,
-                order
+            val count: Int
+            if (isOrderExist(group, menuName)) {
+                val order = readOrder(tableNumber, menuName)
+                count = order.count + 1
+                updateOrder(
+                    tableNumber,
+                    order.copy(count = count)
+                )
+            } else {
+                count = 1
+                createOrder(
+                    tableNumber,
+                    menuName,
+                    menuPrice
+                )
+            }
+
+            DataTableOrder(
+                menuName,
+                menuPrice,
+                count
             )
         }
     }
     fun cancelOrder(
         tableNumber: Int,
-        order: DataTableOrder
+        menuName: String,
+        menuPrice: Int
     ) = asFlow {
-        val group = tableRepository.getGroupNumber(tableNumber)
-        val menuCount = tableRepository.getMenuCount(group, order.name)
+        tableRepository.run {
+            val group = readTable(tableNumber).group
 
-        when(menuCount) {
-            0 -> { throw TableException.NonEnoughMenuToCancel() }
-            1 -> { tableRepository.deleteOrder(tableNumber, order.name) }
-            else -> {
-                tableRepository.updateOrder(
-                    tableNumber,
-                    order
-                )
+            val count: Int
+            if (isOrderExist(group, menuName)) {
+                when(val menuCount = readOrder(group, menuName).count) {
+                    0 -> { throw TableException.NonEnoughMenuToCancel() }
+                    1 -> {
+                        count = 0
+                        deleteOrder(tableNumber, menuName)
+                    }
+                    else -> {
+                        count = menuCount-1
+                        updateOrder(
+                            tableNumber,
+                            DataTableOrder(
+                                menuName,
+                                menuPrice,
+                                count
+                            )
+                        )
+                    }
+                }
             }
+            else throw TableException.InvalidOrderName()
+
+            DataTableOrder(
+                menuName,
+                menuPrice,
+                count
+            )
         }
+
+    }
+
+    fun getGroup(tableNumber: Int) = asFlow {
+        tableRepository.readTable(tableNumber).group
     }
 }

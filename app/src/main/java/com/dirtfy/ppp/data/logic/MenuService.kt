@@ -5,7 +5,7 @@ import com.dirtfy.ppp.data.dto.DataMenu
 import com.dirtfy.ppp.data.source.repository.MenuRepository
 
 class MenuService(
-    val menuRepository: MenuRepository
+    private val menuRepository: MenuRepository
 ): Service {
 
     fun createMenu(menu: DataMenu) = asFlow {

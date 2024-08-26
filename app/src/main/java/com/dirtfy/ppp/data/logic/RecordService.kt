@@ -4,7 +4,7 @@ import com.dirtfy.ppp.data.dto.DataRecord
 import com.dirtfy.ppp.data.source.repository.RecordRepository
 
 class RecordService(
-    val repository: RecordRepository
+    private val repository: RecordRepository
 ): Service {
 
     fun readRecords() = asFlow {

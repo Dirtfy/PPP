@@ -14,11 +14,7 @@ object FireStorePath {
     const val RECORD_DETAIL: String = "detail"
 
     const val TABLE: String = "table_exp"
-    const val TABLE_MAPPING: String = "mapping"
-    const val TABLE_NUMBER: String = "number"
-    const val TABLE_GROUP: String = "group"
-    const val TABLE_NUMBER_FIELD: String = "group"
-    const val TABLE_GROUP_FIELD: String = "member"
+    const val TABLE_ORDER: String = "order"
 
 
 }

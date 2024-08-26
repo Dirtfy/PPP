@@ -1,11 +1,7 @@
 package com.dirtfy.ppp.data.source.firestore.table
 
 data class FireStoreGroup(
-    val group: Int?,
-    val memberList: List<Int>?
+    val member: List<Int>?
 ) {
-    constructor(): this(
-        null,
-        null
-    )
+    constructor(): this(null)
 }

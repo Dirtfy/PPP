@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -15,30 +16,75 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiMenu
 import com.dirtfy.ppp.ui.dto.UiPointUse
 import com.dirtfy.ppp.ui.dto.UiTable
 import com.dirtfy.ppp.ui.dto.UiTableOrder
+import com.dirtfy.ppp.ui.presenter.controller.TableController
+import com.dirtfy.ppp.ui.presenter.viewmodel.TableViewModel
 
 object TableScreen {
 
     @Composable
     fun Main(
-        tableList: List<UiTable>,
-        tableOrderList: List<UiTableOrder>,
-        menuList: List<UiMenu>,
+        controller: TableController = viewModel<TableViewModel>()
+    ) {
+        val tableList by controller.tableList.collectAsStateWithLifecycle()
+        val orderList by controller.orderList.collectAsStateWithLifecycle()
+        val menuList by controller.menuList.collectAsStateWithLifecycle()
+        val totalPrice by controller.orderTotalPrice.collectAsStateWithLifecycle()
+
+        LaunchedEffect(key1 = controller) {
+            controller.updateTableList()
+        }
+
+        ScreenContent(
+            tableListState = tableList,
+            tableOrderListState = orderList,
+            menuListState = menuList,
+            totalPrice = totalPrice,
+            onTableClick = {
+                controller.run {
+                    clickTable(it)
+                    updateOrderList(it)
+                    updateMenuList()
+                }
+            },
+            onMergeClick = { controller.mergeTable() },
+            onCashClick = { controller.payTableWithCash() },
+            onCardClick = { controller.payTableWithCard() },
+            onPointClick = { controller.payTableWithPoint() },
+            onAddClick = { controller.addOrder(it.name, it.price) },
+            onCancelClick = { controller.cancelOrder(it.name, it.price) },
+            onMenuAddClick = { controller.addOrder(it.name, it.price) },
+            onMenuCancelClick = { controller.cancelOrder(it.name, it.price) }
+        )
+    }
+
+    @Composable
+    fun ScreenContent(
+        tableListState: FlowState<List<UiTable>>,
+        tableOrderListState: FlowState<List<UiTableOrder>>,
+        menuListState: FlowState<List<UiMenu>>,
         totalPrice: String,
-        onTableClick: () -> Unit,
+        onTableClick: (UiTable) -> Unit,
         onMergeClick: () -> Unit,
         onCashClick: () -> Unit,
         onCardClick: () -> Unit,
@@ -49,14 +95,14 @@ object TableScreen {
         onMenuCancelClick: (UiMenu) -> Unit
     ) {
         Column {
-            TableLayout(
-                tableList = tableList,
+            TableLayoutState(
+                tableListState = tableListState,
                 onTableClick = onTableClick,
                 onMergeClick = onMergeClick
             )
 
-            OrderLayout(
-                tableOrderList = tableOrderList,
+            OrderLayoutState(
+                tableOrderListState = tableOrderListState,
                 totalPrice = totalPrice,
                 onCardClick = onCardClick,
                 onCashClick = onCashClick,
@@ -65,8 +111,8 @@ object TableScreen {
                 onCancelClick = onCancelClick
             )
 
-            MenuList(
-                menuList = menuList,
+            MenuListState(
+                menuListState = menuListState,
                 onAddClick = onMenuAddClick,
                 onCancelClick = onMenuCancelClick
             )
@@ -75,15 +121,45 @@ object TableScreen {
     }
 
     @Composable
+    fun TableLayoutState(
+        tableListState: FlowState<List<UiTable>>,
+        onTableClick: (UiTable) -> Unit,
+        onMergeClick: () -> Unit
+    ) {
+        when(tableListState) {
+            is FlowState.Success -> {
+                val tableList = tableListState.data
+                TableLayout(
+                    tableList = tableList,
+                    onTableClick = onTableClick,
+                    onMergeClick = onMergeClick
+                )
+            }
+            is FlowState.Failed -> {
+                val throwable = tableListState.throwable
+                Fail(throwable = throwable) {
+
+                }
+            }
+            is FlowState.Loading -> {
+                Loading()
+            }
+        }
+    }
+
+    @Composable
     fun TableLayout(
         tableList: List<UiTable>,
-        onTableClick: () -> Unit,
+        onTableClick: (UiTable) -> Unit,
         onMergeClick: () -> Unit
     ) {
         Column {
             LazyVerticalGrid(columns = GridCells.Fixed(10)) {
                 items(tableList) {
-                    Table(it, onTableClick)
+                    Table(
+                        table = it,
+                        onClick = { onTableClick(it) }
+                    )
                 }
             }
             Button(onClick = onMergeClick) {
@@ -97,18 +173,54 @@ object TableScreen {
         table: UiTable,
         onClick: () -> Unit
     ){
-        Box(
-            modifier = Modifier
-                .size(35.dp)
-                .background(Color(table.color))
-                .clickable {
-                    onClick()
-                }
-        ) {
-            Text(text = table.number)
+        if (table.number != "0") {
+            Box(
+                modifier = Modifier
+                    .size(35.dp)
+                    .background(Color(table.color))
+                    .clickable {
+                        onClick()
+                    }
+            ) {
+                Text(text = table.number)
+            }
         }
     }
 
+    @Composable
+    fun OrderLayoutState(
+        tableOrderListState: FlowState<List<UiTableOrder>>,
+        totalPrice: String,
+        onCardClick: () -> Unit,
+        onCashClick: () -> Unit,
+        onPointClick: () -> Unit,
+        onAddClick: (UiTableOrder) -> Unit,
+        onCancelClick: (UiTableOrder) -> Unit
+    ) {
+        when(tableOrderListState) {
+            is FlowState.Success -> {
+                val orderList = tableOrderListState.data
+                OrderLayout(
+                    tableOrderList = orderList,
+                    totalPrice = totalPrice,
+                    onCardClick = onCardClick,
+                    onCashClick = onCashClick,
+                    onPointClick = onPointClick,
+                    onAddClick = onAddClick,
+                    onCancelClick = onCancelClick
+                )
+            }
+            is FlowState.Failed -> {
+                val throwable = tableOrderListState.throwable
+                Fail(throwable = throwable) {
+
+                }
+            }
+            is FlowState.Loading -> {
+                Loading()
+            }
+        }
+    }
     @Composable
     fun OrderLayout(
         tableOrderList: List<UiTableOrder>,
@@ -125,7 +237,6 @@ object TableScreen {
                 onCashClick = onCashClick,
                 onPointClick = onPointClick
             )
-
 
             OrderList(
                 tableOrderList = tableOrderList,
@@ -147,10 +258,10 @@ object TableScreen {
                 Text(text = "Cash")
             }
             Button(onClick = onCardClick) {
-                Text(text = "Cash")
+                Text(text = "Card")
             }
             Button(onClick = onPointClick) {
-                Text(text = "Cash")
+                Text(text = "Point")
             }
         }
     }
@@ -242,6 +353,32 @@ object TableScreen {
     }
 
     @Composable
+    fun MenuListState(
+        menuListState: FlowState<List<UiMenu>>,
+        onAddClick: (UiMenu) -> Unit,
+        onCancelClick: (UiMenu) -> Unit
+    ) {
+        when(menuListState) {
+            is FlowState.Success -> {
+                val menuList = menuListState.data
+                MenuList(
+                    menuList = menuList,
+                    onAddClick = onAddClick,
+                    onCancelClick = onCancelClick
+                )
+            }
+            is FlowState.Failed -> {
+                val throwable = menuListState.throwable
+                Fail(throwable = throwable) {
+
+                }
+            }
+            is FlowState.Loading -> {
+                Loading()
+            }
+        }
+    }
+    @Composable
     fun MenuList(
         menuList: List<UiMenu>,
         onAddClick: (UiMenu) -> Unit,
@@ -265,5 +402,33 @@ object TableScreen {
         onCancelClick: () -> Unit
     ) {
         Text(text = menu.name)
+    }
+
+    @Composable
+    fun Loading() {
+        CircularProgressIndicator(
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    @Composable
+    fun Fail(
+        throwable: Throwable,
+        onRetryClick: () -> Unit
+    ) {
+        AlertDialog(
+            onDismissRequest = { },
+            confirmButton = {
+                Button(onClick = { }) {
+                    Text(text = "Cancel")
+                }
+            },
+            dismissButton = {
+                Button(onClick = onRetryClick) {
+                    Text(text = "Retry")
+                }
+            },
+            title = { Text(text = throwable.message?: "unknown error") }
+        )
     }
 }

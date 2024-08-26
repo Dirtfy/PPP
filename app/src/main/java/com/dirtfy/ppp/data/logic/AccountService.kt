@@ -9,7 +9,7 @@ import com.dirtfy.ppp.data.source.repository.AccountRepository
 import kotlin.random.Random
 
 class AccountService(
-    val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository
 ): Service {
 
     private fun isValidPhoneNumber(phoneNumber: String): Boolean {

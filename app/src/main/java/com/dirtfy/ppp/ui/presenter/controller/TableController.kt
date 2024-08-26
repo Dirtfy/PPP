@@ -27,7 +27,7 @@ interface TableController: Controller {
     fun payTableWithCash()
     fun payTableWithCard()
     fun payTableWithPoint()
-    fun addOrder(menuName: String)
-    fun cancelOrder(menuName: String)
+    fun addOrder(name: String, price: String)
+    fun cancelOrder(name: String, price: String)
 
 }
