@@ -26,17 +26,7 @@ data class FireStoreRecord(
                 timestamp = Timestamp(Date(timestamp)),
                 amount = income,
                 type = type,
-                issuedName = null
-            )
-        }
-        fun DataRecord.convertToFireStoreRecord(
-            issuedName: String?
-        ): FireStoreRecord {
-            return FireStoreRecord(
-                timestamp = Timestamp(Date(timestamp)),
-                amount = income,
-                type = type,
-                issuedName = issuedName
+                issuedName = issuedBy
             )
         }
     }

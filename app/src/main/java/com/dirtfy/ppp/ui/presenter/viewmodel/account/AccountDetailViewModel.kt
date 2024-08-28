@@ -59,9 +59,9 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController {
         ).conflate().collect {
             bubbles.accountRecordList.let { bubble ->
                 bubble.set(it.passMap { data ->
-                    val newList = bubble.value.toMutableList()
+                    val newList = bubble.value.reversed().toMutableList()
                     newList.add(data.convertToUiAccountRecord())
-                    newList
+                    newList.reversed()
                 })
             }
         }

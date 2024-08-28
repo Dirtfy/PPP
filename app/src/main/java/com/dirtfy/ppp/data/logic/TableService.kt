@@ -39,9 +39,8 @@ class TableService(
                 throw TableException.InvalidTableNumber()
         }
 
-        val tableList = tableNumberList.map {
-            tableRepository.readTable(it)
-        }
+        val tableList = tableRepository.readAllTable()
+            .filter { tableNumberList.contains(it.number) }
 
         val groupUniqueList = tableList.map {
             it.group
@@ -81,7 +80,7 @@ class TableService(
         }
 
         tableList.filter {
-            it.group == baseGroup
+            it.group != baseGroup
         }.forEach {
             tableRepository.updateTable(it.copy(group = baseGroup))
         }
@@ -93,7 +92,7 @@ class TableService(
             readAllTable()
                 .filter { it.group == group }
                 .forEach {
-                    tableRepository.updateTable(
+                    updateTable(
                         it.copy(group = it.number)
                     )
                 }
@@ -158,7 +157,7 @@ class TableService(
 
         recordRepository.create(
             record = DataRecord(
-                income = orderList.calcTotalPrice(),
+                income = -orderList.calcTotalPrice(),
                 type = accountNumber.toString(),
                 issuedBy = issuedName
             ),

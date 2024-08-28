@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.compose.rememberNavController
 import com.dirtfy.ppp.ui.view.phone.PhoneScreen
+import com.dirtfy.ppp.ui.view.tablet.TabletScreen
 
 class MainActivity: ComponentActivity() {
 
@@ -23,10 +24,8 @@ class MainActivity: ComponentActivity() {
         enum class Destination {
             Table,
             Menu,
-            Sales,
-            SalesDetail,
+            Record,
             Account,
-            AccountDetail
         }
     }
 
@@ -54,14 +53,26 @@ class MainActivity: ComponentActivity() {
                     listOf(
                         Destination.Table.name to Icons.Filled.Home,
                         Destination.Menu.name to Icons.Filled.Menu,
-                        Destination.Sales.name to Icons.Filled.DateRange,
+                        Destination.Record.name to Icons.Filled.DateRange,
                         Destination.Account.name to Icons.Filled.AccountBox
                     )
                 )
             }
 
             if (isTablet) {
-
+                TabletScreen.Main(
+                    navController = navController,
+                    destinationList = destinationList,
+                    selectedIndex = selectedIndex,
+                    onNavigatorItemClick = {
+                        selectedIndex = it
+                        navController.navigate(destinationList[it].first) {
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
             }
             else {
                 PhoneScreen.Main(

@@ -64,14 +64,14 @@ class TableFireStore: TableRepository {
     override suspend fun updateTable(table: DataTable) {
         val nowGroup = readGroup(table.number)
 
+        val nowGroupMember = readGroupMember(nowGroup)
+        tableRef.document("$nowGroup").set(
+            FireStoreGroup(member = nowGroupMember.filter { it != table.number })
+        ).await()
+
         val targetGroupMember = readGroupMember(table.group)
         tableRef.document("${table.group}").set(
             FireStoreGroup(member = targetGroupMember + table.number)
-        ).await()
-
-        val nowGroupMember = readGroupMember(nowGroup)
-        tableRef.document("$nowGroup").set(
-            FireStoreGroup(member = nowGroupMember.filter { it == table.number })
         ).await()
     }
 
@@ -124,7 +124,8 @@ class TableFireStore: TableRepository {
         val order = getOrderRef(tableNumber)
             .document(orderID)
             .get().await()
-            .toObject(DataTableOrder::class.java)!!
+            .toObject(FireStoreTableOrder::class.java)!!
+            .convertToDataTableOrder()
 
         return DataTableOrder(
             name = menuName,

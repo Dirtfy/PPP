@@ -9,6 +9,7 @@ class RecordService(
 
     fun readRecords() = asFlow {
         repository.readAll()
+            .sortedBy { -it.timestamp }
     }
 
     fun readRecordDetail(record: DataRecord) = asFlow {

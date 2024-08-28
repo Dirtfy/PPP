@@ -1,13 +1,11 @@
-package com.dirtfy.ppp.ui.view.phone.table
+package com.dirtfy.ppp.ui.view.tablet.table
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,7 +23,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,12 +35,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
@@ -133,67 +129,43 @@ object TableScreen {
         onPointUseAccountNumberChange: (String) -> Unit,
         onPointUseConfirm: () -> Unit
     ) {
-        ConstraintLayout {
-            val (table, order, menu) = createRefs()
+        Column {
+            TableLayoutState(
+                tableListState = tableListState,
+                mode = mode,
+                onTableClick = onTableClick,
+                onTableLongClick = onTableLongClick,
+                onMergeClick = onMergeClick,
+                onMergeCancelClick = onMergeCancelClick
+            )
 
-            Box(
-                modifier = Modifier
-                    .constrainAs(table) {
-                        top.linkTo(parent.top)
-                    }
-            ) {
-                TableLayoutState(
-                    tableListState = tableListState,
-                    mode = mode,
-                    onTableClick = onTableClick,
-                    onTableLongClick = onTableLongClick,
-                    onMergeClick = onMergeClick,
-                    onMergeCancelClick = onMergeCancelClick
+            if (mode == UiTableMode.Order || mode == UiTableMode.PointUse) {
+                OrderLayoutState(
+                    tableOrderListState = tableOrderListState,
+                    totalPrice = totalPrice,
+                    onCardClick = onCardClick,
+                    onCashClick = onCashClick,
+                    onPointClick = onPointClick,
+                    onAddClick = onAddClick,
+                    onCancelClick = onCancelClick
+                )
+
+                MenuListState(
+                    menuListState = menuListState,
+                    onAddClick = onMenuAddClick,
+                    onCancelClick = onMenuCancelClick
                 )
             }
 
-            if (mode == UiTableMode.Order || mode == UiTableMode.PointUse) {
-                Box(
-                    modifier = Modifier.constrainAs(order){
-                        top.linkTo(table.bottom)
-                        bottom.linkTo(menu.top)
-                        height = Dimension.fillToConstraints
-                    }
-                ) {
-                    OrderLayoutState(
-                        tableOrderListState = tableOrderListState,
-                        totalPrice = totalPrice,
-                        onCardClick = onCardClick,
-                        onCashClick = onCashClick,
-                        onPointClick = onPointClick,
-                        onAddClick = onAddClick,
-                        onCancelClick = onCancelClick
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .constrainAs(menu) {
-                            bottom.linkTo(parent.bottom)
-                        }
-                ) {
-                    MenuListState(
-                        menuListState = menuListState,
-                        onAddClick = onMenuAddClick,
-                        onCancelClick = onMenuCancelClick
-                    )
-                }
+            if (mode == UiTableMode.PointUse) {
+                PointUseDataInputDialog(
+                    pointUse = pointUse,
+                    onDismissRequest = onPointUseDialogDismissRequest,
+                    onUserNameChange = onPointUseUserNameChange,
+                    onAccountNumberChange = onPointUseAccountNumberChange,
+                    onConfirmClick = onPointUseConfirm,
+                )
             }
-        }
-
-        if (mode == UiTableMode.PointUse) {
-            PointUseDataInputDialog(
-                pointUse = pointUse,
-                onDismissRequest = onPointUseDialogDismissRequest,
-                onUserNameChange = onPointUseUserNameChange,
-                onAccountNumberChange = onPointUseAccountNumberChange,
-                onConfirmClick = onPointUseConfirm,
-            )
         }
     }
 
@@ -239,34 +211,24 @@ object TableScreen {
         onMergeClick: () -> Unit,
         onMergeCancelClick: () -> Unit
     ) {
-        Box {
-            Column(
-                modifier = Modifier.padding(10.dp)
-            ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(10)
-                ) {
-                    items(tableList) {
-                        Box(
-                            modifier = Modifier.padding(2.dp)
-                        ) {
-                            Table(
-                                table = it,
-                                onClick = { onTableClick(it) },
-                                onLongClick = onTableLongClick
-                            )
-                        }
-                    }
+        Column {
+            LazyVerticalGrid(columns = GridCells.Fixed(10)) {
+                items(tableList) {
+                    Table(
+                        table = it,
+                        onClick = { onTableClick(it) },
+                        onLongClick = onTableLongClick
+                    )
                 }
+            }
 
-                if (mode == UiTableMode.Merge) {
-                    Row {
-                        Button(onClick = onMergeClick) {
-                            Text(text = "Merge")
-                        }
-                        Button(onClick = onMergeCancelClick) {
-                            Text(text = "Cancel")
-                        }
+            if (mode == UiTableMode.Merge) {
+                Row {
+                    Button(onClick = onMergeClick) {
+                        Text(text = "Merge")
+                    }
+                    Button(onClick = onMergeCancelClick) {
+                        Text(text = "Cancel")
                     }
                 }
             }
@@ -284,15 +246,11 @@ object TableScreen {
             Box(
                 modifier = Modifier
                     .size(35.dp)
-                    .background(
-                        color = Color(table.color),
-                        shape = RoundedCornerShape(12.dp)
-                    )
+                    .background(Color(table.color))
                     .combinedClickable(
                         onClick = onClick,
                         onLongClick = onLongClick
-                    ),
-                contentAlignment = Alignment.Center
+                    )
             ) {
                 Text(text = table.number)
             }
@@ -343,28 +301,20 @@ object TableScreen {
         onAddClick: (UiTableOrder) -> Unit,
         onCancelClick: (UiTableOrder) -> Unit
     ) {
-        Box{
-            Row(
-                modifier = Modifier.padding(10.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                PaySelect(
-                    onCardClick = onCardClick,
-                    onCashClick = onCashClick,
-                    onPointClick = onPointClick
-                )
+        Row {
+            PaySelect(
+                onCardClick = onCardClick,
+                onCashClick = onCashClick,
+                onPointClick = onPointClick
+            )
 
-                Spacer(modifier = Modifier.size(10.dp))
-
-                OrderList(
-                    tableOrderList = tableOrderList,
-                    totalPrice = totalPrice,
-                    onAddClick = onAddClick,
-                    onCancelClick = onCancelClick
-                )
-            }
+            OrderList(
+                tableOrderList = tableOrderList,
+                totalPrice = totalPrice,
+                onAddClick = onAddClick,
+                onCancelClick = onCancelClick
+            )
         }
-
     }
 
     @Composable
@@ -424,13 +374,11 @@ object TableScreen {
         Column {
             TextField(
                 value = pointUse.accountNumber,
-                onValueChange = onAccountNumberChange,
-                label = { Text(text = "account number") }
+                onValueChange = onAccountNumberChange
             )
             TextField(
                 value = pointUse.userName,
-                onValueChange = onUserNameChange,
-                label = { Text(text = "issued name") }
+                onValueChange = onUserNameChange
             )
             Button(onClick = onConfirmClick) {
                 Text(text = "Confirm")
@@ -447,36 +395,18 @@ object TableScreen {
     ) {
         Column {
             Row {
-                Text(text = "total:", fontSize = 20.sp)
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(text = totalPrice, fontSize = 20.sp)
+                Text(text = "total")
+                Text(text = totalPrice)
             }
 
-            Spacer(modifier = Modifier.size(15.dp))
-
-            if (tableOrderList.isNotEmpty()) {
-                Column {
-                    Row {
-                        Text(text = "name")
-                        Spacer(modifier = Modifier.size(20.dp))
-                        Text(text = "price")
-                        Spacer(modifier = Modifier.size(20.dp))
-                        Text(text = "count")
-                        Spacer(modifier = Modifier.size(20.dp))
-                    }
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(tableOrderList) {
-                            Order(
-                                tableOrder = it,
-                                onAddClick = { onAddClick(it) },
-                                onCancelClick = { onCancelClick(it) }
-                            )
-                        }
-                    }
+            LazyColumn {
+                items(tableOrderList) {
+                    Order(
+                        tableOrder = it,
+                        onAddClick = { onAddClick(it) },
+                        onCancelClick = { onCancelClick(it) }
+                    )
                 }
-
             }
         }
     }
@@ -487,15 +417,10 @@ object TableScreen {
         onAddClick: () -> Unit,
         onCancelClick: () -> Unit
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Row {
             Text(text = tableOrder.name)
-            Spacer(modifier = Modifier.size(20.dp))
             Text(text = tableOrder.price)
-            Spacer(modifier = Modifier.size(20.dp))
             Text(text = tableOrder.count)
-            Spacer(modifier = Modifier.size(20.dp))
             IconButton(onClick = onAddClick) {
                 val addIcon = Icons.Filled.Add
                 Icon(imageVector = addIcon, contentDescription = addIcon.name)
@@ -541,15 +466,11 @@ object TableScreen {
     ) {
         LazyRow {
             items(menuList) {
-                Box(
-                    modifier = Modifier.padding(5.dp)
-                ) {
-                    Menu(
-                        menu = it,
-                        onAddClick = { onAddClick(it) },
-                        onCancelClick = { onCancelClick(it) }
-                    )
-                }
+                Menu(
+                    menu = it,
+                    onAddClick = { onAddClick(it) },
+                    onCancelClick = { onCancelClick(it) }
+                )
             }
         }
     }
@@ -560,25 +481,20 @@ object TableScreen {
         onAddClick: () -> Unit,
         onCancelClick: () -> Unit
     ) {
-        Card{
-            Column(
-                modifier = Modifier.padding(5.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = menu.name, fontSize = 20.sp)
-                Spacer(modifier = Modifier.size(10.dp))
-                Row {
-                    IconButton(onClick = onAddClick) {
-                        val addIcon = Icons.Filled.Add
-                        Icon(imageVector = addIcon, contentDescription = addIcon.name)
-                    }
-                    IconButton(onClick = onCancelClick) {
-                        val cancelIcon = Icons.Filled.Close
-                        Icon(imageVector = cancelIcon, contentDescription = cancelIcon.name)
-                    }
+        Column {
+            Text(text = menu.name)
+            Row {
+                IconButton(onClick = onAddClick) {
+                    val addIcon = Icons.Filled.Add
+                    Icon(imageVector = addIcon, contentDescription = addIcon.name)
+                }
+                IconButton(onClick = onCancelClick) {
+                    val cancelIcon = Icons.Filled.Close
+                    Icon(imageVector = cancelIcon, contentDescription = cancelIcon.name)
                 }
             }
         }
+
     }
 
     @Composable

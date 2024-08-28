@@ -1,24 +1,21 @@
-package com.dirtfy.ppp.ui.view.phone
+package com.dirtfy.ppp.ui.view.tablet
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.dirtfy.ppp.ui.view.MainActivity
-import com.dirtfy.ppp.ui.view.phone.account.AccountScreen
-import com.dirtfy.ppp.ui.view.phone.menu.MenuScreen
-import com.dirtfy.ppp.ui.view.phone.record.RecordScreen
-import com.dirtfy.ppp.ui.view.phone.table.TableScreen
+import com.dirtfy.ppp.ui.view.tablet.account.AccountScreen
+import com.dirtfy.ppp.ui.view.tablet.menu.MenuScreen
+import com.dirtfy.ppp.ui.view.tablet.record.RecordScreen
+import com.dirtfy.ppp.ui.view.tablet.table.TableScreen
 
-object PhoneScreen {
+object TabletScreen {
 
     @Composable
     fun Main(
@@ -27,19 +24,10 @@ object PhoneScreen {
         selectedIndex: Int,
         onNavigatorItemClick: (Int) -> Unit
     ) {
-        Scaffold(
-            bottomBar = {
-                Navigator(
-                    selectedIndex = selectedIndex,
-                    destinationList = destinationList,
-                    onItemClick = onNavigatorItemClick
-                )
-            }
-        ) {
+        Row {
             NavHost(
                 navController = navController,
-                startDestination = MainActivity.Companion.Destination.Table.name,
-                modifier = Modifier.padding(it).fillMaxSize()
+                startDestination = MainActivity.Companion.Destination.Table.name
             ) {
                 composable(route = MainActivity.Companion.Destination.Table.name) {
                     TableScreen.Main()
@@ -54,7 +42,13 @@ object PhoneScreen {
                     AccountScreen.Main()
                 }
             }
+            Navigator(
+                selectedIndex = selectedIndex,
+                destinationList = destinationList,
+                onItemClick = onNavigatorItemClick
+            )
         }
+
     }
 
     @Composable
@@ -63,15 +57,16 @@ object PhoneScreen {
         destinationList: List<Pair<String, ImageVector>>,
         onItemClick: (Int) -> Unit
     ) {
-        NavigationBar {
-            destinationList.forEachIndexed { index, pair -> 
-                NavigationBarItem(
+        NavigationRail {
+            destinationList.forEachIndexed { index, pair ->
+                NavigationRailItem(
                     selected = selectedIndex == index,
                     onClick = { onItemClick(index) },
                     icon = {
                         Icon(
                             imageVector = pair.second,
-                            contentDescription = pair.first)
+                            contentDescription = pair.first
+                        )
                     }
                 )
             }

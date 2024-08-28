@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ui.view.phone.record
+package com.dirtfy.ppp.ui.view.tablet.record
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

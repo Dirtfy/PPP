@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ui.presenter.viewmodel
+package com.dirtfy.ppp.ui.presenter.viewmodel.table
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color
@@ -17,8 +17,9 @@ import com.dirtfy.ppp.ui.dto.UiMenu
 import com.dirtfy.ppp.ui.dto.UiMenu.Companion.convertToUiMenu
 import com.dirtfy.ppp.ui.dto.UiPointUse
 import com.dirtfy.ppp.ui.dto.UiTable
+import com.dirtfy.ppp.ui.dto.UiTableMode
 import com.dirtfy.ppp.ui.dto.UiTableOrder
-import com.dirtfy.ppp.ui.presenter.controller.TableController
+import com.dirtfy.ppp.ui.presenter.controller.table.TableController
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,6 +74,11 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     override val pointUse: StateFlow<UiPointUse>
         get() = _pointUse
 
+    private val _mode: MutableStateFlow<UiTableMode>
+    = MutableStateFlow(UiTableMode.Main)
+    override val mode: StateFlow<UiTableMode>
+        get() = _mode
+
     private fun DataTable.convertToUiTable(): UiTable {
         return UiTable(
             number = number.toString(),
@@ -88,39 +94,47 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         )
     }
 
+    private fun UiTableOrder.convertToDataTableOrder(): DataTableOrder {
+        return DataTableOrder(
+            name = name,
+            price = Utils.currencyReformatting(price),
+            count = count.toInt()
+        )
+    }
+
     private suspend fun _updateTableList() {
         tableService.readTables().conflate().collect {
             _tableList.value = it.passMap { data ->
                 val newList = data.map { table -> table.convertToUiTable() }.toMutableList()
                 Log.d(TAG, "$newList")
 
+                val groupMemberCount = MutableList(12) { 0 }
                 data.forEach { table ->
                     groupMap[table.number] = table.group
+                    groupMemberCount[table.group]++
                 }
 
-                // TODO group color 배정 다시 생각
-//                groupMap.toSet().toList().forEach { group ->
-//                    var groupColor = getRandomColor()
-//                    while (groupColorSet.contains(groupColor)) {
-//                        groupColor = getRandomColor()
-//                    }
-//                    groupColorSet.add(groupColor)
-//
-//                    data.filter { table ->
-//                        table.number != table.group ||
-//                                groupMap[table.number] == group
-//                    }
-//
-//                    (1..11).filter { tableNumber ->
-//                        groupMap[tableNumber] == group
-//                    }.let { member ->
-//                        newList.replaceAll { table ->
-//                            if (member.contains(table.number.toInt()))
-//                                table.copy(color = groupColor)
-//                            else table
-//                        }
-//                    }
-//                }
+                groupMemberCount
+                    .zip((0..11))
+                    .filter { zip -> zip.first > 1 }
+                    .map { zip -> zip.second }
+                    .forEach { group ->
+                        var groupColor = getRandomColor()
+                        while (groupColorSet.contains(groupColor)) {
+                            groupColor = getRandomColor()
+                        }
+                        groupColorSet.add(groupColor)
+
+                        (1..11).filter { tableNumber ->
+                            groupMap[tableNumber] == group
+                        }.let { member ->
+                            newList.replaceAll { table ->
+                                if (member.contains(table.number.toInt()))
+                                    table.copy(color = groupColor)
+                                else table
+                            }
+                        }
+                    }
 
                 tableFormation.map { tableNumber ->
                     if (tableNumber == 0)
@@ -143,6 +157,10 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         tableService.readOrders(tableNumber)
             .conflate().collect {
                 _orderList.value = it.passMap { data ->
+                    _orderTotalPrice.value = Utils
+                        .currencyFormatting(
+                            data.sumOf { order -> order.price * order.count }
+                        )
                     data.map { order -> order.convertToUiTableOrder() }
                 }
             }
@@ -167,14 +185,11 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         _pointUse.value = pointUse
     }
 
-    override fun clickTable(table: UiTable) {
+    private fun _clickTableOnMergeMode(
+        table: UiTable,
+        member: List<Int>
+    ) {
         val tableNumber = table.number.toInt()
-        val group = groupMap[tableNumber]
-        val member = mutableListOf<Int>()
-        groupMap.indices.forEach {
-            if (groupMap[it] == group)
-                member.add(it)
-        }
 
         val newColor = if (selectedTableSet.contains(tableNumber)) {
             selectedTableSet.removeAll(member.toSet())
@@ -195,6 +210,58 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                 }
             }
         }
+    }
+    private fun _clickedTable(
+        table: UiTable,
+        member: List<Int>
+    ) {
+        val tableNumber = table.number.toInt()
+
+        _tableList.value = _tableList.value.passMap {
+            val newList = it.toMutableList()
+
+            newList.map { nowTable ->
+                val nowColor = Color(nowTable.color)
+                nowTable.copy(color = nowColor.copy(alpha = 1f).value)
+            }
+        }
+
+        val newColor = if (selectedTableSet.contains(tableNumber)) {
+            selectedTableSet.removeAll(member.toSet())
+            _mode.value = UiTableMode.Main
+            Color(table.color).copy(alpha = 1f)
+        } else {
+            selectedTableSet.clear()
+            selectedTableSet.addAll(member.toSet())
+            _mode.value = UiTableMode.Order
+            Color(table.color).copy(alpha = 0.5f)
+        }
+
+        _tableList.value = _tableList.value.passMap {
+            val newList = it.toMutableList()
+
+            newList.map { nowTable ->
+                if (member.contains(nowTable.number.toInt())) {
+                    nowTable.copy(color = newColor.value)
+                } else {
+                    nowTable
+                }
+            }
+        }
+    }
+    override fun clickTable(table: UiTable) {
+        val tableNumber = table.number.toInt()
+        val group = groupMap[tableNumber]
+        val member = mutableListOf<Int>()
+        groupMap.indices.forEach {
+            if (groupMap[it] == group)
+                member.add(it)
+        }
+
+        if (_mode.value == UiTableMode.Merge)
+            _clickTableOnMergeMode(table, member)
+        else
+            _clickedTable(table, member)
     }
 
     private fun getRandomColor(): ULong {
@@ -219,8 +286,12 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                                 }
                                 groupColorSet.add(groupColor)
 
+                                groupColor = Color(groupColor).value
+
+                                selectedTableSet.clear()
+
                                 data.map { table ->
-                                    if (selectedTableSet.contains(table.number.toInt())){
+                                    if (tableList.contains(table.number.toInt())){
                                         groupMap[table.number.toInt()] = groupNumber
                                         table.copy(color = groupColor)
                                     }
@@ -237,6 +308,19 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         _mergeTable(selectedTableSet.toList())
     }
 
+    override fun cancelMergeTable() {
+        _tableList.value = _tableList.value.passMap {
+            val newList = it.toMutableList()
+
+            newList.map { nowTable ->
+                val nowColor = Color(nowTable.color)
+                nowTable.copy(color = nowColor.copy(alpha = 1f).value)
+            }
+        }
+        selectedTableSet.clear()
+        _mode.value = UiTableMode.Main
+    }
+
     private fun disbandGroup(tableNumber: Int) {
         val member = mutableListOf<Int>()
         val group = groupMap[tableNumber]
@@ -246,6 +330,9 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                 groupMap[it] = it
             }
         }
+
+        if (selectedTableSet.contains(tableNumber))
+            selectedTableSet.removeAll(member.toSet())
 
         var groupColor: ULong = 0u
         _tableList.value = _tableList.value.passMap { list ->
@@ -331,7 +418,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         ).conflate().collect {
             it.passMap { data ->
                 _orderList.value = _orderList.value.passMap { list ->
-                    val newList = list.toMutableList()
+                    var newList = list.toMutableList()
                     val isNewOrder = list
                         .find { order -> order.name == menuName } == null
 
@@ -339,14 +426,22 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                         newList.add(data.convertToUiTableOrder())
                     }
                     else {
-                        newList.map { order ->
+                        newList = newList.map { order ->
                             if (order.name == menuName) {
                                 data.convertToUiTableOrder()
                             }
                             else
                                 order
-                        }
+                        }.toMutableList()
                     }
+
+                    _orderTotalPrice.value =
+                        Utils
+                            .currencyFormatting(
+                                newList
+                                    .map { order -> order.convertToDataTableOrder() }
+                                    .sumOf { order -> order.price * order.count }
+                            )
 
                     newList
                 }
@@ -356,7 +451,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
     override fun addOrder(name: String, price: String) = request {
         val tableNumber = selectedTableNumber
-        val menuPrice = price.toInt()
+        val menuPrice = Utils.currencyReformatting(price)
         _addOrder(tableNumber, name, menuPrice)
     }
 
@@ -370,21 +465,29 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         ).conflate().collect {
             it.passMap { data ->
                 _orderList.value = _orderList.value.passMap { list ->
-                    val newList = list.toMutableList()
+                    var newList = list.toMutableList()
                     val isNoLongerExist = (data.count == 0)
 
                     if (isNoLongerExist) {
                         newList.removeIf { order -> order.name == menuName }
                     }
                     else {
-                        newList.map { order ->
+                        newList = newList.map { order ->
                             if (order.name == menuName) {
                                 data.convertToUiTableOrder()
                             }
                             else
                                 order
-                        }
+                        }.toMutableList()
                     }
+
+                    _orderTotalPrice.value =
+                        Utils
+                            .currencyFormatting(
+                                newList
+                                    .map { order -> order.convertToDataTableOrder() }
+                                    .sumOf { order -> order.price * order.count }
+                            )
 
                     newList
                 }
@@ -394,8 +497,12 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
     override fun cancelOrder(name: String, price: String) = request {
         val tableNumber = selectedTableNumber
-        val menuPrice = price.toInt()
+        val menuPrice = Utils.currencyReformatting(price)
         _cancelOrder(tableNumber, name, menuPrice)
+    }
+
+    override fun setMode(mode: UiTableMode) {
+        _mode.value = mode
     }
 
     private fun request(job: suspend TableViewModel.() -> Unit) {
