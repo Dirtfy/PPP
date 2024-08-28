@@ -19,8 +19,9 @@
         android:theme="@style/Theme.PPP"
         tools:targetApi="31">
         <activity
-            android:name=".view.MainActivity"
+            android:name=".ui.view.MainActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.PPP">
             <intent-filter>
@@ -34,6 +35,11 @@
                 <data android:scheme="@string/deeplink_scheme" android:host="@string/deeplink_host" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation" />
     </application>
 
 </manifest>
