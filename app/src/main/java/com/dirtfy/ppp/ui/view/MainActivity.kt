@@ -17,7 +17,9 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.rememberNavController
 import com.dirtfy.ppp.ui.view.phone.PhoneScreen
 import com.dirtfy.ppp.ui.view.tablet.TabletScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity: ComponentActivity() {
 
     companion object {

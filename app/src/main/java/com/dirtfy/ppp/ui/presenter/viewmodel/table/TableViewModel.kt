@@ -22,16 +22,19 @@ import com.dirtfy.ppp.ui.dto.UiTableOrder
 import com.dirtfy.ppp.ui.presenter.controller.table.TableController
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.random.Random
 
-class TableViewModel: ViewModel(), TableController, Tagger {
-
-    private val tableService: TableService = TableService(TableFireStore(), RecordFireStore())
-    private val menuService: MenuService = MenuService(MenuFireStore())
+@HiltViewModel
+class TableViewModel @Inject constructor(
+    private val tableService: TableService,
+    private val menuService: MenuService
+): ViewModel(), TableController, Tagger {
 
     private val groupColorSet = mutableSetOf<ULong>()
     private val defaultColor = Color.LightGray.value

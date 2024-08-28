@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -85,6 +87,13 @@ dependencies {
     // Tagger
     implementation(libs.ansroid.auto.tagger)
 
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
+    // HiltViewModel(for composable function hiltViewModel)
+    implementation(libs.androidx.hilt.navigation.compose)
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)
@@ -95,4 +104,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // Android Studio Preview support
     debugImplementation(libs.androidx.ui.tooling)
+}
+
+// Hilt
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
 }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
@@ -30,7 +31,7 @@ object RecordScreen {
 
     @Composable
     fun Main(
-        controller: RecordController = viewModel<RecordViewModel>()
+        controller: RecordController = hiltViewModel<RecordViewModel>()
     ) {
         val recordListState by controller.recordList.collectAsStateWithLifecycle()
         val searchClue by controller.searchClue.collectAsStateWithLifecycle()

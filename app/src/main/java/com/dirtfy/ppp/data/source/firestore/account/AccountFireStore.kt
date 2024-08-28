@@ -17,8 +17,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import java.util.Date
+import javax.inject.Inject
 
-class AccountFireStore: AccountRepository, Tagger {
+class AccountFireStore @Inject constructor(
+): AccountRepository, Tagger {
 
     private val accountRef = Firebase.firestore.collection(FireStorePath.ACCOUNT)
     private val recordRef = Firebase.firestore.collection(FireStorePath.RECORD)

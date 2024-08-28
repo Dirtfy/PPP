@@ -9,14 +9,17 @@ import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
 import com.dirtfy.ppp.ui.dto.UiMenu
 import com.dirtfy.ppp.ui.dto.UiMenu.Companion.convertToUiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MenuViewModel: ViewModel(), MenuController {
-
-    private val menuService = MenuService(MenuFireStore())
+@HiltViewModel
+class MenuViewModel @Inject constructor(
+    private val menuService: MenuService
+): ViewModel(), MenuController {
 
     private val _menuList: MutableStateFlow<FlowState<List<UiMenu>>>
     = MutableStateFlow(FlowState.loading())

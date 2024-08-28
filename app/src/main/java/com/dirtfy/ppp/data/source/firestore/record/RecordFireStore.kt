@@ -14,8 +14,10 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 import java.util.Date
+import javax.inject.Inject
 
-class RecordFireStore: RecordRepository, Tagger {
+class RecordFireStore @Inject constructor(
+): RecordRepository, Tagger {
 
     private val recordRef = Firebase.firestore.collection(FireStorePath.RECORD)
 

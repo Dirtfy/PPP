@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
@@ -46,7 +47,7 @@ object AccountDetailScreen {
     @Composable
     fun Main(
         account: UiAccount,
-        controller: AccountDetailController = viewModel<AccountDetailViewModel>()
+        controller: AccountDetailController = hiltViewModel<AccountDetailViewModel>()
     ) {
         val nowAccount by controller.nowAccount.collectAsStateWithLifecycle()
         val newRecord by controller.newAccountRecord.collectAsStateWithLifecycle()

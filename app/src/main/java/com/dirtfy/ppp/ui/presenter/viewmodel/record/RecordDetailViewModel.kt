@@ -14,14 +14,17 @@ import com.dirtfy.ppp.ui.dto.UiRecordDetail
 import com.dirtfy.ppp.ui.dto.UiRecordDetail.Companion.convertToUiRecordDetail
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordDetailController
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RecordDetailViewModel: ViewModel(), RecordDetailController, Tagger {
-
-    private val recordService: RecordService = RecordService(RecordFireStore())
+@HiltViewModel
+class RecordDetailViewModel @Inject constructor(
+    private val recordService: RecordService
+): ViewModel(), RecordDetailController, Tagger {
 
     private val _recordDetailList: MutableStateFlow<FlowState<List<UiRecordDetail>>>
     = MutableStateFlow(FlowState.loading())

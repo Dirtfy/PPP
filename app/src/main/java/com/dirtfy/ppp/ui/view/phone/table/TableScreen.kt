@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
@@ -59,7 +60,7 @@ object TableScreen {
 
     @Composable
     fun Main(
-        controller: TableController = viewModel<TableViewModel>()
+        controller: TableController = hiltViewModel<TableViewModel>()
     ) {
         val tableList by controller.tableList.collectAsStateWithLifecycle()
         val orderList by controller.orderList.collectAsStateWithLifecycle()

@@ -10,13 +10,16 @@ import com.dirtfy.ppp.ui.dto.UiAccountRecord
 import com.dirtfy.ppp.ui.dto.UiAccountRecord.Companion.convertToUiAccountRecord
 import com.dirtfy.ppp.ui.dto.UiNewAccountRecord
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountDetailController
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AccountDetailViewModel: ViewModel(), AccountDetailController {
-
-    private val accountService = AccountService(AccountFireStore())
+@HiltViewModel
+class AccountDetailViewModel @Inject constructor(
+    private val accountService: AccountService
+): ViewModel(), AccountDetailController {
 
     private val bubbles = Bubbles()
 

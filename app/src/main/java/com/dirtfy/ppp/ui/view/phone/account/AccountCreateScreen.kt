@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.ui.dto.UiAccount
@@ -32,7 +33,7 @@ object AccountCreateScreen {
 
     @Composable
     fun Main(
-        controller: AccountCreateController = viewModel<AccountCreateViewModel>(),
+        controller: AccountCreateController = hiltViewModel<AccountCreateViewModel>(),
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
         val newAccount by controller.newAccount.collectAsStateWithLifecycle()

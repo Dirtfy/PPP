@@ -17,6 +17,8 @@ import com.dirtfy.ppp.ui.view.phone.account.AccountScreen
 import com.dirtfy.ppp.ui.view.phone.menu.MenuScreen
 import com.dirtfy.ppp.ui.view.phone.record.RecordScreen
 import com.dirtfy.ppp.ui.view.phone.table.TableScreen
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 object PhoneScreen {
 

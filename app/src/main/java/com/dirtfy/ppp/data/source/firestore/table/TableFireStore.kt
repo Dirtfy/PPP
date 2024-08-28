@@ -10,8 +10,10 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class TableFireStore: TableRepository {
+class TableFireStore @Inject constructor(
+): TableRepository {
 
     private val tableRef = Firebase.firestore.collection(FireStorePath.TABLE)
 

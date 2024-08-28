@@ -7,13 +7,16 @@ import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
 import com.dirtfy.ppp.ui.dto.UiAccount.Companion.convertToUiAccount
 import com.dirtfy.ppp.ui.dto.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AccountCreateViewModel: ViewModel(), AccountCreateController {
-
-    private val accountService = AccountService(AccountFireStore())
+@HiltViewModel
+class AccountCreateViewModel @Inject constructor(
+    private val accountService: AccountService
+): ViewModel(), AccountCreateController {
 
     private val bubbles = Bubbles()
 

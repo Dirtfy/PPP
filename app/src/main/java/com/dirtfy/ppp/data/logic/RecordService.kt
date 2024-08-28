@@ -2,8 +2,9 @@ package com.dirtfy.ppp.data.logic
 
 import com.dirtfy.ppp.data.dto.DataRecord
 import com.dirtfy.ppp.data.source.repository.RecordRepository
+import javax.inject.Inject
 
-class RecordService(
+class RecordService @Inject constructor(
     private val repository: RecordRepository
 ): Service {
 
