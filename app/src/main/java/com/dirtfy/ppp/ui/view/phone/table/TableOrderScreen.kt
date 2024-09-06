@@ -15,6 +15,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Dialog
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.test.ui.view.phone.table.TableScreen
 import com.dirtfy.ppp.ui.dto.UiPointUse
 import com.dirtfy.ppp.ui.dto.UiTableOrder
 

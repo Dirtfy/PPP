@@ -1,9 +1,9 @@
 package com.dirtfy.ppp.di
 
-import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
+import com.dirtfy.ppp.test.data.source.impl.firestore.account.AccountFireStore
 import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
-import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
-import com.dirtfy.ppp.data.source.firestore.table.TableFireStore
+import com.dirtfy.ppp.test.data.source.impl.firestore.record.RecordFireStore
+import com.dirtfy.ppp.test.data.source.impl.firestore.table.TableFireStore
 import com.dirtfy.ppp.data.source.repository.AccountRepository
 import com.dirtfy.ppp.data.source.repository.MenuRepository
 import com.dirtfy.ppp.data.source.repository.RecordRepository

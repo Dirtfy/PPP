@@ -35,7 +35,7 @@ import com.dirtfy.ppp.ui.dto.UiAccountMode
 import com.dirtfy.ppp.ui.dto.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountViewModel
-import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.test.ui.view.phone.Component
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 

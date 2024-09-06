@@ -34,7 +34,7 @@ import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
-import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.test.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger
 
 object MenuScreen: Tagger {

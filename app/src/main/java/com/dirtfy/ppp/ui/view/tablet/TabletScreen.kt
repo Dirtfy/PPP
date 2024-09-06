@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.dirtfy.ppp.ui.view.MainActivity
+import com.dirtfy.ppp.test.ui.view.MainActivity
 import com.dirtfy.ppp.ui.view.tablet.account.AccountScreen
 import com.dirtfy.ppp.ui.view.tablet.menu.MenuScreen
 import com.dirtfy.ppp.ui.view.tablet.record.RecordScreen

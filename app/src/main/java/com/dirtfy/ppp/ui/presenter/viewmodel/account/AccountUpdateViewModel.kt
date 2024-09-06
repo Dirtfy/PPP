@@ -1,8 +1,7 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel.account
 
 import androidx.lifecycle.ViewModel
-import com.dirtfy.ppp.data.logic.AccountService
-import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
+import com.dirtfy.ppp.data.logic.service.AccountService
 import com.dirtfy.ppp.ui.dto.UiAccount
 import com.dirtfy.ppp.ui.dto.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountUpdateController

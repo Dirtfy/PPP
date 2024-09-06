@@ -5,10 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.data.dto.DataRecordType
-import com.dirtfy.ppp.data.logic.RecordService
-import com.dirtfy.ppp.data.source.firestore.record.FireStoreRecord
-import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
-import com.dirtfy.ppp.data.source.repository.RecordRepository
+import com.dirtfy.ppp.data.logic.service.RecordService
 import com.dirtfy.ppp.ui.dto.UiRecord
 import com.dirtfy.ppp.ui.dto.UiRecordDetail
 import com.dirtfy.ppp.ui.dto.UiRecordDetail.Companion.convertToUiRecordDetail

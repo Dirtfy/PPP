@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.data.logic
+package com.dirtfy.ppp.data.logic.service
 
 import com.dirtfy.ppp.common.FlowState
 import kotlinx.coroutines.Dispatchers

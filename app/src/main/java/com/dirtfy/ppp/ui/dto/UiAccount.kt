@@ -4,11 +4,11 @@ import com.dirtfy.ppp.data.dto.DataAccount
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 
 data class UiAccount(
-    val number: String,
-    val name: String,
-    val phoneNumber: String,
-    val balance: String,
-    val registerTimestamp: String
+    val number: String = "",
+    val name: String = "",
+    val phoneNumber: String = "",
+    val balance: String = "",
+    val registerTimestamp: String = ""
 ) {
 
     companion object {

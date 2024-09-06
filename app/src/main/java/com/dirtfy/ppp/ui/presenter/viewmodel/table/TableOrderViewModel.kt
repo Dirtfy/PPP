@@ -1,12 +1,10 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel.table
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.data.dto.DataTableOrder
-import com.dirtfy.ppp.data.logic.TableService
-import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
-import com.dirtfy.ppp.data.source.firestore.table.TableFireStore
+import com.dirtfy.ppp.test.data.source.impl.firestore.record.RecordFireStore
+import com.dirtfy.ppp.test.data.source.impl.firestore.table.TableFireStore
 import com.dirtfy.ppp.ui.dto.UiPointUse
 import com.dirtfy.ppp.ui.dto.UiTable
 import com.dirtfy.ppp.ui.dto.UiTableMode
@@ -15,10 +13,7 @@ import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 import com.dirtfy.ppp.ui.presenter.controller.table.TableOrderController
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 class TableOrderViewModel: ViewModel(), TableOrderController, Tagger {
 
@@ -30,7 +25,8 @@ class TableOrderViewModel: ViewModel(), TableOrderController, Tagger {
         )
     }
 
-    private val tableService = TableService(TableFireStore(), RecordFireStore())
+    private val tableService =
+        com.dirtfy.ppp.test.data.logic.impl.TableService(TableFireStore(), RecordFireStore())
 
     private val _orderList: MutableStateFlow<FlowState<List<UiTableOrder>>>
     = MutableStateFlow(FlowState.loading())

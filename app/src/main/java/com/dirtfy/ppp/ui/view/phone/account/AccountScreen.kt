@@ -29,14 +29,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiAccount
 import com.dirtfy.ppp.ui.dto.UiAccountMode
 import com.dirtfy.ppp.ui.dto.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountViewModel
-import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.test.ui.view.phone.Component
+import com.dirtfy.ppp.test.ui.view.phone.account.AccountCreateScreen
+import com.dirtfy.ppp.test.ui.view.phone.account.AccountDetailScreen
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 

@@ -19,13 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.test.ui.view.phone.record.RecordDetailScreen
 import com.dirtfy.ppp.ui.dto.UiRecord
 import com.dirtfy.ppp.ui.dto.UiRecordMode
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
 import com.dirtfy.ppp.ui.presenter.viewmodel.record.RecordViewModel
-import com.dirtfy.ppp.ui.view.phone.Component
 
 object RecordScreen {
 

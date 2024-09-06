@@ -24,7 +24,6 @@ import com.dirtfy.ppp.ui.dto.UiRecord
 import com.dirtfy.ppp.ui.dto.UiRecordMode
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
 import com.dirtfy.ppp.ui.presenter.viewmodel.record.RecordViewModel
-import com.dirtfy.ppp.ui.view.phone.Component
 
 object RecordScreen {
 

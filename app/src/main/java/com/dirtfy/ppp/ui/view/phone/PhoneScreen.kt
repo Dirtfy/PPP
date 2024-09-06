@@ -12,13 +12,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.dirtfy.ppp.ui.view.MainActivity
-import com.dirtfy.ppp.ui.view.phone.account.AccountScreen
-import com.dirtfy.ppp.ui.view.phone.menu.MenuScreen
-import com.dirtfy.ppp.ui.view.phone.record.RecordScreen
-import com.dirtfy.ppp.ui.view.phone.table.TableScreen
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import com.dirtfy.ppp.test.ui.view.MainActivity
+import com.dirtfy.ppp.test.ui.view.phone.account.AccountScreen
+import com.dirtfy.ppp.test.ui.view.phone.menu.MenuScreen
+import com.dirtfy.ppp.test.ui.view.phone.record.RecordScreen
+import com.dirtfy.ppp.test.ui.view.phone.table.TableScreen
 
 object PhoneScreen {
 

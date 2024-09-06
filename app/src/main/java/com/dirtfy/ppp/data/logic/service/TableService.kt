@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.data.logic
+package com.dirtfy.ppp.data.logic.service
 
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.DataRecord

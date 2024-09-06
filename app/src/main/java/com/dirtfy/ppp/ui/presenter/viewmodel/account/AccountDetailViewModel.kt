@@ -3,8 +3,7 @@ package com.dirtfy.ppp.ui.presenter.viewmodel.account
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.data.logic.AccountService
-import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
+import com.dirtfy.ppp.data.logic.service.AccountService
 import com.dirtfy.ppp.ui.dto.UiAccount
 import com.dirtfy.ppp.ui.dto.UiAccountRecord
 import com.dirtfy.ppp.ui.dto.UiAccountRecord.Companion.convertToUiAccountRecord
