@@ -7,8 +7,9 @@ import com.dirtfy.ppp.data.source.repository.MenuRepository
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class MenuFireStore: MenuRepository {
+class MenuFireStore @Inject constructor(): MenuRepository {
 
     private val ref = Firebase.firestore.collection(FireStorePath.MENU)
 

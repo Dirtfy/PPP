@@ -6,9 +6,10 @@ import com.dirtfy.ppp.data.dto.DataAccountRecord
 import com.dirtfy.ppp.data.dto.DataRecord
 import com.dirtfy.ppp.data.dto.DataRecordType
 import com.dirtfy.ppp.data.source.repository.AccountRepository
+import javax.inject.Inject
 import kotlin.random.Random
 
-class AccountService(
+class AccountService @Inject constructor(
     private val accountRepository: AccountRepository
 ): Service {
 

@@ -36,12 +36,17 @@ import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 object MenuScreen: Tagger {
+
+    @Inject lateinit var menuController: MenuController
 
     @Composable
     fun Main(
-        controller: MenuController = viewModel<MenuViewModel>()
+        controller: MenuController = menuController
     ) {
         val menuListState by controller.menuList.collectAsStateWithLifecycle()
         val searchClue by controller.searchClue.collectAsStateWithLifecycle()

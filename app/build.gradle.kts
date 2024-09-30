@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.gms.google-services")
     kotlin("plugin.serialization")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -49,9 +51,15 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
 
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -95,4 +103,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // Android Studio Preview support
     debugImplementation(libs.androidx.ui.tooling)
+}
+
+kapt {
+    correctErrorTypes = true
 }
