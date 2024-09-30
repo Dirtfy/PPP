@@ -54,12 +54,15 @@ import com.dirtfy.ppp.ui.dto.UiTableMode
 import com.dirtfy.ppp.ui.dto.UiTableOrder
 import com.dirtfy.ppp.ui.presenter.controller.table.TableController
 import com.dirtfy.ppp.ui.presenter.viewmodel.table.TableViewModel
+import javax.inject.Inject
 
-object TableScreen {
+class TableScreen @Inject constructor(
+    val tableController: TableController
+){
 
     @Composable
     fun Main(
-        controller: TableController = viewModel<TableViewModel>()
+        controller: TableController = tableController
     ) {
         val tableList by controller.tableList.collectAsStateWithLifecycle()
         val orderList by controller.orderList.collectAsStateWithLifecycle()

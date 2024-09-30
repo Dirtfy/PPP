@@ -40,13 +40,16 @@ import com.dirtfy.ppp.ui.dto.UiAccountRecord
 import com.dirtfy.ppp.ui.dto.UiNewAccountRecord
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountDetailController
 import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountDetailViewModel
+import javax.inject.Inject
 
-object AccountDetailScreen {
+class AccountDetailScreen @Inject constructor(
+    val accountDetailController: AccountDetailController
+) {
 
     @Composable
     fun Main(
         account: UiAccount,
-        controller: AccountDetailController = viewModel<AccountDetailViewModel>()
+        controller: AccountDetailController = accountDetailController
     ) {
         val nowAccount by controller.nowAccount.collectAsStateWithLifecycle()
         val newRecord by controller.newAccountRecord.collectAsStateWithLifecycle()

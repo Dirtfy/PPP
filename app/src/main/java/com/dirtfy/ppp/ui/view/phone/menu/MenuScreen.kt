@@ -47,14 +47,6 @@ class MenuScreen @Inject constructor(
     val menuController: MenuController
 ): Tagger {
 
-//    class SecretFriend @Inject constructor(
-//        val menuController: MenuController
-//    ) {
-//
-//    }
-
-
-
     @Composable
     fun Main(
         controller: MenuController = menuController

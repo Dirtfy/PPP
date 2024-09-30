@@ -36,13 +36,16 @@ import com.dirtfy.ppp.ui.dto.UiRecordDetail
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordDetailController
 import com.dirtfy.ppp.ui.presenter.viewmodel.record.RecordDetailViewModel
 import com.dirtfy.ppp.ui.view.phone.account.AccountDetailScreen
+import javax.inject.Inject
 
-object RecordDetailScreen {
+class RecordDetailScreen @Inject constructor(
+    val recordDetailController: RecordDetailController
+) {
 
     @Composable
     fun Main(
         firstRecord: UiRecord,
-        controller: RecordDetailController = viewModel<RecordDetailViewModel>()
+        controller: RecordDetailController = recordDetailController
     ) {
         val recordDetailListState by controller.recordDetailList.collectAsStateWithLifecycle()
         val nowRecord by controller.nowRecord.collectAsStateWithLifecycle()

@@ -17,8 +17,11 @@ import androidx.compose.ui.window.Dialog
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiPointUse
 import com.dirtfy.ppp.ui.dto.UiTableOrder
+import javax.inject.Inject
 
-object TableOrderScreen {
+class TableOrderScreen @Inject constructor(
+    val tableScreen: TableScreen
+) {
 
     @Composable
     fun Main(
@@ -52,12 +55,12 @@ object TableOrderScreen {
             }
             is FlowState.Failed -> {
                 val throwable = tableOrderListState.throwable
-                TableScreen.Fail(throwable = throwable) {
+                tableScreen.Fail(throwable = throwable) {
 
                 }
             }
             is FlowState.Loading -> {
-                TableScreen.Loading()
+                tableScreen.Loading()
             }
         }
     }

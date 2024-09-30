@@ -36,14 +36,20 @@ import com.dirtfy.ppp.ui.dto.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountViewModel
 import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.view.phone.record.RecordDetailScreen
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import javax.inject.Inject
 
-object AccountScreen {
+class AccountScreen @Inject constructor(
+    val accountController: AccountController,
+    val accountCreateScreen: AccountCreateScreen,
+    val accountDetailScreen: AccountDetailScreen
+){
 
     @Composable
     fun Main(
-        controller: AccountController = viewModel<AccountViewModel>()
+        controller: AccountController = accountController
     ) {
         val searchClue by controller.searchClue.collectAsStateWithLifecycle()
         val accountListState by controller.accountList.collectAsStateWithLifecycle()
@@ -278,7 +284,7 @@ object AccountScreen {
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            AccountCreateScreen.Main(
+            accountCreateScreen.Main(
                 onAccountCreate = onAccountCreate
             )
         }
@@ -290,7 +296,7 @@ object AccountScreen {
         onDismissRequest: () -> Unit
     ) { //TODO maxHeight 설정?
         Dialog(onDismissRequest = onDismissRequest) {
-            AccountDetailScreen.Main(account = account)
+            accountDetailScreen.Main(account = account)
         }
     }
 }
