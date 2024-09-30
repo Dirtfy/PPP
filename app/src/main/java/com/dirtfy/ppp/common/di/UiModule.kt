@@ -25,7 +25,7 @@ import dagger.hilt.android.qualifiers.ActivityContext
  */
 @Module
 @InstallIn(ActivityComponent::class)
-abstract class UiModule {
+class UiModule {
 
     @Provides
     fun aaa(

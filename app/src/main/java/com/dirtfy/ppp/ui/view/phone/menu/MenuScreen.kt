@@ -36,13 +36,24 @@ import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.components.ActivityComponent
 import javax.inject.Inject
 
-@AndroidEntryPoint
-object MenuScreen: Tagger {
 
-    @Inject lateinit var menuController: MenuController
+class MenuScreen @Inject constructor(
+    val menuController: MenuController
+): Tagger {
+
+//    class SecretFriend @Inject constructor(
+//        val menuController: MenuController
+//    ) {
+//
+//    }
+
+
 
     @Composable
     fun Main(

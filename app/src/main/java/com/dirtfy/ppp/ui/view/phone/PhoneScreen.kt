@@ -17,8 +17,11 @@ import com.dirtfy.ppp.ui.view.phone.account.AccountScreen
 import com.dirtfy.ppp.ui.view.phone.menu.MenuScreen
 import com.dirtfy.ppp.ui.view.phone.record.RecordScreen
 import com.dirtfy.ppp.ui.view.phone.table.TableScreen
+import javax.inject.Inject
 
-object PhoneScreen {
+class PhoneScreen @Inject constructor(
+    val menuScreen: MenuScreen
+){
 
     @Composable
     fun Main(
@@ -45,7 +48,7 @@ object PhoneScreen {
                     TableScreen.Main()
                 }
                 composable(route = MainActivity.Companion.Destination.Menu.name) {
-                    MenuScreen.Main()
+                    menuScreen.Main()
                 }
                 composable(route = MainActivity.Companion.Destination.Record.name) {
                     RecordScreen.Main()
