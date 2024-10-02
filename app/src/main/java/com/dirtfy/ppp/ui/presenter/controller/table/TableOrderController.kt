@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.ui.presenter.controller.table
 
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiMenu
 import com.dirtfy.ppp.ui.dto.UiPointUse
 import com.dirtfy.ppp.ui.dto.UiTable
 import com.dirtfy.ppp.ui.dto.UiTableMode

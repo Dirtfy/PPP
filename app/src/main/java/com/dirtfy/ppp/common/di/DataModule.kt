@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.common.di
 
 import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
-import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore_Factory
 import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
 import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
 import com.dirtfy.ppp.data.source.firestore.table.TableFireStore

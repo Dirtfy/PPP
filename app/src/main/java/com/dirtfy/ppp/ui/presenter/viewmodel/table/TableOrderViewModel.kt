@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel.table
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.data.dto.DataTableOrder
 import com.dirtfy.ppp.data.logic.TableService
@@ -15,10 +14,7 @@ import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 import com.dirtfy.ppp.ui.presenter.controller.table.TableOrderController
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 class TableOrderViewModel: ViewModel(), TableOrderController, Tagger {
 

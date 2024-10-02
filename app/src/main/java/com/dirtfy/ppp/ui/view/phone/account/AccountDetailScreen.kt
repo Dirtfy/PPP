@@ -33,13 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiAccount
 import com.dirtfy.ppp.ui.dto.UiAccountRecord
 import com.dirtfy.ppp.ui.dto.UiNewAccountRecord
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountDetailController
-import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountDetailViewModel
 import javax.inject.Inject
 
 class AccountDetailScreen @Inject constructor(

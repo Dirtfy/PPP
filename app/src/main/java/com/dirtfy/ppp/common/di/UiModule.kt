@@ -1,10 +1,8 @@
 package com.dirtfy.ppp.common.di
 
-import android.app.Activity
 import android.content.Context
-import androidx.activity.ComponentActivity
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
@@ -29,16 +27,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.qualifiers.ActivityContext
 
-/**
- * UI 레이어에 DI를 하기 위해
- * 컨트롤러에 의존하도록 하고 싶다.
- * 근데 구현체가 뷰모델임
- * 그래서 constructor inject 못하고,
- * 일반 provide 어노테이션 달린 함수도 못함. 뷰모델 클래스 생성 불가
- * 이를 해결하기 위해 알아낸 정보
- * 뷰모델 팩토리를 쓰면된다
- * 근데 그럼 뷰 레이어에서 컨트롤러를 뷰모델 타입으로 구현한 것이 보인다.
- */
 @Module
 @InstallIn(ActivityComponent::class)
 class UiModule {
@@ -47,7 +35,7 @@ class UiModule {
     fun providesMenuController(
         @ActivityContext context: Context
     ): MenuController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[MenuViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[MenuViewModel::class.java]
         return viewModel
     }
 
@@ -55,7 +43,7 @@ class UiModule {
     fun providesAccountController(
         @ActivityContext context: Context
     ): AccountController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[AccountViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[AccountViewModel::class.java]
         return viewModel
     }
 
@@ -63,7 +51,7 @@ class UiModule {
     fun providesAccountCreateController(
         @ActivityContext context: Context
     ): AccountCreateController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[AccountCreateViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[AccountCreateViewModel::class.java]
         return viewModel
     }
 
@@ -71,7 +59,7 @@ class UiModule {
     fun providesAccountDetailController(
         @ActivityContext context: Context
     ): AccountDetailController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[AccountDetailViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[AccountDetailViewModel::class.java]
         return viewModel
     }
 
@@ -79,7 +67,7 @@ class UiModule {
     fun providesAccountUpdateController(
         @ActivityContext context: Context
     ): AccountUpdateController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[AccountUpdateViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[AccountUpdateViewModel::class.java]
         return viewModel
     }
 
@@ -87,7 +75,7 @@ class UiModule {
     fun providesRecordController(
         @ActivityContext context: Context
     ): RecordController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[RecordViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[RecordViewModel::class.java]
         return viewModel
     }
 
@@ -95,7 +83,7 @@ class UiModule {
     fun providesRecordDetailController(
         @ActivityContext context: Context
     ): RecordDetailController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[RecordDetailViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[RecordDetailViewModel::class.java]
         return viewModel
     }
 
@@ -103,7 +91,7 @@ class UiModule {
     fun providesTableController(
         @ActivityContext context: Context
     ): TableController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[TableViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[TableViewModel::class.java]
         return viewModel
     }
 
@@ -111,7 +99,7 @@ class UiModule {
     fun providesTableOrderController(
         @ActivityContext context: Context
     ): TableOrderController {
-        val viewModel = ViewModelProvider(context as ComponentActivity)[TableOrderViewModel::class.java]
+        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[TableOrderViewModel::class.java]
         return viewModel
     }
 }
