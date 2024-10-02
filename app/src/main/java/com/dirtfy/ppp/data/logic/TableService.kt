@@ -7,8 +7,9 @@ import com.dirtfy.ppp.data.dto.DataRecordType
 import com.dirtfy.ppp.data.dto.DataTableOrder
 import com.dirtfy.ppp.data.source.repository.RecordRepository
 import com.dirtfy.ppp.data.source.repository.TableRepository
+import javax.inject.Inject
 
-class TableService(
+class TableService @Inject constructor(
     private val tableRepository: TableRepository,
     private val recordRepository: RecordRepository
 ): Service {

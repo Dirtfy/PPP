@@ -18,19 +18,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiRecord
 import com.dirtfy.ppp.ui.dto.UiRecordMode
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
-import com.dirtfy.ppp.ui.presenter.viewmodel.record.RecordViewModel
-import com.dirtfy.ppp.ui.view.phone.Component
+import javax.inject.Inject
 
-object RecordScreen {
+class RecordScreen @Inject constructor(
+    val recordController: RecordController
+) {
+    @Inject
+    lateinit var recordDetailScreen: RecordDetailScreen
 
     @Composable
     fun Main(
-        controller: RecordController = viewModel<RecordViewModel>()
+        controller: RecordController = recordController
     ) {
         val recordListState by controller.recordList.collectAsStateWithLifecycle()
         val searchClue by controller.searchClue.collectAsStateWithLifecycle()
@@ -178,7 +180,7 @@ object RecordScreen {
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            RecordDetailScreen.Main(firstRecord = nowAccount)
+            recordDetailScreen.Main(firstRecord = nowAccount)
         }
     }
 }

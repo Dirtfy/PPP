@@ -5,10 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,14 +36,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiMenu
 import com.dirtfy.ppp.ui.dto.UiPointUse
@@ -53,13 +49,15 @@ import com.dirtfy.ppp.ui.dto.UiTable
 import com.dirtfy.ppp.ui.dto.UiTableMode
 import com.dirtfy.ppp.ui.dto.UiTableOrder
 import com.dirtfy.ppp.ui.presenter.controller.table.TableController
-import com.dirtfy.ppp.ui.presenter.viewmodel.table.TableViewModel
+import javax.inject.Inject
 
-object TableScreen {
+class TableScreen @Inject constructor(
+    val tableController: TableController
+){
 
     @Composable
     fun Main(
-        controller: TableController = viewModel<TableViewModel>()
+        controller: TableController = tableController
     ) {
         val tableList by controller.tableList.collectAsStateWithLifecycle()
         val orderList by controller.orderList.collectAsStateWithLifecycle()

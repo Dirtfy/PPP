@@ -29,19 +29,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
-import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger
+import javax.inject.Inject
 
-object MenuScreen: Tagger {
+
+class MenuScreen @Inject constructor(
+    val menuController: MenuController
+): Tagger {
 
     @Composable
     fun Main(
-        controller: MenuController = viewModel<MenuViewModel>()
+        controller: MenuController = menuController
     ) {
         val menuListState by controller.menuList.collectAsStateWithLifecycle()
         val searchClue by controller.searchClue.collectAsStateWithLifecycle()

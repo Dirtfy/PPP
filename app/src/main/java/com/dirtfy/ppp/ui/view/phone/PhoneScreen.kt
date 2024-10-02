@@ -17,8 +17,14 @@ import com.dirtfy.ppp.ui.view.phone.account.AccountScreen
 import com.dirtfy.ppp.ui.view.phone.menu.MenuScreen
 import com.dirtfy.ppp.ui.view.phone.record.RecordScreen
 import com.dirtfy.ppp.ui.view.phone.table.TableScreen
+import javax.inject.Inject
 
-object PhoneScreen {
+class PhoneScreen @Inject constructor(
+    val tableScreen: TableScreen,
+    val menuScreen: MenuScreen,
+    val recordScreen: RecordScreen,
+    val accountScreen: AccountScreen
+){
 
     @Composable
     fun Main(
@@ -42,16 +48,16 @@ object PhoneScreen {
                 modifier = Modifier.padding(it).fillMaxSize()
             ) {
                 composable(route = MainActivity.Companion.Destination.Table.name) {
-                    TableScreen.Main()
+                    tableScreen.Main()
                 }
                 composable(route = MainActivity.Companion.Destination.Menu.name) {
-                    MenuScreen.Main()
+                    menuScreen.Main()
                 }
                 composable(route = MainActivity.Companion.Destination.Record.name) {
-                    RecordScreen.Main()
+                    recordScreen.Main()
                 }
                 composable(route = MainActivity.Companion.Destination.Account.name) {
-                    AccountScreen.Main()
+                    accountScreen.Main()
                 }
             }
         }

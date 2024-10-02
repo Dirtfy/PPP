@@ -17,8 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.rememberNavController
 import com.dirtfy.ppp.ui.view.phone.PhoneScreen
 import com.dirtfy.ppp.ui.view.tablet.TabletScreen
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity: ComponentActivity() {
+
+    @Inject
+    lateinit var phoneScreen : PhoneScreen
 
     companion object {
         enum class Destination {
@@ -75,7 +81,7 @@ class MainActivity: ComponentActivity() {
                 )
             }
             else {
-                PhoneScreen.Main(
+                phoneScreen.Main(
                     navController = navController,
                     destinationList = destinationList,
                     selectedIndex = selectedIndex,

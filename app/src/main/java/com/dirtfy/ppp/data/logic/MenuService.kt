@@ -3,8 +3,9 @@ package com.dirtfy.ppp.data.logic
 import com.dirtfy.ppp.common.exception.MenuException
 import com.dirtfy.ppp.data.dto.DataMenu
 import com.dirtfy.ppp.data.source.repository.MenuRepository
+import javax.inject.Inject
 
-class MenuService(
+class MenuService @Inject constructor(
     private val menuRepository: MenuRepository
 ): Service {
 
