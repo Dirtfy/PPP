@@ -5,23 +5,27 @@ import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.logic.AccountService
 import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
 import com.dirtfy.ppp.ui.dto.UiAccount.Companion.convertToUiAccount
+import com.dirtfy.ppp.ui.dto.UiAccountScreen
 import com.dirtfy.ppp.ui.dto.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AccountCreateViewModel: ViewModel(), AccountCreateController {
 
     private val accountService = AccountService(AccountFireStore())
 
-    private val bubbles = Bubbles()
-
-    override val newAccount: StateFlow<UiNewAccount>
-        get() = bubbles.newAccount.get()
+    private val _uiAccountScreen = MutableStateFlow(UiAccountScreen())
+    override val uiAccountScreen: StateFlow<UiAccountScreen>
+        get() = _uiAccountScreen
 
     private fun _updateNewAccount(newAccountData: UiNewAccount) {
-        bubbles.newAccount.set(newAccountData)
+        _uiAccountScreen.update {
+            it.copy(newAccount = newAccountData)
+        }
     }
     override fun updateNewAccount(newAccountData: UiNewAccount) = request {
         _updateNewAccount(newAccountData)
@@ -35,12 +39,15 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController {
             name = name,
             phoneNumber = phoneNumber
         ).conflate().collect {
-            bubbles.accountList.let { bubble -> // TODO newAccount로 바꾸기
-                bubble.set(it.passMap { data -> // TODO FlowState 반영되도록
-                    val newList = bubble.value.toMutableList()
-                    newList.add(data.convertToUiAccount())
-                    newList
-                })
+            it.passMap { data ->
+                _uiAccountScreen.update { before ->
+                    before.copy(accountList = before.accountList.passMap { originalList ->
+                        val newList = originalList.toMutableList()
+                        newList.add(data.convertToUiAccount())
+                        _updateNewAccount(UiNewAccount())
+                        newList
+                    })
+                }
             }
         }
     }
@@ -51,12 +58,10 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController {
     suspend fun _setRandomValidAccountNumberToNewAccount() {
         accountService.createAccountNumber()
             .conflate().collect {
-                bubbles.newAccount.let { newAccount ->
-                    newAccount.set(
-                        it.ignoreMap { value ->
-                            newAccount.value.copy(number = value.toString())
-                        }?: UiNewAccount()
-                    )
+                it.ignoreMap { value -> //TODO ignore map -- 에러체인 무시해도 되나?
+                    _uiAccountScreen.update { before ->
+                        before.copy(newAccount = before.newAccount.copy(number = value.toString()))
+                    }
                 }
             }
     }

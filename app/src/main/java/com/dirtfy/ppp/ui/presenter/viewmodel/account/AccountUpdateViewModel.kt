@@ -3,20 +3,22 @@ package com.dirtfy.ppp.ui.presenter.viewmodel.account
 import androidx.lifecycle.ViewModel
 import com.dirtfy.ppp.data.logic.AccountService
 import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
-import com.dirtfy.ppp.ui.dto.UiAccount
+import com.dirtfy.ppp.ui.dto.UiAccount.Companion.convertToUiAccount
+import com.dirtfy.ppp.ui.dto.UiAccountScreen
 import com.dirtfy.ppp.ui.dto.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountUpdateController
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.update
 
 class AccountUpdateViewModel: ViewModel(), AccountUpdateController {
 
     private val accountService = AccountService(AccountFireStore())
 
-    private val bubbles = Bubbles()
-
-    override val nowAccount: StateFlow<UiAccount>
-        get() = bubbles.nowAccount.get()
+    private val _uiAccountScreen = MutableStateFlow(UiAccountScreen())
+    override val uiAccountScreen: StateFlow<UiAccountScreen>
+        get() = _uiAccountScreen
 
     override suspend fun updateAccount(newAccountData: UiNewAccount) {
         val (number, name, phoneNumber) = newAccountData
@@ -26,21 +28,15 @@ class AccountUpdateViewModel: ViewModel(), AccountUpdateController {
             name = name,
             phoneNumber = phoneNumber
         ).conflate().collect {
-            bubbles.accountList.let { bubble ->
-                bubble.set(it.passMap { data ->
-                    val newList = bubble.value.toMutableList()
-
-                    newList.replaceAll { account ->
-                        if (account.number.toInt() == data.number)
-                            account.copy(
-                                number = number,
-                                name = name,
-                                phoneNumber = phoneNumber
-                            )
-                        else
-                            account
+            _uiAccountScreen.update { before ->
+                before.copy(accountList = before.accountList.passMap { uiAccountList ->
+                    val newList = uiAccountList.toMutableList()
+                    it.passMap { data ->
+                        newList.replaceAll { uiAccount ->
+                            if (uiAccount.number.toInt() == data.number) data.convertToUiAccount()
+                            else uiAccount
+                        }
                     }
-
                     newList
                 })
             }

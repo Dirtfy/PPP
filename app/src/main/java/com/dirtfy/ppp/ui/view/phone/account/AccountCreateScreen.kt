@@ -35,15 +35,15 @@ class AccountCreateScreen @Inject constructor(
         controller: AccountCreateController = accountCreateController,
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
-        val newAccount by controller.newAccount.collectAsStateWithLifecycle()
+        val screen by controller.uiAccountScreen.collectAsStateWithLifecycle()
 
         ScreenContent(
-            newAccount = newAccount,
+            newAccount = screen.newAccount,
             onValueChange = { controller.updateNewAccount(it) },
             onAutoGenerateClick = { controller.setRandomValidAccountNumberToNewAccount() },
             onCreateClick = {
-                controller.addAccount(newAccount)
-                onAccountCreate(newAccount)
+                controller.addAccount(screen.newAccount)
+                onAccountCreate(screen.newAccount)
             }
         )
     }
