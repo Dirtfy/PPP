@@ -49,9 +49,7 @@ class AccountDetailScreen @Inject constructor(
         account: UiAccount,
         controller: AccountDetailController = accountDetailController
     ) {
-        val nowAccount by controller.nowAccount.collectAsStateWithLifecycle()
-        val newRecord by controller.newAccountRecord.collectAsStateWithLifecycle()
-        val recordListState by controller.accountRecordList.collectAsStateWithLifecycle()
+        val screen by controller.uiAccountScreen.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request {
@@ -61,9 +59,9 @@ class AccountDetailScreen @Inject constructor(
         }
 
         ScreenContent(
-            nowAccount = nowAccount,
-            newRecord = newRecord,
-            recordListState = recordListState,
+            nowAccount = screen.nowAccount,
+            newRecord = screen.newAccountRecord,
+            recordListState = screen.accountRecordList,
             onRecordChange = {
                 controller.request { updateNewAccountRecord(it) }
             },

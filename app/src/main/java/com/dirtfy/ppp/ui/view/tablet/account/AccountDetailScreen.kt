@@ -48,9 +48,7 @@ object AccountDetailScreen {
         account: UiAccount,
         controller: AccountDetailController = viewModel<AccountDetailViewModel>()
     ) {
-        val nowAccount by controller.nowAccount.collectAsStateWithLifecycle()
-        val newRecord by controller.newAccountRecord.collectAsStateWithLifecycle()
-        val recordListState by controller.accountRecordList.collectAsStateWithLifecycle()
+        val screen by controller.uiAccountScreen.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request {
@@ -60,9 +58,9 @@ object AccountDetailScreen {
         }
 
         ScreenContent(
-            nowAccount = nowAccount,
-            newRecord = newRecord,
-            recordListState = recordListState,
+            nowAccount = screen.nowAccount,
+            newRecord = screen.newAccountRecord,
+            recordListState = screen.accountRecordList,
             onRecordChange = {
                 controller.request { updateNewAccountRecord(it) }
             },

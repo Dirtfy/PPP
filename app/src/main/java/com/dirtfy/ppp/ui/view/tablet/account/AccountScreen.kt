@@ -45,12 +45,7 @@ object AccountScreen {
     fun Main(
         controller: AccountController = viewModel<AccountViewModel>()
     ) {
-        val searchClue by controller.searchClue.collectAsStateWithLifecycle()
-        val accountListState by controller.accountList.collectAsStateWithLifecycle()
-
-        val nowAccount by controller.nowAccount.collectAsStateWithLifecycle()
-
-        val mode by controller.mode.collectAsStateWithLifecycle()
+        val uiAccountScreen by controller.uiAccountScreen.collectAsStateWithLifecycle()
 
         val scanLauncher = rememberLauncherForActivityResult(
             contract = ScanContract()
@@ -65,10 +60,10 @@ object AccountScreen {
         }
 
         ScreenContent(
-            searchClue = searchClue,
-            nowAccount = nowAccount,
-            accountListState = accountListState,
-            mode = mode,
+            searchClue = uiAccountScreen.searchClue,
+            nowAccount = uiAccountScreen.nowAccount,
+            accountListState = uiAccountScreen.accountList,
+            mode = uiAccountScreen.mode,
             onClueChanged = { controller.request { updateSearchClue(it) } },
             onBarcodeIconClick = {
                 scanLauncher.launch(
