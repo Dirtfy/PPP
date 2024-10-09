@@ -22,7 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.dto.UiNewAccount
+import com.dirtfy.ppp.ui.dto.account.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
 import javax.inject.Inject
 

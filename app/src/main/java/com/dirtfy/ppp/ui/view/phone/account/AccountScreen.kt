@@ -29,9 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiAccount
-import com.dirtfy.ppp.ui.dto.UiAccountMode
-import com.dirtfy.ppp.ui.dto.UiNewAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccountMode
+import com.dirtfy.ppp.ui.dto.account.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.journeyapps.barcodescanner.ScanContract

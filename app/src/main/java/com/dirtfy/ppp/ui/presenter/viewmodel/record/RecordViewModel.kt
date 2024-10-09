@@ -7,10 +7,10 @@ import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.data.logic.RecordService
 import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
-import com.dirtfy.ppp.ui.dto.UiRecord
-import com.dirtfy.ppp.ui.dto.UiRecord.Companion.convertToRawUiRecord
-import com.dirtfy.ppp.ui.dto.UiRecord.Companion.convertToUiRecord
-import com.dirtfy.ppp.ui.dto.UiRecordMode
+import com.dirtfy.ppp.ui.dto.record.UiRecord
+import com.dirtfy.ppp.ui.dto.record.UiRecord.Companion.convertToRawUiRecord
+import com.dirtfy.ppp.ui.dto.record.UiRecord.Companion.convertToUiRecord
+import com.dirtfy.ppp.ui.dto.record.UiRecordMode
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.MutableStateFlow

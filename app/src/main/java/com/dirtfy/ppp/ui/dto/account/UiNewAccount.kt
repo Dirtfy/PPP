@@ -1,7 +1,7 @@
-package com.dirtfy.ppp.ui.dto
+package com.dirtfy.ppp.ui.dto.account
 
 import com.dirtfy.ppp.data.dto.DataAccount
-import com.dirtfy.ppp.ui.dto.UiAccount.Companion.convertToUiAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccount.Companion.convertToUiAccount
 
 data class UiNewAccount(
     val number: String = "",

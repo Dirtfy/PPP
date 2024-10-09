@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ui.dto
+package com.dirtfy.ppp.ui.dto.account
 
 data class UiNewAccountRecord(
     val issuedName: String = "",

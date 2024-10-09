@@ -6,8 +6,8 @@ import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.common.exception.MenuException
 import com.dirtfy.ppp.data.logic.MenuService
 import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
-import com.dirtfy.ppp.ui.dto.UiMenu
-import com.dirtfy.ppp.ui.dto.UiMenu.Companion.convertToUiMenu
+import com.dirtfy.ppp.ui.dto.menu.UiMenu
+import com.dirtfy.ppp.ui.dto.menu.UiMenu.Companion.convertToUiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

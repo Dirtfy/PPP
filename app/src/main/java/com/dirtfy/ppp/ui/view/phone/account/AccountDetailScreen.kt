@@ -34,9 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiAccount
-import com.dirtfy.ppp.ui.dto.UiAccountRecord
-import com.dirtfy.ppp.ui.dto.UiNewAccountRecord
+import com.dirtfy.ppp.ui.dto.account.UiAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccountRecord
+import com.dirtfy.ppp.ui.dto.account.UiNewAccountRecord
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountDetailController
 import javax.inject.Inject
 

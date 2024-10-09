@@ -1,8 +1,8 @@
 package com.dirtfy.ppp.ui.presenter.controller.account
 
-import com.dirtfy.ppp.ui.dto.UiAccount
-import com.dirtfy.ppp.ui.dto.UiAccountMode
-import com.dirtfy.ppp.ui.dto.UiAccountScreen
+import com.dirtfy.ppp.ui.dto.account.UiAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccountMode
+import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreen
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 

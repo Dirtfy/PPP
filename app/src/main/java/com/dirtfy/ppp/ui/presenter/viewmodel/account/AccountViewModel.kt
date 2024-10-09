@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.logic.AccountService
 import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
-import com.dirtfy.ppp.ui.dto.UiAccount
-import com.dirtfy.ppp.ui.dto.UiAccount.Companion.convertToUiAccount
-import com.dirtfy.ppp.ui.dto.UiAccountMode
-import com.dirtfy.ppp.ui.dto.UiAccountScreen
+import com.dirtfy.ppp.ui.dto.account.UiAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccount.Companion.convertToUiAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccountMode
+import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreen
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

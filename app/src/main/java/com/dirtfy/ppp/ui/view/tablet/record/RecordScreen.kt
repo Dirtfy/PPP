@@ -20,8 +20,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiRecord
-import com.dirtfy.ppp.ui.dto.UiRecordMode
+import com.dirtfy.ppp.ui.dto.record.UiRecord
+import com.dirtfy.ppp.ui.dto.record.UiRecordMode
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
 import com.dirtfy.ppp.ui.presenter.viewmodel.record.RecordViewModel
 
