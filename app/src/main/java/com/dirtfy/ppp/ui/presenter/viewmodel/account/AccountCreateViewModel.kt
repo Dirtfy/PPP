@@ -39,16 +39,16 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController {
             name = name,
             phoneNumber = phoneNumber
         ).conflate().collect {
-            it.passMap { data ->
-                _uiAccountScreen.update { before ->
-                    before.copy(accountList = before.accountList.passMap { originalList ->
-                        val newList = originalList.toMutableList()
-                        newList.add(data.convertToUiAccount())
-                        _updateNewAccount(UiNewAccount())
-                        newList
-                    })
-                }
-            }
+//            it.passMap { data ->
+//                _uiAccountScreen.update { before ->
+//                    before.copy(accountList = before.accountList.passMap { originalList ->
+//                        val newList = originalList.toMutableList()
+//                        newList.add(data.convertToUiAccount())
+//                        _updateNewAccount(UiNewAccount())
+//                        newList
+//                    })
+//                }
+//            }
         }
     }
     override fun addAccount(newAccountData: UiNewAccount) = request {
@@ -58,11 +58,11 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController {
     suspend fun _setRandomValidAccountNumberToNewAccount() {
         accountService.createAccountNumber()
             .conflate().collect {
-                it.ignoreMap { value -> //TODO ignore map -- 에러체인 무시해도 되나?
-                    _uiAccountScreen.update { before ->
-                        before.copy(newAccount = before.newAccount.copy(number = value.toString()))
-                    }
-                }
+//                it.ignoreMap { value -> //TODO ignore map -- 에러체인 무시해도 되나?
+//                    _uiAccountScreen.update { before ->
+//                        before.copy(newAccount = before.newAccount.copy(number = value.toString()))
+//                    }
+//                }
             }
     }
     override fun setRandomValidAccountNumberToNewAccount() = request {

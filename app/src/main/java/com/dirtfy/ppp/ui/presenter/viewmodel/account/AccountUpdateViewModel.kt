@@ -31,12 +31,12 @@ class AccountUpdateViewModel: ViewModel(), AccountUpdateController {
             _uiAccountScreen.update { before ->
                 before.copy(accountList = before.accountList.passMap { uiAccountList ->
                     val newList = uiAccountList.toMutableList()
-                    it.passMap { data ->
-                        newList.replaceAll { uiAccount ->
-                            if (uiAccount.number.toInt() == data.number) data.convertToUiAccount()
-                            else uiAccount
-                        }
-                    }
+//                    it.passMap { data ->
+//                        newList.replaceAll { uiAccount ->
+//                            if (uiAccount.number.toInt() == data.number) data.convertToUiAccount()
+//                            else uiAccount
+//                        }
+//                    }
                     newList
                 })
             }

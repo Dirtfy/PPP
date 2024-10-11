@@ -30,6 +30,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.account.UiAccount
 import com.dirtfy.ppp.ui.dto.account.UiAccountMode
 import com.dirtfy.ppp.ui.dto.account.UiNewAccount
@@ -45,7 +47,7 @@ object AccountScreen {
     fun Main(
         controller: AccountController = viewModel<AccountViewModel>()
     ) {
-        val uiAccountScreen by controller.uiAccountScreen.collectAsStateWithLifecycle()
+        val uiAccountScreen by controller.uiAccountScreenState.collectAsStateWithLifecycle()
 
         val scanLauncher = rememberLauncherForActivityResult(
             contract = ScanContract()
@@ -62,7 +64,8 @@ object AccountScreen {
         ScreenContent(
             searchClue = uiAccountScreen.searchClue,
             nowAccount = uiAccountScreen.nowAccount,
-            accountListState = uiAccountScreen.accountList,
+            accountList = uiAccountScreen.accountList,
+            accountListState = uiAccountScreen.accountListState,
             mode = uiAccountScreen.mode,
             onClueChanged = { controller.request { updateSearchClue(it) } },
             onBarcodeIconClick = {
@@ -96,7 +99,8 @@ object AccountScreen {
     fun ScreenContent(
         searchClue: String,
         nowAccount: UiAccount,
-        accountListState: FlowState<List<UiAccount>>,
+        accountList: List<UiAccount>,
+        accountListState: UiScreenState,
         mode: UiAccountMode,
         onClueChanged: (String) -> Unit,
         onBarcodeIconClick: () -> Unit,
@@ -118,6 +122,7 @@ object AccountScreen {
             Spacer(modifier = Modifier.size(10.dp))
 
             AccountListState(
+                accountList = accountList,
                 accountListState = accountListState,
                 onItemClick = onItemClick,
                 onRetryClick = onRetryClick
@@ -188,25 +193,24 @@ object AccountScreen {
 
     @Composable
     fun AccountListState(
-        accountListState: FlowState<List<UiAccount>>,
+        accountList: List<UiAccount>,
+        accountListState: UiScreenState,
         onItemClick: (UiAccount) -> Unit,
         onRetryClick: () -> Unit
     ) {
-        when(accountListState) {
-            is FlowState.Success -> {
-                val accountList = accountListState.data
+        when(accountListState.state) {
+            UiState.COMPLETE -> {
                 AccountList(
                     accountList = accountList,
                     onItemClick = onItemClick
                 )
             }
-            is FlowState.Loading -> {
+            UiState.LOADING -> {
                 AccountListLoading()
             }
-            is FlowState.Failed -> {
-                val throwable = accountListState.throwable
+            UiState.FAIL -> {
                 AccountListLoadFail(
-                    throwable = throwable,
+                    failMessage = accountListState.failMessage,
                     onRetryClick = onRetryClick
                 )
             }
@@ -248,7 +252,7 @@ object AccountScreen {
 
     @Composable
     fun AccountListLoadFail(
-        throwable: Throwable,
+        failMessage: String?,
         onRetryClick: () -> Unit
     ) {
         AlertDialog(
@@ -263,7 +267,7 @@ object AccountScreen {
                     Text(text = "Cancel")
                 }
             },
-            title = { Text(text = throwable.message?: "unknown error") }
+            title = { Text(text = failMessage ?: "unknown error") }
         )
     }
     

@@ -26,11 +26,11 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController {
     override suspend fun updateAccountRecordList() {
         val accountNumber = _uiAccountScreen.value.nowAccount.number.toInt()
         accountService.readAccountRecord(accountNumber).collect { flowState ->
-            _uiAccountScreen.update {
-                it.copy(accountRecordList = flowState.passMap { data ->
-                    data.map { record -> record.convertToUiAccountRecord() }
-                })
-            }
+//            _uiAccountScreen.update {
+////                it.copy(accountRecordList = flowState.passMap { data ->
+////                    data.map { record -> record.convertToUiAccountRecord() }
+////                })
+//            }
         }
     }
 
@@ -53,9 +53,9 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController {
             _uiAccountScreen.update { before ->
                 before.copy(accountRecordList = before.accountRecordList.passMap { native ->
                     val newList = native.reversed().toMutableList()
-                    it.passMap { data ->
-                        newList.add(data.convertToUiAccountRecord())
-                    }
+//                    it.passMap { data ->
+//                        newList.add(data.convertToUiAccountRecord())
+//                    }
                     newList.reversed()
                 })
             }
