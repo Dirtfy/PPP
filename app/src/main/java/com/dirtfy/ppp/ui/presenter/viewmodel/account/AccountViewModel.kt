@@ -11,6 +11,8 @@ import com.dirtfy.ppp.ui.dto.account.UiAccount.Companion.convertToUiAccount
 import com.dirtfy.ppp.ui.dto.account.UiAccountMode
 import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreenState
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
+import com.dirtfy.tagger.Tagger
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,19 +23,17 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AccountViewModel: ViewModel(), AccountController {
+class AccountViewModel: ViewModel(), AccountController, Tagger {
 
     private val accountService = AccountService(AccountFireStore()) //TODO 왜 DI 안함? 뷰모델 다 안함
 
     //private val _uiAccountScreenState = MutableStateFlow(UiAccountScreenState())
 
     override val uiAccountScreenState: StateFlow<UiAccountScreenState>
-        get() = accountList
-            .combine(searchClueFlow) { accountList, searchClue ->
-                val filteredAccountList = accountList.filter { it.number.contains(searchClue) }
+        get() = nowAccountFlow
+            .combine(searchClueFlow) { nowAccount, searchClue ->
                 UiAccountScreenState(
-                    accountList = filteredAccountList,
-                    accountListState = UiScreenState(UiState.COMPLETE),
+                    nowAccount = nowAccount,
                     searchClue = searchClue
                 )
             }
@@ -46,6 +46,22 @@ class AccountViewModel: ViewModel(), AccountController {
                 state.copy(
                     nowAccount = nowAccount
                 )
+            }
+            .combine(accountList) { state, accountList ->
+                val filteredAccountList = accountList.filter {
+                    it.number.contains(state.searchClue)
+                }
+
+                var newState = state.copy(
+                    accountList = filteredAccountList,
+                )
+
+                if (state.accountList !== accountList)
+                    newState = newState.copy(
+                        accountListState = UiScreenState(state = UiState.COMPLETE)
+                    )
+
+                newState
             }
             .stateIn(
                 scope = viewModelScope,
