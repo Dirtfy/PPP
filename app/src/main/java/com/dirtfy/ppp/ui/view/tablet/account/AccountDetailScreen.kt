@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.account.UiAccount
 import com.dirtfy.ppp.ui.dto.account.UiAccountRecord
 import com.dirtfy.ppp.ui.dto.account.UiNewAccountRecord
@@ -48,7 +50,7 @@ object AccountDetailScreen {
         account: UiAccount,
         controller: AccountDetailController = viewModel<AccountDetailViewModel>()
     ) {
-        val screen by controller.uiAccountScreen.collectAsStateWithLifecycle()
+        val screen by controller.uiAccountDetailScreenState.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request {
@@ -60,7 +62,8 @@ object AccountDetailScreen {
         ScreenContent(
             nowAccount = screen.nowAccount,
             newRecord = screen.newAccountRecord,
-            recordListState = screen.accountRecordList,
+            recordList = screen.accountRecordList,
+            recordListState = screen.accountRecordListState,
             onRecordChange = {
                 controller.request { updateNewAccountRecord(it) }
             },
@@ -77,7 +80,8 @@ object AccountDetailScreen {
     fun ScreenContent(
         nowAccount: UiAccount,
         newRecord: UiNewAccountRecord,
-        recordListState: FlowState<List<UiAccountRecord>>,
+        recordList: List<UiAccountRecord>,
+        recordListState: UiScreenState,
         onRecordChange: (UiNewAccountRecord) -> Unit,
         onAddClick: (UiNewAccountRecord) -> Unit,
         onRetryClick: () -> Unit
@@ -102,6 +106,7 @@ object AccountDetailScreen {
                     )
                     Spacer(modifier = Modifier.size(10.dp))
                     RecordListState(
+                        recordList = recordList,
                         recordListState = recordListState,
                         onRetryClick = onRetryClick
                     )
@@ -233,21 +238,21 @@ object AccountDetailScreen {
 
     @Composable
     fun RecordListState(
-        recordListState: FlowState<List<UiAccountRecord>>,
+        recordList: List<UiAccountRecord>,
+        recordListState: UiScreenState,
         onRetryClick: () -> Unit
     ) {
-        when(recordListState) {
-            is FlowState.Success -> {
-                val recordList = recordListState.data
+        when(recordListState.state) {
+            UiState.COMPLETE -> {
                 RecordList(recordList = recordList)
             }
-            is FlowState.Loading -> {
+            UiState.LOADING -> {
                 RecordListLoading()
             }
-            is FlowState.Failed -> {
-                val throwable = recordListState.throwable
+            UiState.FAIL -> {
+                val failMessage = recordListState.failMessage
                 RecordListLoadFail(
-                    throwable = throwable,
+                    failMessage = failMessage,
                     onRetryClick = onRetryClick
                 )
             }
@@ -285,7 +290,7 @@ object AccountDetailScreen {
 
     @Composable
     fun RecordListLoadFail(
-        throwable: Throwable,
+        failMessage: String?,
         onRetryClick: () -> Unit
     ) {
         AlertDialog(
@@ -300,7 +305,7 @@ object AccountDetailScreen {
                     Text(text = "Cancel")
                 }
             },
-            title = { Text(text = throwable.message?: "unknown error") }
+            title = { Text(text = failMessage ?: "unknown error") }
         )
     }
 }

@@ -27,8 +27,6 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
 
     private val accountService = AccountService(AccountFireStore()) //TODO 왜 DI 안함? 뷰모델 다 안함
 
-    //private val _uiAccountScreenState = MutableStateFlow(UiAccountScreenState())
-
     override val uiAccountScreenState: StateFlow<UiAccountScreenState>
         get() = nowAccountFlow
             .combine(searchClueFlow) { nowAccount, searchClue ->
@@ -40,11 +38,6 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
             .combine(modeFlow) { state, mode ->
                 state.copy(
                     mode = mode
-                )
-            }
-            .combine(nowAccountFlow) { state, nowAccount ->
-                state.copy(
-                    nowAccount = nowAccount
                 )
             }
             .combine(accountList) { state, accountList ->
@@ -92,7 +85,7 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
 //                before.copy(accountList = )
 //            }
 //        }
-        // 없어도 될듯?
+        // 다른 기기에서 어카운트 변경시 어떻게 뷰를 변경할 지 정해야 할 듯
     }
 
     override suspend fun updateNowAccount(account: UiAccount) {
@@ -101,18 +94,6 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
 
     override suspend fun updateSearchClue(clue: String) {
         searchClueFlow.update { clue }
-//        accountService.readAllAccounts()
-//            .conflate().collect {
-//                _uiAccountScreenState.update { before ->
-//                    before.copy(accountList = it.passMap { data ->
-//                        val filter = data.map { account -> account.number.toString() }
-//                            .filter { number -> number.contains(clue) }
-//
-//                        data.map { account -> account.convertToUiAccount() }
-//                            .filter { account -> filter.contains(account.number) }
-//                    })
-//                }
-//            }
     }
 
     override suspend fun setMode(mode: UiAccountMode) {

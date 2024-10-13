@@ -4,9 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.logic.AccountService
 import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
-import com.dirtfy.ppp.ui.dto.account.UiAccount.Companion.convertToUiAccount
-import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreen
 import com.dirtfy.ppp.ui.dto.account.UiNewAccount
+import com.dirtfy.ppp.ui.dto.account.screen.UiAccountCreateScreenState
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,12 +17,12 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController {
 
     private val accountService = AccountService(AccountFireStore())
 
-    private val _uiAccountScreen = MutableStateFlow(UiAccountScreen())
-    override val uiAccountScreen: StateFlow<UiAccountScreen>
-        get() = _uiAccountScreen
+    private val _uiAccountCreateScreenState = MutableStateFlow(UiAccountCreateScreenState())
+    override val uiAccountCreateScreenState: StateFlow<UiAccountCreateScreenState>
+        get() = _uiAccountCreateScreenState
 
     private fun _updateNewAccount(newAccountData: UiNewAccount) {
-        _uiAccountScreen.update {
+        _uiAccountCreateScreenState.update {
             it.copy(newAccount = newAccountData)
         }
     }
@@ -49,6 +48,8 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController {
 //                    })
 //                }
 //            }
+            // TODO 이거 해도 create 이후 text field 값이 유지됨.
+            _uiAccountCreateScreenState.update { it.copy(newAccount = UiNewAccount()) }
         }
     }
     override fun addAccount(newAccountData: UiNewAccount) = request {
@@ -63,6 +64,10 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController {
 //                        before.copy(newAccount = before.newAccount.copy(number = value.toString()))
 //                    }
 //                }
+                // TODO 왜 버튼 눌러도 text field에 값이 안 들어 오냐
+                _uiAccountCreateScreenState.update { before ->
+                    before.copy(newAccount = before.newAccount.copy(number = it.toString()))
+                }
             }
     }
     override fun setRandomValidAccountNumberToNewAccount() = request {

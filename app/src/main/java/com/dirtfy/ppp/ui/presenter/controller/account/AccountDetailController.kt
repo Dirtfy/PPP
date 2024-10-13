@@ -1,8 +1,8 @@
 package com.dirtfy.ppp.ui.presenter.controller.account
 
 import com.dirtfy.ppp.ui.dto.account.UiAccount
-import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreen
 import com.dirtfy.ppp.ui.dto.account.UiNewAccountRecord
+import com.dirtfy.ppp.ui.dto.account.screen.UiAccountDetailScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
@@ -12,7 +12,7 @@ interface AccountDetailController: Controller {
 //
 //    val nowAccount: StateFlow<UiAccount>
 //    val newAccountRecord: StateFlow<UiNewAccountRecord>
-    val uiAccountScreen: StateFlow<UiAccountScreen>
+    val uiAccountDetailScreenState: StateFlow<UiAccountDetailScreenState>
 
     suspend fun updateAccountRecordList()
     suspend fun updateNowAccount(account: UiAccount)

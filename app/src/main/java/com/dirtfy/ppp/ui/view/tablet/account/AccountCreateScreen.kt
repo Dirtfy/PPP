@@ -34,7 +34,7 @@ object AccountCreateScreen {
         controller: AccountCreateController = viewModel<AccountCreateViewModel>(),
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
-        val screen by controller.uiAccountScreen.collectAsStateWithLifecycle()
+        val screen by controller.uiAccountCreateScreenState.collectAsStateWithLifecycle()
 
         ScreenContent(
             newAccount = screen.newAccount,
