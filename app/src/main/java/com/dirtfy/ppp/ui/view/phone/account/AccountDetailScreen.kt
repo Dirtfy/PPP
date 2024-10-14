@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view.phone.account
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.ui.dto.UiScreenState
@@ -271,7 +273,7 @@ class AccountDetailScreen @Inject constructor(
     ) {
         val itemCount = recordList.size
         val maxHeight = if (itemCount > 2) 300.dp else (itemCount * 100).dp // 2개 초과 시 고정 높이, 그렇지 않으면 아이템 개수에 따라 높이 설정
-
+        Log.d("minseok","$itemCount $maxHeight")
         LazyColumn(
             modifier = Modifier.height(maxHeight) // 계산된 최대 높이를 사용
         ) {
