@@ -93,7 +93,7 @@ class MenuScreen @Inject constructor(
                     val menuList = (menuListState as FlowState.Success<List<UiMenu>>).data
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(160.dp),
-                        contentPadding = PaddingValues(16.dp)
+                        contentPadding = PaddingValues(10.dp)
                     ) {
                         items(
                             items = menuList,
@@ -203,7 +203,7 @@ class MenuScreen @Inject constructor(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 5.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
