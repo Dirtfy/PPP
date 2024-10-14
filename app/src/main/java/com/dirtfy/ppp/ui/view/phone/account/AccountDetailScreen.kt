@@ -1,12 +1,15 @@
 package com.dirtfy.ppp.ui.view.phone.account
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -22,6 +25,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,7 +92,9 @@ class AccountDetailScreen @Inject constructor(
         onRetryClick: () -> Unit
     ) {
         Surface(
-            modifier = Modifier.wrapContentHeight(),
+            modifier = Modifier
+                .wrapContentHeight()
+                .heightIn(max = LocalConfiguration.current.screenHeightDp.dp - 40.dp), // 최대 높이 설정
             shape = RoundedCornerShape(12.dp)
         ) {
             Box(
@@ -262,15 +269,36 @@ class AccountDetailScreen @Inject constructor(
     fun RecordList(
         recordList: List<UiAccountRecord>
     ) {
+        val itemCount = recordList.size
+        val maxHeight = if (itemCount > 2) 300.dp else (itemCount * 100).dp // 2개 초과 시 고정 높이, 그렇지 않으면 아이템 개수에 따라 높이 설정
+
         LazyColumn(
-            modifier = Modifier.height(300.dp)
+            modifier = Modifier.height(maxHeight) // 계산된 최대 높이를 사용
         ) {
-            items(recordList) {
+            items(recordList) { record ->
                 ListItem(
-                    overlineContent = { Text(text = it.timestamp) },
-                    headlineContent = { Text(text = it.difference) },
-                    supportingContent = { Text(text = it.result) },
-                    trailingContent = { Text(text = it.issuedName) }
+                    overlineContent = {
+                        Text(
+                            text = record.timestamp,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        ) },
+                    headlineContent = {
+                        Text(
+                            text = record.difference,
+                            style = MaterialTheme.typography.titleMedium
+                        ) },
+                    supportingContent = {
+                        Text(
+                            text = record.result,
+                            style = MaterialTheme.typography.bodyMedium
+                        ) },
+                    trailingContent = {
+                        Text(
+                            text = record.issuedName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        ) }
                 )
             }
         }
@@ -278,11 +306,16 @@ class AccountDetailScreen @Inject constructor(
 
     @Composable
     fun RecordListLoading() {
-        Column(
-            modifier = Modifier.height(300.dp)
+        Box(
+            modifier = Modifier
+                .padding(top = 50.dp)
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)), // 배경 색상을 좀 더 부드럽게
+            contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier.size(100.dp), // 크기를 조정
+                color = MaterialTheme.colorScheme.primary, // 색상 조정
+                strokeWidth = 8.dp // 두께 조정
             )
         }
     }
