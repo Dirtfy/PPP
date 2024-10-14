@@ -57,7 +57,7 @@ class MainActivity: ComponentActivity() {
             val destinationList by remember {
                 mutableStateOf(
                     listOf(
-                        Destination.Table.name to Icons.Filled.Home,
+                        Destination.Table.name to Icons.Filled.Home,//<String, Icon>
                         Destination.Menu.name to Icons.Filled.Menu,
                         Destination.Record.name to Icons.Filled.DateRange,
                         Destination.Account.name to Icons.Filled.AccountBox
@@ -88,8 +88,8 @@ class MainActivity: ComponentActivity() {
                     onNavigatorItemClick = {
                         selectedIndex = it
                         navController.navigate(destinationList[it].first) {
-                            popUpTo(navController.graph.id) {
-                                inclusive = true
+                            popUpTo(navController.graph.id) {// 백스택 모두 pop
+                                inclusive = true // 현재 화면 포함 제거
                             }
                         }
                     }

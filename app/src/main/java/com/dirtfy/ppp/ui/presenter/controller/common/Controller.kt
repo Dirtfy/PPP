@@ -4,7 +4,7 @@ import com.dirtfy.ppp.common.FlowState
 
 interface Controller {
 
-    fun <T, U> FlowState<T>.passMap(dataTransform: (data: T) -> U): FlowState<U> {
+    fun <T, U> FlowState<T>.passMap(dataTransform: (data: T) -> U): FlowState<U> {//if success this transforms FlowState<T> to FlowState<U> (if fail-> no happen)
         return when(this) {
             is FlowState.Loading -> FlowState.loading()
             is FlowState.Failed -> {
@@ -16,7 +16,7 @@ interface Controller {
         }
     }
 
-    fun <T, U> FlowState<T>.ignoreMap(dataTransform: (data: T) -> U): U? {
+    fun <T, U> FlowState<T>.ignoreMap(dataTransform: (data: T) -> U): U? {//they return the result of the dataTransform when they put FlowState<T>
         return when(this) {
             is FlowState.Loading, is FlowState.Failed -> { null }
             is FlowState.Success -> {

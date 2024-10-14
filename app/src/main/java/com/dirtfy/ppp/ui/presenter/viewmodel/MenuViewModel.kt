@@ -38,8 +38,8 @@ class MenuViewModel: ViewModel(), MenuController {
 
 
     override suspend fun updateMenuList() {
-        menuService.readMenu().conflate().collect {
-            _menuList.value = it.passMap { data ->
+        menuService.readMenu().conflate().collect { //menuService.readMenu() : return List<DataMenu>
+            _menuList.value = it.passMap { data -> // FlowState<List<DataMenu>> data = List<DataMenu>
                 val newValue = data.map { menu -> menu.convertToUiMenu() }
 
                 _menuListLastValue = newValue
