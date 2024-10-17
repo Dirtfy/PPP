@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -27,8 +26,16 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
 
     private val accountService = AccountService(AccountFireStore()) //TODO 왜 DI 안함? 뷰모델 다 안함
 
+    private val accountList: Flow<List<UiAccount>>
+            = accountService.accountStream()
+        .map { it.map { account -> account.convertToUiAccount() } }
+
+    private val searchClueFlow = MutableStateFlow("")
+    private val modeFlow = MutableStateFlow(UiAccountMode.Main)
+    private val nowAccountFlow = MutableStateFlow(UiAccount())
+
     override val uiAccountScreenState: StateFlow<UiAccountScreenState>
-        get() = nowAccountFlow
+        = nowAccountFlow
             .combine(searchClueFlow) { nowAccount, searchClue ->
                 UiAccountScreenState(
                     nowAccount = nowAccount,
@@ -62,30 +69,11 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
                 initialValue = UiAccountScreenState()
             )
 
-    private val accountList: StateFlow<List<UiAccount>>
-            = accountService.accountStream()
-        .map { it.map { account -> account.convertToUiAccount() } }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
 
-    private val searchClueFlow = MutableStateFlow("")
-    private val modeFlow = MutableStateFlow(UiAccountMode.Main)
-    private val nowAccountFlow = MutableStateFlow(UiAccount())
 
+    @Deprecated("screen state synchronized with repository")
     override suspend fun updateAccountList() {
-//        accountService.readAllAccounts().conflate().collect {
-//            _uiAccountScreenState.update { before ->
-//                before.copy(accountList = it.passMap { data ->
-//                    data.map { account -> account.convertToUiAccount() }
-//                })
-//
-//                before.copy(accountList = )
-//            }
-//        }
-        // 다른 기기에서 어카운트 변경시 어떻게 뷰를 변경할 지 정해야 할 듯
+        // TODO 다른 기기에서 어카운트 변경시 어떻게 뷰를 변경할 지 정해야 할 듯
     }
 
     override suspend fun updateNowAccount(account: UiAccount) {

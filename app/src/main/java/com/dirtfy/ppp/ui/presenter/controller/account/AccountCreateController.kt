@@ -9,6 +9,7 @@ interface AccountCreateController: Controller {
 //    val newAccount: StateFlow<UiNewAccount>
     val uiAccountCreateScreenState: StateFlow<UiAccountCreateScreenState>
 
+    @Deprecated("screen state synchronized with repository")
     fun updateNewAccount(newAccountData: UiNewAccount)
     fun addAccount(newAccountData: UiNewAccount)
     fun setRandomValidAccountNumberToNewAccount()

@@ -14,6 +14,7 @@ interface AccountDetailController: Controller {
 //    val newAccountRecord: StateFlow<UiNewAccountRecord>
     val uiAccountDetailScreenState: StateFlow<UiAccountDetailScreenState>
 
+    @Deprecated("screen state synchronized with repository")
     suspend fun updateAccountRecordList()
     suspend fun updateNowAccount(account: UiAccount)
     suspend fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord)

@@ -2,8 +2,6 @@ package com.dirtfy.ppp.data.source.repository
 
 import com.dirtfy.ppp.data.dto.DataAccount
 import com.dirtfy.ppp.data.dto.DataAccountRecord
-import com.dirtfy.ppp.data.source.firestore.account.FireStoreAccount
-import com.dirtfy.ppp.data.source.firestore.account.FireStoreAccountRecord
 import kotlinx.coroutines.flow.Flow
 
 interface AccountRepository {

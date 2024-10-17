@@ -10,6 +10,7 @@ interface AccountController: Controller {
 
     val uiAccountScreenState: StateFlow<UiAccountScreenState>
 
+    @Deprecated("screen state synchronized with repository")
     suspend fun updateAccountList()
     suspend fun updateNowAccount(account: UiAccount)
     suspend fun updateSearchClue(clue: String)

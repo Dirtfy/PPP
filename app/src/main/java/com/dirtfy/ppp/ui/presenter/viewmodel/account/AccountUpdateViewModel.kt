@@ -3,9 +3,8 @@ package com.dirtfy.ppp.ui.presenter.viewmodel.account
 import androidx.lifecycle.ViewModel
 import com.dirtfy.ppp.data.logic.AccountService
 import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
-import com.dirtfy.ppp.ui.dto.account.UiAccount.Companion.convertToUiAccount
-import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreen
 import com.dirtfy.ppp.ui.dto.account.UiNewAccount
+import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreen
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountUpdateController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
