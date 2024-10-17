@@ -1,6 +1,5 @@
 package com.dirtfy.ppp.ui.presenter.controller
 
-import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.dto.menu.screen.UiMenuScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
