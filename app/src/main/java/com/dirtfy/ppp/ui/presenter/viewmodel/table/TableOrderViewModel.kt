@@ -6,10 +6,10 @@ import com.dirtfy.ppp.data.dto.DataTableOrder
 import com.dirtfy.ppp.data.logic.TableService
 import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
 import com.dirtfy.ppp.data.source.firestore.table.TableFireStore
-import com.dirtfy.ppp.ui.dto.UiPointUse
-import com.dirtfy.ppp.ui.dto.UiTable
-import com.dirtfy.ppp.ui.dto.UiTableMode
-import com.dirtfy.ppp.ui.dto.UiTableOrder
+import com.dirtfy.ppp.ui.dto.table.UiPointUse
+import com.dirtfy.ppp.ui.dto.table.UiTable
+import com.dirtfy.ppp.ui.dto.table.UiTableMode
+import com.dirtfy.ppp.ui.dto.table.UiTableOrder
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 import com.dirtfy.ppp.ui.presenter.controller.table.TableOrderController
 import com.dirtfy.tagger.Tagger

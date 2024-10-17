@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiMenu
+import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger

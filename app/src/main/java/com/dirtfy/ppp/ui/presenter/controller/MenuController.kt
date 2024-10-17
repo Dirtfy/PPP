@@ -1,7 +1,7 @@
 package com.dirtfy.ppp.ui.presenter.controller
 
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiMenu
+import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 

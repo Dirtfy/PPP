@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiRecord
-import com.dirtfy.ppp.ui.dto.UiRecordMode
+import com.dirtfy.ppp.ui.dto.record.UiRecord
+import com.dirtfy.ppp.ui.dto.record.UiRecordMode
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
 import javax.inject.Inject
 

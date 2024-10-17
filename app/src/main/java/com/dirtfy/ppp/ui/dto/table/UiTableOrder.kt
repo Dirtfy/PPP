@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ui.dto
+package com.dirtfy.ppp.ui.dto.table
 
 data class UiTableOrder(
     val name: String,

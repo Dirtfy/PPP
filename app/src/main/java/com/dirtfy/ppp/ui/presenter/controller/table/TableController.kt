@@ -1,11 +1,11 @@
 package com.dirtfy.ppp.ui.presenter.controller.table
 
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiMenu
-import com.dirtfy.ppp.ui.dto.UiPointUse
-import com.dirtfy.ppp.ui.dto.UiTable
-import com.dirtfy.ppp.ui.dto.UiTableMode
-import com.dirtfy.ppp.ui.dto.UiTableOrder
+import com.dirtfy.ppp.ui.dto.menu.UiMenu
+import com.dirtfy.ppp.ui.dto.table.UiPointUse
+import com.dirtfy.ppp.ui.dto.table.UiTable
+import com.dirtfy.ppp.ui.dto.table.UiTableMode
+import com.dirtfy.ppp.ui.dto.table.UiTableOrder
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 

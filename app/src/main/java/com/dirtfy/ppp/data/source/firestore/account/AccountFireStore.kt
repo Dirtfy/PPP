@@ -13,8 +13,12 @@ import com.dirtfy.tagger.Tagger
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 import javax.inject.Inject
@@ -65,21 +69,7 @@ class AccountFireStore @Inject constructor(): AccountRepository, Tagger {
                 DataRecordType.entries.map { it.name }
             ).get().await()
 
-        return accountRef.get().await().documents.map {
-            it.toObject(FireStoreAccount::class.java)!!
-        }.map { account ->
-            val balance = cap.documents
-                .map {
-                    it.toObject(FireStoreRecord::class.java)!!
-                }
-                .filter {
-                   it.type == "${account.number}"
-                }
-                .sumOf {
-                    it.amount!!
-                }
-            account.convertToDataAccount(balance) // TODO balance를 왜 미리 계산하지?
-        }
+        return readAllAccount(accountRef.get().await(), cap)
     }
 
     override suspend fun readAccountBalance(accountNumber: Int): Int {
@@ -107,16 +97,9 @@ class AccountFireStore @Inject constructor(): AccountRepository, Tagger {
         val query = recordRef
             .whereEqualTo("type", "$accountNumber")
             .orderBy("timestamp")
-        val documents = query.get().await().documents
-        var result = 0
+        val querySnapshot = query.get().await()
 
-        return documents.map {
-            it.toObject(FireStoreRecord::class.java)!!
-        }.map {
-            Log.d(TAG, "$result - ${it.timestamp}")
-            result += it.amount ?: throw RecordException.DifferenceLoss()
-            it.convertToDataAccountRecord(result = result)
-        }
+        return readAllRecord(querySnapshot)
     }
 
     override suspend fun update(account: DataAccount): DataAccount {
@@ -148,5 +131,87 @@ class AccountFireStore @Inject constructor(): AccountRepository, Tagger {
     override suspend fun getMaxAccountNumber(): Int {
         return Firebase.firestore.document(FireStorePath.MAX_ACCOUNT_NUMBER).get().await()
             .getLong("number")!!.toInt()
+    }
+
+    override fun accountStream(): Flow<List<DataAccount>> = callbackFlow {
+        val targetRecordRef = recordRef
+            .whereNotIn(
+                "type",
+                DataRecordType.entries.map { it.name }
+            )
+        var recordSnapshot = targetRecordRef.get().await()
+
+        val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) { return@addSnapshotListener }
+            recordSnapshot = snapshot
+        }
+
+        val accountSubscription = accountRef.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) { return@addSnapshotListener }
+            try {
+                val accountList = readAllAccount(snapshot, recordSnapshot)
+                trySend(accountList)
+            } catch (e: Throwable) {
+                // 혹시 모르니까 ㄹㅇㅋㅋ
+            }
+        }
+
+        awaitClose {
+            recordSubscription.remove()
+            accountSubscription.remove()
+        }
+    }
+
+    override fun accountRecordStream(accountNumber: Int): Flow<List<DataAccountRecord>> = callbackFlow {
+        val targetRecordRef = recordRef
+            .whereEqualTo("type", "$accountNumber")
+            .orderBy("timestamp")
+
+        val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) { return@addSnapshotListener }
+            try {
+                val accountRecordList = readAllRecord(snapshot)
+                trySend(accountRecordList)
+            } catch (e: Throwable) {
+                // 혹시 모르니까 ㄹㅇㅋㅋ
+            }
+        }
+
+        awaitClose {
+            recordSubscription.remove()
+        }
+    }
+
+    private fun readAllAccount(
+        accountSnapshot: QuerySnapshot,
+        recordSnapshot: QuerySnapshot
+    ): List<DataAccount> {
+        return accountSnapshot.documents.map {
+            it.toObject(FireStoreAccount::class.java)!!
+        }.map { account ->
+            val balance = recordSnapshot.documents
+                .map {
+                    it.toObject(FireStoreRecord::class.java)!!
+                }
+                .filter {
+                    it.type == "${account.number}"
+                }
+                .sumOf {
+                    it.amount!!
+                }
+            account.convertToDataAccount(balance)
+        }
+    }
+
+    private fun readAllRecord(
+        recordSnapshot: QuerySnapshot
+    ): List<DataAccountRecord> {
+        var result = 0
+        return recordSnapshot.documents.map {
+            it.toObject(FireStoreRecord::class.java)!!
+        }.map {
+            result += it.amount ?: throw RecordException.DifferenceLoss()
+            it.convertToDataAccountRecord(result = result)
+        }
     }
 }

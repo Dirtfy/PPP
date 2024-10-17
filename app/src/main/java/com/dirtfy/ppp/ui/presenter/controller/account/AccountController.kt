@@ -1,15 +1,16 @@
 package com.dirtfy.ppp.ui.presenter.controller.account
 
-import com.dirtfy.ppp.ui.dto.UiAccount
-import com.dirtfy.ppp.ui.dto.UiAccountMode
-import com.dirtfy.ppp.ui.dto.UiAccountScreen
+import com.dirtfy.ppp.ui.dto.account.UiAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccountMode
+import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
 interface AccountController: Controller {
 
-    val uiAccountScreen: StateFlow<UiAccountScreen>
+    val uiAccountScreenState: StateFlow<UiAccountScreenState>
 
+    @Deprecated("screen state synchronized with repository")
     suspend fun updateAccountList()
     suspend fun updateNowAccount(account: UiAccount)
     suspend fun updateSearchClue(clue: String)

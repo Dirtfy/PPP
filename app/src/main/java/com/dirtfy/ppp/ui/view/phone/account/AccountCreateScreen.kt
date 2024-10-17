@@ -22,7 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.dto.UiNewAccount
+import com.dirtfy.ppp.ui.dto.account.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
 import javax.inject.Inject
 
@@ -35,7 +35,7 @@ class AccountCreateScreen @Inject constructor(
         controller: AccountCreateController = accountCreateController,
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
-        val screen by controller.uiAccountScreen.collectAsStateWithLifecycle()
+        val screen by controller.uiAccountCreateScreenState.collectAsStateWithLifecycle()
 
         ScreenContent(
             newAccount = screen.newAccount,

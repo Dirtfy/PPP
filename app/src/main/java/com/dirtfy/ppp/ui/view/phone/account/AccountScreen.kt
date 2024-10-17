@@ -27,11 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.NotificationCompat.MessagingStyle.Message
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiAccount
-import com.dirtfy.ppp.ui.dto.UiAccountMode
-import com.dirtfy.ppp.ui.dto.UiNewAccount
+import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
+import com.dirtfy.ppp.ui.dto.account.UiAccount
+import com.dirtfy.ppp.ui.dto.account.UiAccountMode
+import com.dirtfy.ppp.ui.dto.account.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountController
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.journeyapps.barcodescanner.ScanContract
@@ -48,7 +51,7 @@ class AccountScreen @Inject constructor(
     fun Main(
         controller: AccountController = accountController
     ) {
-        val uiAccountScreen by controller.uiAccountScreen.collectAsStateWithLifecycle()
+        val uiAccountScreen by controller.uiAccountScreenState.collectAsStateWithLifecycle()
 
         val scanLauncher = rememberLauncherForActivityResult(
             contract = ScanContract()
@@ -65,7 +68,8 @@ class AccountScreen @Inject constructor(
         ScreenContent(
             searchClue = uiAccountScreen.searchClue,
             nowAccount = uiAccountScreen.nowAccount,
-            accountListState = uiAccountScreen.accountList,
+            accountList = uiAccountScreen.accountList,
+            accountListState = uiAccountScreen.accountListState,
             mode = uiAccountScreen.mode,
             onClueChanged = { controller.request { updateSearchClue(it) } },
             onBarcodeIconClick = {
@@ -99,7 +103,8 @@ class AccountScreen @Inject constructor(
     fun ScreenContent(
         searchClue: String,
         nowAccount: UiAccount,
-        accountListState: FlowState<List<UiAccount>>,
+        accountList: List<UiAccount>,
+        accountListState: UiScreenState,
         mode: UiAccountMode,
         onClueChanged: (String) -> Unit,
         onBarcodeIconClick: () -> Unit,
@@ -121,6 +126,7 @@ class AccountScreen @Inject constructor(
             Spacer(modifier = Modifier.size(10.dp))
 
             AccountListState(
+                accountList = accountList,
                 accountListState = accountListState,
                 onItemClick = onItemClick,
                 onRetryClick = onRetryClick
@@ -191,25 +197,24 @@ class AccountScreen @Inject constructor(
 
     @Composable
     fun AccountListState(
-        accountListState: FlowState<List<UiAccount>>,
+        accountList: List<UiAccount>,
+        accountListState: UiScreenState,
         onItemClick: (UiAccount) -> Unit,
         onRetryClick: () -> Unit
     ) {
-        when(accountListState) {
-            is FlowState.Success -> {
-                val accountList = accountListState.data
+        when(accountListState.state) {
+            UiState.COMPLETE -> {
                 AccountList(
                     accountList = accountList,
                     onItemClick = onItemClick
                 )
             }
-            is FlowState.Loading -> {
+            UiState.LOADING -> {
                 AccountListLoading()
             }
-            is FlowState.Failed -> {
-                val throwable = accountListState.throwable
+            UiState.FAIL -> {
                 AccountListLoadFail(
-                    throwable = throwable,
+                    failMessage = accountListState.failMessage,
                     onRetryClick = onRetryClick
                 )
             }
@@ -251,7 +256,7 @@ class AccountScreen @Inject constructor(
 
     @Composable
     fun AccountListLoadFail(
-        throwable: Throwable,
+        failMessage: String?,
         onRetryClick: () -> Unit
     ) {
         AlertDialog(
@@ -266,7 +271,7 @@ class AccountScreen @Inject constructor(
                     Text(text = "Cancel")
                 }
             },
-            title = { Text(text = throwable.message?: "unknown error") }
+            title = { Text(text = failMessage ?: "unknown error") }
         )
     }
     

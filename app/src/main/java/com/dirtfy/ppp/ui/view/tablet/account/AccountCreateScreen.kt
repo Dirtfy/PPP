@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.ui.dto.UiNewAccount
+import com.dirtfy.ppp.ui.dto.account.UiNewAccount
 import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
 import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountCreateViewModel
 
@@ -34,7 +34,7 @@ object AccountCreateScreen {
         controller: AccountCreateController = viewModel<AccountCreateViewModel>(),
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
-        val screen by controller.uiAccountScreen.collectAsStateWithLifecycle()
+        val screen by controller.uiAccountCreateScreenState.collectAsStateWithLifecycle()
 
         ScreenContent(
             newAccount = screen.newAccount,

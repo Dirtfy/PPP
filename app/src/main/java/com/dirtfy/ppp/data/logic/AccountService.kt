@@ -4,6 +4,8 @@ import com.dirtfy.ppp.common.exception.AccountException
 import com.dirtfy.ppp.data.dto.DataAccount
 import com.dirtfy.ppp.data.dto.DataAccountRecord
 import com.dirtfy.ppp.data.source.repository.AccountRepository
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -20,8 +22,8 @@ class AccountService @Inject constructor(
         number: Int,
         name: String,
         phoneNumber: String
-    ) = asFlow {
-        accountRepository.let {
+    ) = flow {
+        val account = accountRepository.let {
             if (it.isSameNumberExist(number))
                 throw AccountException.NonUniqueNumber()
 
@@ -39,18 +41,19 @@ class AccountService @Inject constructor(
                 )
             )
         }
+        emit(account)
     }
 
-    fun createAccountNumber() = asFlow {
+    fun createAccountNumber() = flow {
         val maxAccountNumber = accountRepository.getMaxAccountNumber()
         var candidate = Random.nextInt(maxAccountNumber)
         while(accountRepository.isSameNumberExist(candidate)) {
             candidate = Random.nextInt(maxAccountNumber)
         }
-        candidate
+        emit(candidate)
     }
 
-    fun readAllAccounts() = asFlow {
+    fun readAllAccounts() = flow<List<DataAccount>> {
         accountRepository.readAllAccount()
     }
 
@@ -58,8 +61,8 @@ class AccountService @Inject constructor(
         number: Int,
         name: String,
         phoneNumber: String
-    ) = asFlow {
-        accountRepository.let {
+    ) = flow {
+        val account = accountRepository.let {
             if (!it.isNumberExist(number))
                 throw AccountException.InvalidNumber()
 
@@ -73,9 +76,10 @@ class AccountService @Inject constructor(
                 )
             )
         }
+        emit(account)
     }
 
-    fun readAccountRecord(accountNumber: Int) = asFlow {
+    fun readAccountRecord(accountNumber: Int) = flow<List<DataAccountRecord>> {
         if (!accountRepository.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()
 
@@ -86,7 +90,7 @@ class AccountService @Inject constructor(
         accountNumber: Int,
         issuedName: String,
         difference: Int
-    ) = asFlow {
+    ) = flow {
         if (!accountRepository.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()
 
@@ -96,7 +100,7 @@ class AccountService @Inject constructor(
         if (result < 0)
             throw AccountException.InvalidBalance()
 
-        accountRepository.createRecord(
+        val record = accountRepository.createRecord(
             accountNumber = accountNumber,
             record = DataAccountRecord(
                 issuedName = issuedName,
@@ -104,5 +108,12 @@ class AccountService @Inject constructor(
                 result = result
             )
         )
+        emit(record)
     }
+
+    fun accountStream() = accountRepository.accountStream()
+
+    fun accountRecordStream(accountNumber: Int) =
+        accountRepository.accountRecordStream(accountNumber)
+            .map { it.sortedBy { data -> -data.timestamp } }
 }

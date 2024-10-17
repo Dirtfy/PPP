@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ui.dto
+package com.dirtfy.ppp.ui.dto.record
 
 import com.dirtfy.ppp.data.dto.DataRecord
 import com.dirtfy.ppp.data.dto.DataRecordType

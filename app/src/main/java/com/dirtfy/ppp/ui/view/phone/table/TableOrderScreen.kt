@@ -15,8 +15,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Dialog
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiPointUse
-import com.dirtfy.ppp.ui.dto.UiTableOrder
+import com.dirtfy.ppp.ui.dto.table.UiPointUse
+import com.dirtfy.ppp.ui.dto.table.UiTableOrder
 import javax.inject.Inject
 
 class TableOrderScreen @Inject constructor(

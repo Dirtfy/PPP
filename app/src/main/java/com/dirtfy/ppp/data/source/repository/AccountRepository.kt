@@ -2,6 +2,7 @@ package com.dirtfy.ppp.data.source.repository
 
 import com.dirtfy.ppp.data.dto.DataAccount
 import com.dirtfy.ppp.data.dto.DataAccountRecord
+import kotlinx.coroutines.flow.Flow
 
 interface AccountRepository {
 
@@ -21,4 +22,7 @@ interface AccountRepository {
     suspend fun isSameNumberExist(accountNumber: Int): Boolean
     suspend fun isNumberExist(accountNumber: Int): Boolean
     suspend fun getMaxAccountNumber(): Int
+
+    fun accountStream(): Flow<List<DataAccount>>
+    fun accountRecordStream(accountNumber: Int): Flow<List<DataAccountRecord>>
 }

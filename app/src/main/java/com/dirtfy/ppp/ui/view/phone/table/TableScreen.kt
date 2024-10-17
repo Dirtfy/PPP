@@ -43,11 +43,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiMenu
-import com.dirtfy.ppp.ui.dto.UiPointUse
-import com.dirtfy.ppp.ui.dto.UiTable
-import com.dirtfy.ppp.ui.dto.UiTableMode
-import com.dirtfy.ppp.ui.dto.UiTableOrder
+import com.dirtfy.ppp.ui.dto.menu.UiMenu
+import com.dirtfy.ppp.ui.dto.table.UiPointUse
+import com.dirtfy.ppp.ui.dto.table.UiTable
+import com.dirtfy.ppp.ui.dto.table.UiTableMode
+import com.dirtfy.ppp.ui.dto.table.UiTableOrder
 import com.dirtfy.ppp.ui.presenter.controller.table.TableController
 import javax.inject.Inject
 

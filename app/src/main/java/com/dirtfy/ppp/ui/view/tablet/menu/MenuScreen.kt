@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.ui.dto.UiMenu
+import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
 import com.dirtfy.ppp.ui.view.phone.Component
