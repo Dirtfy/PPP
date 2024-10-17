@@ -69,7 +69,12 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
             }
             .catch { cause ->
                 Log.e(TAG, "uiAccountScreenState - combine failed \n ${cause.message}")
+
+                // TODO 더 기가 막힌 방법 생각해보기
                 UiAccountScreenState(
+                    searchClue = searchClueFlow.value,
+                    mode = modeFlow.value,
+                    nowAccount = nowAccountFlow.value,
                     accountListState = UiScreenState(UiState.FAIL, cause.message)
                 )
             }

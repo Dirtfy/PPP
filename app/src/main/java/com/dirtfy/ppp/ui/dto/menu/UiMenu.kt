@@ -4,8 +4,8 @@ import com.dirtfy.ppp.data.dto.DataMenu
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 
 data class UiMenu(
-    val name: String,
-    val price: String
+    val name: String = "",
+    val price: String = ""
 ) {
 
     companion object {

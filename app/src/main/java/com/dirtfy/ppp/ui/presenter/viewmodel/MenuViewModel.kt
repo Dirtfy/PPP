@@ -1,109 +1,140 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.common.exception.MenuException
 import com.dirtfy.ppp.data.logic.MenuService
 import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
+import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.dto.menu.UiMenu.Companion.convertToUiMenu
+import com.dirtfy.ppp.ui.dto.menu.screen.UiMenuScreenState
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
+import com.dirtfy.tagger.Tagger
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MenuViewModel: ViewModel(), MenuController {
+class MenuViewModel: ViewModel(), MenuController, Tagger {
 
     private val menuService = MenuService(MenuFireStore())
 
-    private val _menuList: MutableStateFlow<FlowState<List<UiMenu>>>
-    = MutableStateFlow(FlowState.loading())
-    private var _menuListLastValue: List<UiMenu>
-    = emptyList()
-    override val menuList: StateFlow<FlowState<List<UiMenu>>>
-        get() =_menuList
+    private val menuListFlow: Flow<List<UiMenu>> = menuService.menuStream().map {
+        it.map { menu -> menu.convertToUiMenu() }
+    }
 
-    private val _searchClue: MutableStateFlow<String>
-    = MutableStateFlow("")
-    override val searchClue: StateFlow<String>
-        get() = _searchClue
+    private val searchClueFlow = MutableStateFlow("")
+    private val newMenuFlow = MutableStateFlow(UiMenu())
+    private val newMenuStateFlow = MutableStateFlow(UiScreenState(UiState.COMPLETE))
+    private val deleteMenuStateFlow = MutableStateFlow(UiScreenState(UiState.COMPLETE))
 
-    private val _newMenu: MutableStateFlow<UiMenu>
-    = MutableStateFlow(UiMenu("", ""))
-    override val newMenu: StateFlow<UiMenu>
-        get() = _newMenu
+    override val uiMenuScreenState: StateFlow<UiMenuScreenState>
+        = searchClueFlow
+            .combine(newMenuFlow) { searchClue, newMenu ->
+                UiMenuScreenState(
+                    searchClue = searchClue,
+                    newMenu = newMenu
+                )
+            }
+            .combine(newMenuStateFlow) { state, newMenuState ->
+                state.copy(
+                    newMenuState = newMenuState
+                )
+            }
+            .combine(deleteMenuStateFlow) { state, deleteMenuState ->
+                state.copy(
+                    deleteMenuState = deleteMenuState
+                )
+            }
+            .combine(menuListFlow) { state, menuList ->
+                val filteredList = menuList.filter {
+                    it.name.contains(state.searchClue)
+                }
 
+                var newState = state.copy(
+                    menuList = filteredList
+                )
 
+                if (state.menuList != menuList /* 내용이 달라졌을 때 */
+                    || state.menuList !== menuList /* 내용이 같지만 다른 인스턴스 */
+                    || menuList == emptyList<UiMenu>() /* emptyList()는 항상 같은 인스턴스 */)
+                    newState = newState.copy(
+                        menuListState = UiScreenState(UiState.COMPLETE)
+                    )
 
+                newState
+            }
+            .catch { cause ->
+                Log.e(TAG, "uiMenuScreenState - combine failed \n ${cause.message}")
+
+                // TODO 더 기가 막힌 방법 생각해보기
+                UiMenuScreenState(
+                    searchClue = searchClueFlow.value,
+                    newMenu = newMenuFlow.value,
+                    menuListState = UiScreenState(UiState.FAIL, cause.message)
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = UiMenuScreenState()
+            )
+
+    @Deprecated("screen state synchronized with repository")
     override suspend fun updateMenuList() {
-        menuService.readMenu().conflate().collect {
-            _menuList.value = it.passMap { data ->
-                val newValue = data.map { menu -> menu.convertToUiMenu() }
 
-                _menuListLastValue = newValue
-                newValue
-            }
-        }
     }
 
-    override suspend fun updateSearchClue(clue: String) {
-        _searchClue.value = clue
-        menuService.readMenu().conflate().collect {
-            _menuList.value = it.passMap { data ->
-                val newValue = data.map { menu -> menu.convertToUiMenu() }
-
-                val filteredList = newValue.filter { menu -> menu.name.contains(clue) }
-
-                _menuListLastValue = filteredList
-                filteredList
-            }
-        }
+    override fun updateSearchClue(clue: String) {
+        searchClueFlow.update { clue }
     }
 
-    override suspend fun updateNewMenu(menu: UiMenu) {
-        _newMenu.value = menu
+    override fun updateNewMenu(menu: UiMenu) {
+        newMenuFlow.update { menu }
     }
 
     override suspend fun createMenu(menu: UiMenu) {
         if (menu.name == "") {
-            _menuList.value = FlowState.failed(MenuException.BlankName())
+            newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankName().message) }
             return
         }
         if (menu.price == "") {
-            _menuList.value = FlowState.failed(MenuException.BlankPrice())
+            newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankPrice().message) }
             return
         }
 
+        newMenuStateFlow.update { UiScreenState(UiState.LOADING) }
+
         menuService.createMenu(
             menu.convertToDataMenu()
-        ).conflate().collect {
-            _menuList.value = it.passMap { newData ->
-                val nowList = _menuListLastValue.toMutableList()
-
-                nowList.add(newData.convertToUiMenu())
-
-                _menuListLastValue = nowList
-                nowList
-            }
-
+        ).catch { cause ->
+            Log.e(TAG, "createMenu() - createMenu failed")
+            newMenuStateFlow.update { UiScreenState(UiState.FAIL, cause.message) }
+        }.collect {
+            newMenuFlow.update { UiMenu() }
+            newMenuStateFlow.update { UiScreenState(UiState.COMPLETE) }
         }
     }
 
     override suspend fun deleteMenu(menu: UiMenu) {
+        deleteMenuStateFlow.update { UiScreenState(UiState.LOADING) }
+
         menuService.deleteMenu(
             menu.convertToDataMenu()
-        ).conflate().collect {
-            _menuList.value = it.passMap { data ->
-                val nowList = _menuListLastValue.toMutableList()
-                nowList.removeIf { target ->
-                    target == data.convertToUiMenu()
-                }
-
-                _menuListLastValue = nowList
-                nowList
-            }
+        ).catch { cause ->
+            Log.e(TAG, "deleteMenu() - deleteMenu failed")
+            deleteMenuStateFlow.update { UiScreenState(UiState.FAIL, cause.message) }
+        }.collect {
+            deleteMenuStateFlow.update { UiScreenState(UiState.COMPLETE) }
         }
     }
 

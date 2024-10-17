@@ -29,7 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.view.phone.Component
@@ -45,9 +45,7 @@ class MenuScreen @Inject constructor(
     fun Main(
         controller: MenuController = menuController
     ) {
-        val menuListState by controller.menuList.collectAsStateWithLifecycle()
-        val searchClue by controller.searchClue.collectAsStateWithLifecycle()
-        val newMenu by controller.newMenu.collectAsStateWithLifecycle()
+        val screen by controller.uiMenuScreenState.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request { updateMenuList() }
@@ -58,29 +56,29 @@ class MenuScreen @Inject constructor(
             modifier = Modifier.fillMaxSize()
         ) {
             Component.SearchBar(
-                searchClue = searchClue, onClueChanged = {
-                    controller.request { updateSearchClue(it) }
+                searchClue = screen.searchClue,
+                onClueChanged = {
+                    controller.updateSearchClue(it)
                 },
                 placeholder = "menu name"
             )
             
             NewMenu(
-                newMenu = newMenu,
-                onMenuChanged = {controller.request { updateNewMenu(it) }},
+                newMenu = screen.newMenu,
+                onMenuChanged = { controller.updateNewMenu(it) },
                 onMenuAdd = { controller.request { createMenu(it) } }
             )
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            when(menuListState) {
-                is FlowState.Success -> {
-                    val menuList = (menuListState as FlowState.Success<List<UiMenu>>).data
+            when(screen.menuListState.state) {
+                UiState.COMPLETE -> {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(150.dp),
                         contentPadding = PaddingValues(10.dp)
                     ) {
                         items(
-                            items = menuList,
+                            items = screen.menuList,
                             key = { it.name }
                         ) {
                             ListItem(
@@ -102,14 +100,12 @@ class MenuScreen @Inject constructor(
                         }
                     }
                 }
-                is FlowState.Loading -> {
+                UiState.LOADING -> {
                     CircularProgressIndicator(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                is FlowState.Failed -> {
-                    val throwable = (menuListState as FlowState.Failed<List<UiMenu>>).throwable
-
+                UiState.FAIL -> {
                     AlertDialog(
                         onDismissRequest = { },
                         confirmButton = {
@@ -117,7 +113,7 @@ class MenuScreen @Inject constructor(
                                 Text(text = "OK")
                             }
                         },
-                        title = { Text(text = throwable.message?: "unknown error") }
+                        title = { Text(text = screen.menuListState.failMessage ?: "unknown error") }
                     )
 
                 }
