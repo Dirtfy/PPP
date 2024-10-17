@@ -12,10 +12,10 @@ interface AccountController: Controller {
 
     @Deprecated("screen state synchronized with repository")
     suspend fun updateAccountList()
-    suspend fun updateNowAccount(account: UiAccount)
-    suspend fun updateSearchClue(clue: String)
+    fun updateNowAccount(account: UiAccount)
+    fun updateSearchClue(clue: String)
 
-    suspend fun setMode(mode: UiAccountMode)
+    fun setMode(mode: UiAccountMode)
 
 
     fun request(job: suspend AccountController.() -> Unit)

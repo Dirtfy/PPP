@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel.account
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.logic.AccountService
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -56,12 +58,20 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
                     accountList = filteredAccountList,
                 )
 
-                if (state.accountList !== accountList)
+                if (state.accountList != accountList /* 내용이 달라졌을 때 */
+                    || state.accountList !== accountList /* 내용이 같지만 다른 인스턴스 */
+                    || accountList == emptyList<UiAccount>() /* emptyList()는 항상 같은 인스턴스 */)
                     newState = newState.copy(
                         accountListState = UiScreenState(state = UiState.COMPLETE)
                     )
 
                 newState
+            }
+            .catch { cause ->
+                Log.e(TAG, "uiAccountScreenState - combine failed \n ${cause.message}")
+                UiAccountScreenState(
+                    accountListState = UiScreenState(UiState.FAIL, cause.message)
+                )
             }
             .stateIn(
                 scope = viewModelScope,
@@ -76,15 +86,15 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
         // TODO 다른 기기에서 어카운트 변경시 어떻게 뷰를 변경할 지 정해야 할 듯
     }
 
-    override suspend fun updateNowAccount(account: UiAccount) {
+    override fun updateNowAccount(account: UiAccount) {
         nowAccountFlow.update { account }
     }
 
-    override suspend fun updateSearchClue(clue: String) {
+    override fun updateSearchClue(clue: String) {
         searchClueFlow.update { clue }
     }
 
-    override suspend fun setMode(mode: UiAccountMode) {
+    override fun setMode(mode: UiAccountMode) {
         modeFlow.update { mode }
     }
 

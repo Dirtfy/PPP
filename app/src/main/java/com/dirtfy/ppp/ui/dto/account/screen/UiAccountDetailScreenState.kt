@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.ui.dto.account.screen
 
 import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.account.UiAccount
 import com.dirtfy.ppp.ui.dto.account.UiAccountRecord
 import com.dirtfy.ppp.ui.dto.account.UiNewAccountRecord
@@ -10,5 +11,6 @@ data class UiAccountDetailScreenState(
     val newAccountRecord: UiNewAccountRecord = UiNewAccountRecord(),
     val accountRecordList: List<UiAccountRecord> = emptyList(),
 
-    val accountRecordListState: UiScreenState = UiScreenState()
+    val accountRecordListState: UiScreenState = UiScreenState(),
+    val newAccountRecordState: UiScreenState = UiScreenState(UiState.COMPLETE)
 )
