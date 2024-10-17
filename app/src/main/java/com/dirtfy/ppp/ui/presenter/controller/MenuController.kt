@@ -2,23 +2,20 @@ package com.dirtfy.ppp.ui.presenter.controller
 
 import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
+import com.dirtfy.ppp.ui.dto.menu.screen.UiMenuScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
 interface MenuController: Controller {
-    val menuList: StateFlow<FlowState<List<UiMenu>>>
+    val uiMenuScreenState: StateFlow<UiMenuScreenState>
 
-    val searchClue: StateFlow<String>
-
-    val newMenu: StateFlow<UiMenu>
-
+    @Deprecated("screen state synchronized with repository")
     suspend fun updateMenuList()
-    suspend fun updateSearchClue(clue: String)
 
-    suspend fun updateNewMenu(menu: UiMenu)
+    fun updateSearchClue(clue: String)
+    fun updateNewMenu(menu: UiMenu)
 
     suspend fun createMenu(menu: UiMenu)
-
     suspend fun deleteMenu(menu: UiMenu)
 
     fun request(job: suspend MenuController.() -> Unit)

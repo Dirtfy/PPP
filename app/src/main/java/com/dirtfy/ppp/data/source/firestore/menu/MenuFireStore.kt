@@ -1,11 +1,16 @@
 package com.dirtfy.ppp.data.source.firestore.menu
 
+import androidx.compose.animation.core.snap
 import com.dirtfy.ppp.data.dto.DataMenu
 import com.dirtfy.ppp.data.source.firestore.FireStorePath
 import com.dirtfy.ppp.data.source.firestore.menu.FireStoreMenu.Companion.convertToFireStoreMenu
 import com.dirtfy.ppp.data.source.repository.MenuRepository
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -26,9 +31,18 @@ class MenuFireStore @Inject constructor(): MenuRepository {
     }
 
     override suspend fun readAll(): List<DataMenu> {
-        return ref.get().await().documents.map {
+        val snapshot = ref.get().await()
+        return readAll(snapshot)
+    }
+
+    private fun readAll(
+        menuSnapshot: QuerySnapshot
+    ): List<DataMenu> {
+        return menuSnapshot.documents.map {
             it.toObject(FireStoreMenu::class.java)!!
-        }.map { it.convertToDataMenu() }
+        }.map {
+            it.convertToDataMenu()
+        }
     }
 
     override suspend fun delete(menu: DataMenu): DataMenu {
@@ -49,6 +63,22 @@ class MenuFireStore @Inject constructor(): MenuRepository {
         val matchedDocumentList = query.get().await().documents
 
         return matchedDocumentList.size > 0
+    }
+
+    override fun menuStream(): Flow<List<DataMenu>> = callbackFlow {
+        val menuSubscription = ref.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) { return@addSnapshotListener }
+            try {
+                val menuList = readAll(snapshot)
+                trySend(menuList)
+            } catch (e: Throwable) {
+                // For something wrong...
+            }
+        }
+
+        awaitClose {
+            menuSubscription.remove()
+        }
     }
 
 }

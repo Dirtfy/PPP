@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
 import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
@@ -43,9 +44,7 @@ object MenuScreen: Tagger {
     fun Main(
         controller: MenuController = viewModel<MenuViewModel>()
     ) {
-        val menuListState by controller.menuList.collectAsStateWithLifecycle()
-        val searchClue by controller.searchClue.collectAsStateWithLifecycle()
-        val newMenu by controller.newMenu.collectAsStateWithLifecycle()
+        val screen by controller.uiMenuScreenState.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request { updateMenuList() }
@@ -56,29 +55,28 @@ object MenuScreen: Tagger {
             modifier = Modifier.fillMaxSize()
         ) {
             Component.SearchBar(
-                searchClue = searchClue, onClueChanged = {
+                searchClue = screen.searchClue, onClueChanged = {
                     controller.request { updateSearchClue(it) }
                 },
                 placeholder = "menu name"
             )
             
             NewMenu(
-                newMenu = newMenu,
-                onMenuChanged = {controller.request { updateNewMenu(it) }},
+                newMenu = screen.newMenu,
+                onMenuChanged = { controller.updateNewMenu(it) },
                 onMenuAdd = { controller.request { createMenu(it) } }
             )
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            when(menuListState) {
-                is FlowState.Success -> {
-                    val menuList = (menuListState as FlowState.Success<List<UiMenu>>).data
+            when(screen.menuListState.state) {
+                UiState.COMPLETE -> {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(150.dp),
                         contentPadding = PaddingValues(10.dp)
                     ) {
                         items(
-                            items = menuList,
+                            items = screen.menuList,
                             key = { it.name }
                         ) {
                             ListItem(
@@ -100,14 +98,12 @@ object MenuScreen: Tagger {
                         }
                     }
                 }
-                is FlowState.Loading -> {
+                UiState.LOADING -> {
                     CircularProgressIndicator(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                is FlowState.Failed -> {
-                    val throwable = (menuListState as FlowState.Failed<List<UiMenu>>).throwable
-
+                UiState.FAIL -> {
                     AlertDialog(
                         onDismissRequest = { },
                         confirmButton = {
@@ -115,7 +111,7 @@ object MenuScreen: Tagger {
                                 Text(text = "OK")
                             }
                         },
-                        title = { Text(text = throwable.message?: "unknown error") }
+                        title = { Text(text = screen.menuListState.failMessage ?: "unknown error") }
                     )
 
                 }

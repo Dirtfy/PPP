@@ -25,4 +25,6 @@ class MenuService @Inject constructor(
     fun deleteMenu(menu: DataMenu) = asFlow {
         menuRepository.delete(menu)
     }
+
+    fun menuStream() = menuRepository.menuStream()
 }
