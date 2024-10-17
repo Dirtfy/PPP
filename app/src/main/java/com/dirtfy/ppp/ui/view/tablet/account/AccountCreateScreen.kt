@@ -31,7 +31,7 @@ object AccountCreateScreen {
 
     @Composable
     fun Main(
-        controller: AccountCreateController = viewModel<AccountCreateViewModel>(),
+        controller: AccountCreateController = viewModel<AccountCreateViewModel>(), // TODO DI - tablet UI viewmodel
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
         val screen by controller.uiAccountCreateScreenState.collectAsStateWithLifecycle()
@@ -39,9 +39,9 @@ object AccountCreateScreen {
         ScreenContent(
             newAccount = screen.newAccount,
             onValueChange = { controller.updateNewAccount(it) },
-            onAutoGenerateClick = { controller.setRandomValidAccountNumberToNewAccount() },
+            onAutoGenerateClick = { controller.request { setRandomValidAccountNumberToNewAccount() } },
             onCreateClick = {
-                controller.addAccount(screen.newAccount)
+                controller.request { addAccount(screen.newAccount) }
                 onAccountCreate(screen.newAccount)
             }
         )

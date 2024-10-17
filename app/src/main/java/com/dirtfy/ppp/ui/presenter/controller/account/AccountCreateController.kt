@@ -11,8 +11,8 @@ interface AccountCreateController: Controller {
 
     @Deprecated("screen state synchronized with repository")
     fun updateNewAccount(newAccountData: UiNewAccount)
-    fun addAccount(newAccountData: UiNewAccount)
-    fun setRandomValidAccountNumberToNewAccount()
+    suspend fun addAccount(newAccountData: UiNewAccount)
+    suspend fun setRandomValidAccountNumberToNewAccount()
 
     fun request(job: suspend AccountCreateController.() -> Unit)
 }

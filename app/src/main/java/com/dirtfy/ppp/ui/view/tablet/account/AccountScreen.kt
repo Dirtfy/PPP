@@ -52,9 +52,7 @@ object AccountScreen {
         val scanLauncher = rememberLauncherForActivityResult(
             contract = ScanContract()
         ) {
-            controller.request {
-                updateSearchClue(it.contents?:"")
-            }
+            controller.updateSearchClue(it.contents?:"")
         }
 
         LaunchedEffect(key1 = controller) {
@@ -67,30 +65,28 @@ object AccountScreen {
             accountList = uiAccountScreen.accountList,
             accountListState = uiAccountScreen.accountListState,
             mode = uiAccountScreen.mode,
-            onClueChanged = { controller.request { updateSearchClue(it) } },
+            onClueChanged = { controller.updateSearchClue(it) },
             onBarcodeIconClick = {
                 scanLauncher.launch(
                     ScanOptions().setOrientationLocked(false)
                 )
             },
-            onAddIconClick = { controller.request { setMode(UiAccountMode.Create) } },
+            onAddIconClick = { controller.setMode(UiAccountMode.Create) },
             onItemClick = {
-                controller.request {
-                    updateNowAccount(it)
-                    setMode(UiAccountMode.Detail)
-                }
+                controller.updateNowAccount(it)
+                controller.setMode(UiAccountMode.Detail)
             },
             onRetryClick = {
                 controller.request { updateAccountList() }
             },
             onAccountCreate = {
+                controller.setMode(UiAccountMode.Main)
                 controller.request {
-                    setMode(UiAccountMode.Main)
                     updateAccountList()
                 }
             },
             onDismissRequest = {
-                controller.request { setMode(UiAccountMode.Main) }
+                controller.setMode(UiAccountMode.Main)
             }
         )
     }

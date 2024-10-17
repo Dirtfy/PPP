@@ -66,7 +66,7 @@ class AccountDetailScreen @Inject constructor(
             recordList = screen.accountRecordList,
             recordListState = screen.accountRecordListState,
             onRecordChange = {
-                controller.request { updateNewAccountRecord(it) }
+                controller.updateNewAccountRecord(it)
             },
             onAddClick = {
                 controller.request { addRecord(it) }
