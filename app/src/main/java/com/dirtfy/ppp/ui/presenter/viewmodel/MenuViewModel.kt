@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel
 
 import android.util.Log
+import android.view.Menu
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.MenuException
@@ -104,13 +105,15 @@ class MenuViewModel: ViewModel(), MenuController, Tagger {
 
     override suspend fun createMenu(menu: UiMenu) {
         if (menu.name == "") {
-            throw MenuException.BlankName()
+            newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankName().message) }
+            return
         }
         if (menu.price == "") {
-            throw MenuException.BlankPrice()
+            newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankPrice().message) }
+            return
         }
 
-        newMenuStateFlow.update { UiScreenState() }
+        newMenuStateFlow.update { UiScreenState(UiState.LOADING) }
 
         menuService.createMenu(
             menu.convertToDataMenu()
