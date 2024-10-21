@@ -53,6 +53,7 @@ class AccountService @Inject constructor(
         emit(candidate)
     }
 
+    // TODO deprecate 시키기
     fun readAllAccounts() = flow<List<DataAccount>> {
         accountRepository.readAllAccount()
     }
@@ -79,6 +80,7 @@ class AccountService @Inject constructor(
         emit(account)
     }
 
+    // TODO deprecate 시키기
     fun readAccountRecord(accountNumber: Int) = flow<List<DataAccountRecord>> {
         if (!accountRepository.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()

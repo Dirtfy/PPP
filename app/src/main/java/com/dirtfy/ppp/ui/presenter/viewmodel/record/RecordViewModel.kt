@@ -1,81 +1,120 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel.record
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.data.logic.RecordService
 import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
+import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.record.UiRecord
 import com.dirtfy.ppp.ui.dto.record.UiRecord.Companion.convertToRawUiRecord
 import com.dirtfy.ppp.ui.dto.record.UiRecord.Companion.convertToUiRecord
 import com.dirtfy.ppp.ui.dto.record.UiRecordMode
+import com.dirtfy.ppp.ui.dto.record.screen.UiRecordScreenState
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RecordViewModel: ViewModel(), RecordController, Tagger {
 
     private val recordService: RecordService = RecordService(RecordFireStore())
 
-    private var _rawRecordList: List<UiRecord>
-    = emptyList()
-    private val _recordList: MutableStateFlow<FlowState<List<UiRecord>>>
-    = MutableStateFlow(FlowState.loading())
-    override val recordList: StateFlow<FlowState<List<UiRecord>>>
-        get() = _recordList
+    private val searchClueFlow = MutableStateFlow("")
+    private val nowRecordFlow = MutableStateFlow(UiRecord())
+    private val modeFlow = MutableStateFlow(UiRecordMode.Main)
+    private val rawRecordListFlow = MutableStateFlow(emptyList<UiRecord>())
+    private val nowRecordStateFlow = MutableStateFlow(UiScreenState(UiState.COMPLETE))
 
-    private val _searchClue: MutableStateFlow<String>
-    = MutableStateFlow("")
-    override val searchClue: StateFlow<String>
-        get() = _searchClue
+    private val recordStream = recordService.recordStream()
+        .map {
+            rawRecordListFlow.value = it.map { data -> data.convertToRawUiRecord() }
+            it.map { data -> data.convertToUiRecord() }
+        }
 
-    private val _nowRecord: MutableStateFlow<UiRecord>
-    = MutableStateFlow(UiRecord("", "", ""))
-    override val nowRecord: StateFlow<UiRecord>
-        get() = _nowRecord
+    override val screenData: StateFlow<UiRecordScreenState>
+        = searchClueFlow
+            .combine(modeFlow) { searchClue, mode ->
+                UiRecordScreenState(
+                    searchClue = searchClue,
+                    mode = mode
+                )
+            }.combine(nowRecordFlow) { state, nowRecord ->
+                state.copy(
+                    nowRecord = nowRecord
+                )
+            }.combine(nowRecordStateFlow) { state, nowRecordState ->
+                state.copy(
+                    nowRecordState = nowRecordState
+                )
+            }.combine(recordStream) { state, recordList ->
+                // TODO searchClue 구현되면 여기서 filtering
+                /*val filteredAccountList = recordList.filter {
+                    it.number.contains(state.searchClue)
+                }
+                var newState = state.copy(
+                    accountList = filteredAccountList,
+                )*/
+                var newState = state.copy(
+                    recordList = recordList
+                )
+                if (state.recordList != recordList /* 내용이 달라졌을 때 */
+                    || state.recordList !== recordList /* 내용이 같지만 다른 인스턴스 */
+                    || recordList == emptyList<UiRecord>() /* emptyList()는 항상 같은 인스턴스 */)
+                    newState = newState.copy(
+                        recordListState = UiScreenState(state = UiState.COMPLETE)
+                    )
 
-    private val _mode: MutableStateFlow<UiRecordMode>
-    = MutableStateFlow(UiRecordMode.Main)
-    override val mode: StateFlow<UiRecordMode>
-        get() = _mode
+                newState
+            }.catch { cause ->
+                // TODO 더 기가 막힌 방법 생각해보기
+                UiRecordScreenState(
+                    searchClue = searchClueFlow.value,
+                    mode = modeFlow.value,
+                    nowRecord = nowRecordFlow.value,
+                    nowRecordState = nowRecordStateFlow.value,
+                    recordListState = UiScreenState(UiState.FAIL, cause.message)
+                )
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = UiRecordScreenState()
+            )
 
-    private suspend fun _updateRecordList() {
-        recordService.readRecords().conflate().collect {
-            _recordList.value = it.passMap { data ->
+    @Deprecated("screen state synchronized with repository")
+    override suspend fun updateRecordList() {
+    }
 
-                _rawRecordList = data.map { record -> record.convertToRawUiRecord() }
+    override fun updateSearchClue(clue: String) {
+        searchClueFlow.update { clue }
+    }
 
-                data.map { record -> record.convertToUiRecord() }
+    override fun updateNowRecord(record: UiRecord) {
+        // TODO Utils 함수 바뀌면 substring 길이 바뀌어야함
+        val rawValue = rawRecordListFlow.value.find {
+            it.timestamp.substring(0,16) == record.timestamp
+        }
+        if(rawValue == null)
+            nowRecordStateFlow.update {
+                // TODO 이거 에러 처리 하는 부분 뷰 레이어에 필요함.
+                UiScreenState(UiState.FAIL, RecordException.NonExistQuery().message)
             }
-        }
-    }
-    override fun updateRecordList() = request {
-        _updateRecordList()
-    }
-
-    override fun updateSearchClue(clue: String) = request {
-        _searchClue.value = clue
-    }
-
-    override fun updateNowRecord(record: UiRecord) = request {
-        val rawValue = _rawRecordList.find {
-            Log.d(TAG,"${it.timestamp.substring(0, 16)} - ${record.timestamp}")
-            it.timestamp.substring(0, 16) == record.timestamp
-        }
-            ?: throw RecordException.NonExistQuery()
-        _nowRecord.value = rawValue // TODO issued name 어떻게 주지?
+        else nowRecordFlow.update { rawValue } // TODO issued name 어떻게 주지?
     }
 
     override fun setMode(mode: UiRecordMode) = request {
-        _mode.value = mode
+        modeFlow.update { mode }
     }
 
-    fun request(job: suspend RecordViewModel.() -> Unit) {
+    override fun request(job: suspend RecordController.() -> Unit) {
         viewModelScope.launch {
             job()
         }

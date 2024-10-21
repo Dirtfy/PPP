@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.record.UiRecord
 import com.dirtfy.ppp.ui.dto.record.UiRecordDetail
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordDetailController
@@ -39,8 +41,7 @@ object RecordDetailScreen {
         firstRecord: UiRecord,
         controller: RecordDetailController = viewModel<RecordDetailViewModel>()
     ) {
-        val recordDetailListState by controller.recordDetailList.collectAsStateWithLifecycle()
-        val nowRecord by controller.nowRecord.collectAsStateWithLifecycle()
+        val screenData by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.run {
@@ -50,10 +51,11 @@ object RecordDetailScreen {
         }
 
         ScreenContent(
-            nowRecord = nowRecord,
-            recordDetailListState = recordDetailListState,
+            nowRecord = screenData.nowRecord,
+            recordDetailList = screenData.recordDetailList,
+            recordDetailListState = screenData.recordDetailListState,
             onRetryClick = {
-                controller.updateRecordDetailList(nowRecord)
+                controller.request { updateRecordDetailList(screenData.nowRecord) }
             }
         )
     }
@@ -61,7 +63,8 @@ object RecordDetailScreen {
     @Composable
     fun ScreenContent(
         nowRecord: UiRecord,
-        recordDetailListState: FlowState<List<UiRecordDetail>>,
+        recordDetailList: List<UiRecordDetail>,
+        recordDetailListState: UiScreenState,
         onRetryClick: () -> Unit
     ) {
         Surface(
@@ -76,6 +79,7 @@ object RecordDetailScreen {
                 ) {
                     RecordDetailHead(nowRecord = nowRecord)
                     RecordDetailListState(
+                        recordDetailList = recordDetailList,
                         recordDetailListState = recordDetailListState,
                         onRetryClick = onRetryClick
                     )
@@ -112,22 +116,21 @@ object RecordDetailScreen {
 
     @Composable
     fun RecordDetailListState(
-        recordDetailListState: FlowState<List<UiRecordDetail>>,
+        recordDetailList: List<UiRecordDetail>,
+        recordDetailListState: UiScreenState,
         onRetryClick: () -> Unit
     ) {
-        when(recordDetailListState) {
-            is FlowState.Success -> {
-                val recordDetailList = recordDetailListState.data
+        when(recordDetailListState.state) {
+            UiState.COMPLETE -> {
                 if (recordDetailList.isNotEmpty())
                     RecordDetailList(recordDetailList = recordDetailList)
             }
-            is FlowState.Loading -> {
+            UiState.LOADING -> {
                 RecordDetailListLoading()
             }
-            is FlowState.Failed -> {
-                val throwable = recordDetailListState.throwable
+            UiState.FAIL -> {
                 RecordDetailListLoadFail(
-                    throwable = throwable,
+                    failMessage = recordDetailListState.failMessage,
                     onRetryClick = onRetryClick
                 )
             }
@@ -170,7 +173,7 @@ object RecordDetailScreen {
 
     @Composable
     fun RecordDetailListLoadFail(
-        throwable: Throwable,
+        failMessage: String?,
         onRetryClick: () -> Unit
     ) {
         AlertDialog(
@@ -185,7 +188,7 @@ object RecordDetailScreen {
                     Text(text = "Retry")
                 }
             },
-            title = { Text(text = throwable.message?: "unknown error") }
+            title = { Text(text = failMessage ?: "unknown error") }
         )
     }
 }

@@ -19,9 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.record.UiRecord
 import com.dirtfy.ppp.ui.dto.record.UiRecordMode
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
+import com.dirtfy.ppp.ui.view.tablet.record.RecordScreen.RecordDetailDialog
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(
@@ -34,20 +37,19 @@ class RecordScreen @Inject constructor(
     fun Main(
         controller: RecordController = recordController
     ) {
-        val recordListState by controller.recordList.collectAsStateWithLifecycle()
-        val searchClue by controller.searchClue.collectAsStateWithLifecycle()
-        val nowRecord by controller.nowRecord.collectAsStateWithLifecycle()
-        val mode by controller.mode.collectAsStateWithLifecycle()
+        val screenData by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.updateRecordList()
         }
 
         ScreenContent(
-            searchClue = searchClue,
-            recordListState = recordListState,
-            nowRecord = nowRecord,
-            mode = mode,
+            searchClue = screenData.searchClue,
+            recordList = screenData.recordList,
+            recordListState = screenData.recordListState,
+            nowRecord = screenData.nowRecord,
+            nowRecordState = screenData.nowRecordState,
+            mode = screenData.mode,
             onClueChanged = { controller.updateSearchClue(it) },
             onItemClick = {
                 controller.run{
@@ -59,7 +61,7 @@ class RecordScreen @Inject constructor(
                 controller.setMode(UiRecordMode.Main)
             },
             onRetryClick = {
-                controller.updateRecordList()
+                controller.request { updateRecordList() }
             }
         )
 
@@ -68,8 +70,10 @@ class RecordScreen @Inject constructor(
     @Composable
     fun ScreenContent(
         searchClue: String,
-        recordListState: FlowState<List<UiRecord>>,
+        recordList: List<UiRecord>,
+        recordListState: UiScreenState,
         nowRecord: UiRecord,
+        nowRecordState: UiScreenState,
         mode: UiRecordMode,
         onClueChanged: (String) -> Unit,
         onItemClick: (UiRecord) -> Unit,
@@ -83,6 +87,7 @@ class RecordScreen @Inject constructor(
 //                placeholder = "record date"
 //            )
             RecordListState(
+                recordList = recordList,
                 recordListState = recordListState,
                 onItemClick = onItemClick,
                 onRetryClick = onRetryClick
@@ -102,25 +107,24 @@ class RecordScreen @Inject constructor(
 
     @Composable
     fun RecordListState(
-        recordListState: FlowState<List<UiRecord>>,
+        recordList: List<UiRecord>,
+        recordListState: UiScreenState,
         onItemClick: (UiRecord) -> Unit,
         onRetryClick: () -> Unit
     ) {
-        when(recordListState) {
-            is FlowState.Success -> {
-                val recordList = recordListState.data
+        when(recordListState.state) {
+            UiState.COMPLETE -> {
                 RecordList(
                     recordList = recordList,
                     onItemClick = onItemClick
                 )
             }
-            is FlowState.Loading -> {
+            UiState.LOADING -> {
                 RecordListLoading()
             }
-            is FlowState.Failed -> {
-                val throwable = recordListState.throwable
+            UiState.FAIL -> {
                 RecordListLoadFail(
-                    throwable = throwable,
+                    failMessage = recordListState.failMessage,
                     onRetryClick = onRetryClick
                 )
             }
@@ -155,7 +159,7 @@ class RecordScreen @Inject constructor(
 
     @Composable
     fun RecordListLoadFail(
-        throwable: Throwable,
+        failMessage: String?,
         onRetryClick: () -> Unit
     ) {
         AlertDialog(
@@ -170,7 +174,7 @@ class RecordScreen @Inject constructor(
                     Text(text = "Retry")
                 }
             },
-            title = { Text(text = throwable.message?: "unknown error") }
+            title = { Text(text = failMessage ?: "unknown error") }
         )
     }
 

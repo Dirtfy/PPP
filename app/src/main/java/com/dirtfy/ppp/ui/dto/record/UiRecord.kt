@@ -5,9 +5,9 @@ import com.dirtfy.ppp.data.dto.DataRecordType
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 
 data class UiRecord(
-    val timestamp: String,
-    val income: String,
-    val type: String
+    val timestamp: String = "",
+    val income: String = "",
+    val type: String = ""
 ) {
 
     companion object {
