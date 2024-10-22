@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
 object Component {
@@ -27,6 +29,7 @@ object Component {
         searchClue: String,
         onClueChanged: (String) -> Unit,
         modifier: Modifier = Modifier,
+        isNumber: Boolean = false,
         placeholder: String = "",
         trailingContent: @Composable () -> Unit = {},
     ) {
@@ -54,7 +57,10 @@ object Component {
                         ),
                         placeholder = { Text(text = placeholder) },
                         singleLine = true,
-                        modifier = Modifier.widthIn(200.dp, 400.dp)
+                        modifier = Modifier.widthIn(200.dp, 400.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = if (isNumber) KeyboardType.Number else KeyboardType.Text
+                        )
                     )
 
                     Spacer(modifier = Modifier.size(10.dp))

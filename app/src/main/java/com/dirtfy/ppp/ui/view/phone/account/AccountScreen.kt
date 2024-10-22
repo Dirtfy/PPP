@@ -172,7 +172,8 @@ class AccountScreen @Inject constructor(
         Component.SearchBar(
             searchClue = searchClue,
             onClueChanged = onClueChanged,
-            placeholder = "account number"
+            placeholder = "account number",
+            isNumber = true
         ) {
             BarcodeIcon(onClick = onBarcodeIconClick)
             Spacer(modifier = Modifier.size(10.dp))
