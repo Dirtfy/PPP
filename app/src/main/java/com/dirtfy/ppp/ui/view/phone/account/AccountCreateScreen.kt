@@ -174,7 +174,10 @@ class AccountCreateScreen @Inject constructor(
             value = nowAccount.name,
             onValueChange = {
                 onValueChange(nowAccount.copy(name = it))
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            )
         )
     }
 
