@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.data.logic
 
 import com.dirtfy.ppp.common.FlowState
-import com.dirtfy.ppp.common.exception.AccountException
 import com.dirtfy.ppp.common.exception.CustomException
 import com.dirtfy.ppp.common.exception.ExternalException
 import kotlinx.coroutines.Dispatchers
