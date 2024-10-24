@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.flowOn
 
 interface Service {
 
-    fun <T> Flow<T>.categorize() =
+    fun <T> Flow<T>.convertExceptionAsCheckedException() =
         this.catch { e ->
             if (e is CustomException) throw e
             else {
@@ -34,11 +34,11 @@ interface Service {
     }.catch {
         emit(FlowState.failed(it))
         println(it.message)
-    }.flowOn(Dispatchers.Default).categorize()
+    }.flowOn(Dispatchers.Default).convertExceptionAsCheckedException()
 
     fun <T> operate(func: suspend () -> T) = flow {
         emit(func())
-    }.flowOn(Dispatchers.Default).categorize()
+    }.flowOn(Dispatchers.Default).convertExceptionAsCheckedException()
 
 
 }
