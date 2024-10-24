@@ -64,8 +64,8 @@ class RecordViewModel: ViewModel(), RecordController, Tagger {
 
     override fun updateNowRecord(record: UiRecord) = request {
         val rawValue = _rawRecordList.find {
-            Log.d(TAG,"${it.timestamp.substring(0, 16)} - ${record.timestamp}")
-            it.timestamp.substring(0, 16) == record.timestamp
+            Log.d(TAG,"${it.timestamp} - ${record.timestamp}")
+            it.timestamp == record.timestamp
         }
             ?: throw RecordException.NonExistQuery()
         _nowRecord.value = rawValue // TODO issued name 어떻게 주지?

@@ -21,7 +21,7 @@ class TableOrderViewModel: ViewModel(), TableOrderController, Tagger {
     private fun DataTableOrder.convertToUiTableOrder(): UiTableOrder {
         return UiTableOrder(
             name = name,
-            price = Utils.currencyFormatting(price),
+            price = Utils.formatCurrency(price),
             count = count.toString()
         )
     }

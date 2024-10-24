@@ -33,6 +33,7 @@ class RecordDetailViewModel: ViewModel(), RecordDetailController, Tagger {
 
     private suspend fun _updateRecordDetailList(record: UiRecord) {
         Log.d(TAG, "$record")
+        Log.d(TAG, "${record.convertToDataRecordFromRaw()}")
         recordService.readRecordDetail(record.convertToDataRecordFromRaw())
             .conflate().collect {
                 _recordDetailList.value = it.passMap { data ->

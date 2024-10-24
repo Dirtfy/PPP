@@ -55,6 +55,7 @@ class RecordFireStore @Inject constructor(): RecordRepository, Tagger {
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
         val query = recordRef
             .whereEqualTo("timestamp", Timestamp(Date(record.timestamp)))
+        Log.d(TAG, "${Timestamp(Date(record.timestamp))}")
         val document = query.get().await().documents
         Log.d(TAG, "${record.timestamp}")
 

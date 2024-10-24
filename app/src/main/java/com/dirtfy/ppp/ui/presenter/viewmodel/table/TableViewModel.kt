@@ -89,7 +89,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     private fun DataTableOrder.convertToUiTableOrder(): UiTableOrder {
         return UiTableOrder(
             name = name,
-            price = Utils.currencyFormatting(price),
+            price = Utils.formatCurrency(price),
             count = count.toString()
         )
     }
@@ -97,7 +97,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     private fun UiTableOrder.convertToDataTableOrder(): DataTableOrder {
         return DataTableOrder(
             name = name,
-            price = Utils.currencyReformatting(price),
+            price = Utils.parseCurrency(price),
             count = count.toInt()
         )
     }
@@ -158,7 +158,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             .conflate().collect {
                 _orderList.value = it.passMap { data ->
                     _orderTotalPrice.value = Utils
-                        .currencyFormatting(
+                        .formatCurrency(
                             data.sumOf { order -> order.price * order.count }
                         )
                     data.map { order -> order.convertToUiTableOrder() }
@@ -437,7 +437,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
 
                     _orderTotalPrice.value =
                         Utils
-                            .currencyFormatting(
+                            .formatCurrency(
                                 newList
                                     .map { order -> order.convertToDataTableOrder() }
                                     .sumOf { order -> order.price * order.count }
@@ -451,7 +451,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
     override fun addOrder(name: String, price: String) = request {
         val tableNumber = selectedTableNumber
-        val menuPrice = Utils.currencyReformatting(price)
+        val menuPrice = Utils.parseCurrency(price)
         _addOrder(tableNumber, name, menuPrice)
     }
 
@@ -483,7 +483,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
 
                     _orderTotalPrice.value =
                         Utils
-                            .currencyFormatting(
+                            .formatCurrency(
                                 newList
                                     .map { order -> order.convertToDataTableOrder() }
                                     .sumOf { order -> order.price * order.count }
@@ -497,7 +497,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
     override fun cancelOrder(name: String, price: String) = request {
         val tableNumber = selectedTableNumber
-        val menuPrice = Utils.currencyReformatting(price)
+        val menuPrice = Utils.parseCurrency(price)
         _cancelOrder(tableNumber, name, menuPrice)
     }
 
