@@ -65,4 +65,27 @@ object Utils {
 
         return simpleDateFormat.parse(time.substring(0, 16))?.time?.plus(underMinute) ?: -1L
     }
+
+    fun timestampFormatting(timestamp: Long): String {
+        val date = Date(timestamp)
+
+        val formatter = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss.SSS",
+            Locale.getDefault()
+        )
+
+        return formatter.format(date)
+    }
+
+    fun parseMillisStringToTimestamp(dateString: String): Long {
+        val formatter = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss.SSS",
+            Locale.getDefault()
+        )
+
+        val date: Date = formatter.parse(dateString)
+            ?: throw IllegalArgumentException("Invalid date format")
+
+        return date.time
+    }
 }
