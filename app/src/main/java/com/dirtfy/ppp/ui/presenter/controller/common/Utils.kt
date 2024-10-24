@@ -15,72 +15,18 @@ object Utils {
         return price.split(",").joinToString(separator = "").toInt()
     }
 
-    fun formatTimestampFromDay(time: Long): String {
-        val dateFormat = "yyyy.MM.dd"
-        val date = Date(time)
-        val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
-
-        return simpleDateFormat.format(date)
-    }
-
-    fun parseTimestampFromDay(time: String): Long {
-        val dateFormat = "yyyy.MM.dd"
-        val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
-
-        return simpleDateFormat.parse(time)?.time ?: -1L
-    }
-
-    fun formatTimestampFromMinute(time: Long): String {
-        val dateFormat = "yyyy.MM.dd HH:mm"
-        val date = Date(time)
-        val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
-
-        return simpleDateFormat.format(date)
-    }
-
-    fun parseTimestampFromMinute(time: String): Long {
-        val dateFormat = "yyyy.MM.dd HH:mm"
-        val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
-
-        return simpleDateFormat.parse(time)?.time ?: -1L
-    }
-
-    fun formatTimestampFromSecond(time: Long): String {
-        val dateFormat = "yyyy.MM.dd HH:mm"
-        val date = Date(time)
-        val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
-
-        val formed = simpleDateFormat.let {
-            it.parse(it.format(date))?.time!!
-        }
-        val sec = time - formed
-
-        return simpleDateFormat.format(date) + sec.toString()
-    }
-
-    fun parseTimestampFromSecond(time: String): Long {
-        val dateFormat = "yyyy.MM.dd HH:mm"
-        val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
-        val underMinute = time.substring(16).toLong()
-
-        return simpleDateFormat.parse(time.substring(0, 16))?.time?.plus(underMinute) ?: -1L
-    }
-
-    fun formatTimestampFromMillis(timestamp: Long): String {
+    private fun formatTimestamp(timestamp: Long, format: String): String {
         val date = Date(timestamp)
 
         val formatter = SimpleDateFormat(
-            "yyyy.MM.dd HH:mm:ss.SSS",
-            Locale.getDefault()
+            format, Locale.getDefault()
         )
 
         return formatter.format(date)
     }
-
-    fun parseTimestampFromMillis(dateString: String): Long {
+    private fun parseTimestamp(dateString: String, format: String): Long {
         val formatter = SimpleDateFormat(
-            "yyyy.MM.dd HH:mm:ss.SSS",
-            Locale.getDefault()
+            format, Locale.getDefault()
         )
 
         val date: Date = formatter.parse(dateString)
@@ -88,4 +34,29 @@ object Utils {
 
         return date.time
     }
+
+    private val dayFormat = "yyyy.MM.dd"
+    private val minuteFormat = "yyyy.MM.dd HH:mm"
+    private val secondFormat = "yyyy.MM.dd HH:mm:ss"
+    private val millisFormat = "yyyy.MM.dd HH:mm:ss.SSS"
+
+    fun formatTimestampFromDay(timestamp: Long): String =
+        formatTimestamp(timestamp, dayFormat)
+    fun parseTimestampFromDay(dateString: String): Long =
+        parseTimestamp(dateString, dayFormat)
+
+    fun formatTimestampFromMinute(timestamp: Long): String =
+        formatTimestamp(timestamp, minuteFormat)
+    fun parseTimestampFromMinute(dateString: String): Long =
+        parseTimestamp(dateString, minuteFormat)
+
+    fun formatTimestampFromSecond(timestamp: Long): String =
+        formatTimestamp(timestamp, secondFormat)
+    fun parseTimestampFromSecond(dateString: String): Long =
+        parseTimestamp(dateString, secondFormat)
+
+    fun formatTimestampFromMillis(timestamp: Long): String =
+        formatTimestamp(timestamp, millisFormat)
+    fun parseTimestampFromMillis(dateString: String): Long =
+        parseTimestamp(dateString, millisFormat)
 }
