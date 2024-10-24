@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.presenter.controller.MenuController
@@ -114,7 +115,8 @@ class MenuScreen @Inject constructor(
                 }
 
                 UiState.FAIL -> {
-                    val throwable = (menuListState as FlowState.Failed<List<UiMenu>>).throwable
+                    // TODO 이거 왜 안 지웠지? 누구야~
+//                    val throwable = (menuListState as FlowState.Failed<List<UiMenu>>).throwable
 
                     AlertDialog(
                         onDismissRequest = { },

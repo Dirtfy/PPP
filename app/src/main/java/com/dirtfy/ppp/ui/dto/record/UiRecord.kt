@@ -13,7 +13,7 @@ data class UiRecord(
     companion object {
         fun DataRecord.convertToRawUiRecord(): UiRecord {
             return UiRecord(
-                timestamp = Utils.formatTimestampFromSecond(timestamp),
+                timestamp = Utils.formatTimestampFromMillis(timestamp),
                 income = Utils.formatCurrency(income),
                 type = "$type - $issuedBy"
             )
@@ -21,7 +21,7 @@ data class UiRecord(
 
         fun DataRecord.convertToUiRecord(): UiRecord {
             return UiRecord(
-                timestamp = Utils.formatTimestampFromMinute(timestamp),
+                timestamp = Utils.formatTimestampFromMillis(timestamp),
                 income = Utils.formatCurrency(income),
                 type = if (type == DataRecordType.Cash.name
                     || type == DataRecordType.Card.name) {
@@ -38,7 +38,7 @@ data class UiRecord(
             income = Utils.parseCurrency(income),
             type = type.split("-")[0],
             issuedBy = type.split("-")[1],
-            timestamp = Utils.parseTimestampFromMinute(timestamp)
+            timestamp = Utils.parseTimestampFromMillis(timestamp)
         )
     }
 
@@ -47,7 +47,7 @@ data class UiRecord(
             income = Utils.parseCurrency(income),
             type = type.split("-")[0],
             issuedBy = type.split("-")[1],
-            timestamp = Utils.parseTimestampFromSecond(timestamp)
+            timestamp = Utils.parseTimestampFromMillis(timestamp)
         )
     }
 }

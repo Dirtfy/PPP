@@ -70,7 +70,7 @@ object Utils {
         val date = Date(timestamp)
 
         val formatter = SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy.MM.dd HH:mm:ss.SSS",
             Locale.getDefault()
         )
 
@@ -79,7 +79,7 @@ object Utils {
 
     fun parseTimestampFromMillis(dateString: String): Long {
         val formatter = SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy.MM.dd HH:mm:ss.SSS",
             Locale.getDefault()
         )
 
