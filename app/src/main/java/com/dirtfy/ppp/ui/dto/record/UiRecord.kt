@@ -13,16 +13,16 @@ data class UiRecord(
     companion object {
         fun DataRecord.convertToRawUiRecord(): UiRecord {
             return UiRecord(
-                timestamp = Utils.timestampFormatting_YMDHmms(timestamp),
-                income = Utils.currencyFormatting(income),
+                timestamp = Utils.formatTimestampFromSecond(timestamp),
+                income = Utils.formatCurrency(income),
                 type = "$type - $issuedBy"
             )
         }
 
         fun DataRecord.convertToUiRecord(): UiRecord {
             return UiRecord(
-                timestamp = Utils.timestampFormatting_YMDHm(timestamp),
-                income = Utils.currencyFormatting(income),
+                timestamp = Utils.formatTimestampFromMinute(timestamp),
+                income = Utils.formatCurrency(income),
                 type = if (type == DataRecordType.Cash.name
                     || type == DataRecordType.Card.name) {
                     type
@@ -35,19 +35,19 @@ data class UiRecord(
 
     fun convertToDataRecord(): DataRecord {
         return DataRecord(
-            income = Utils.currencyReformatting(income),
+            income = Utils.parseCurrency(income),
             type = type.split("-")[0],
             issuedBy = type.split("-")[1],
-            timestamp = Utils.timestampReformatting_YMDHm(timestamp)
+            timestamp = Utils.parseTimestampFromMinute(timestamp)
         )
     }
 
     fun convertToDataRecordFromRaw(): DataRecord {
         return DataRecord(
-            income = Utils.currencyReformatting(income),
+            income = Utils.parseCurrency(income),
             type = type.split("-")[0],
             issuedBy = type.split("-")[1],
-            timestamp = Utils.timestampReformatting_YMDHmms(timestamp)
+            timestamp = Utils.parseTimestampFromSecond(timestamp)
         )
     }
 }

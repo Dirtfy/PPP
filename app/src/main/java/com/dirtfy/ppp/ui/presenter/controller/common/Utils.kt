@@ -7,15 +7,15 @@ import java.util.Locale
 
 object Utils {
 
-    fun currencyFormatting(price: Int): String {
+    fun formatCurrency(price: Int): String {
         return DecimalFormat("#,###").format(price)
     }
 
-    fun currencyReformatting(price: String): Int {
+    fun parseCurrency(price: String): Int {
         return price.split(",").joinToString(separator = "").toInt()
     }
 
-    fun timestampFormatting_YMD(time: Long): String {
+    fun formatTimestampFromDay(time: Long): String {
         val dateFormat = "yyyy.MM.dd"
         val date = Date(time)
         val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
@@ -23,14 +23,14 @@ object Utils {
         return simpleDateFormat.format(date)
     }
 
-    fun timestampReformatting_YMD(time: String): Long {
+    fun parseTimestampFromDay(time: String): Long {
         val dateFormat = "yyyy.MM.dd"
         val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
 
         return simpleDateFormat.parse(time)?.time ?: -1L
     }
 
-    fun timestampFormatting_YMDHm(time: Long): String {
+    fun formatTimestampFromMinute(time: Long): String {
         val dateFormat = "yyyy.MM.dd HH:mm"
         val date = Date(time)
         val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
@@ -38,14 +38,14 @@ object Utils {
         return simpleDateFormat.format(date)
     }
 
-    fun timestampReformatting_YMDHm(time: String): Long {
+    fun parseTimestampFromMinute(time: String): Long {
         val dateFormat = "yyyy.MM.dd HH:mm"
         val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
 
         return simpleDateFormat.parse(time)?.time ?: -1L
     }
 
-    fun timestampFormatting_YMDHmms(time: Long): String {
+    fun formatTimestampFromSecond(time: Long): String {
         val dateFormat = "yyyy.MM.dd HH:mm"
         val date = Date(time)
         val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
@@ -58,7 +58,7 @@ object Utils {
         return simpleDateFormat.format(date) + sec.toString()
     }
 
-    fun timestampReformatting_YMDHmms(time: String): Long {
+    fun parseTimestampFromSecond(time: String): Long {
         val dateFormat = "yyyy.MM.dd HH:mm"
         val simpleDateFormat = SimpleDateFormat(dateFormat, Locale.KOREA)
         val underMinute = time.substring(16).toLong()
@@ -66,7 +66,7 @@ object Utils {
         return simpleDateFormat.parse(time.substring(0, 16))?.time?.plus(underMinute) ?: -1L
     }
 
-    fun timestampFormatting(timestamp: Long): String {
+    fun formatTimestampFromMillis(timestamp: Long): String {
         val date = Date(timestamp)
 
         val formatter = SimpleDateFormat(
@@ -77,7 +77,7 @@ object Utils {
         return formatter.format(date)
     }
 
-    fun parseMillisStringToTimestamp(dateString: String): Long {
+    fun parseTimestampFromMillis(dateString: String): Long {
         val formatter = SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss.SSS",
             Locale.getDefault()

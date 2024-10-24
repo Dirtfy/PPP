@@ -12,7 +12,7 @@ data class UiMenu(
         fun DataMenu.convertToUiMenu(): UiMenu {
             return UiMenu(
                 name = name,
-                price = Utils.currencyFormatting(price),
+                price = Utils.formatCurrency(price),
             )
         }
     }
@@ -20,7 +20,7 @@ data class UiMenu(
     fun convertToDataMenu(): DataMenu {
         return DataMenu(
             name = name,
-            price = Utils.currencyReformatting(price),
+            price = Utils.parseCurrency(price),
         )
     }
 }
