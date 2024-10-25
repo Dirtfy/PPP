@@ -271,6 +271,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             Color(table.color).copy(alpha = 1f)
         } else {
             selectedTableSet.addAll(member.toSet())
+            // TODO 색이 안 연해짐
             Color(table.color).copy(alpha = 0.5f)
         }
 
@@ -306,6 +307,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             selectedTableSet.clear()
             selectedTableSet.addAll(member.toSet())
 //            _screenData.update { before -> before.copy(mode = UiTableMode.Order) }
+            // TODO 색이 안 연해짐
             Color(table.color).copy(alpha = 0.5f)
         }
 
