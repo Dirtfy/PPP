@@ -39,6 +39,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.common.FlowState
+import com.dirtfy.ppp.ui.dto.UiScreenState
+import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.dto.table.UiPointUse
 import com.dirtfy.ppp.ui.dto.table.UiTable
@@ -53,47 +55,48 @@ object TableScreen {
     fun Main(
         controller: TableController = viewModel<TableViewModel>()
     ) {
-        val tableList by controller.tableList.collectAsStateWithLifecycle()
-        val orderList by controller.orderList.collectAsStateWithLifecycle()
-        val menuList by controller.menuList.collectAsStateWithLifecycle()
-        val totalPrice by controller.orderTotalPrice.collectAsStateWithLifecycle()
-
-        val pointUse by controller.pointUse.collectAsStateWithLifecycle()
-        val mode by controller.mode.collectAsStateWithLifecycle()
+        val screenData by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.updateTableList()
         }
 
         ScreenContent(
-            tableListState = tableList,
-            tableOrderListState = orderList,
-            menuListState = menuList,
-            totalPrice = totalPrice,
-            pointUse = pointUse,
-            mode = mode,
+            tableList = screenData.tableList,
+            tableListState = screenData.tableListState,
+            tableOrderList = screenData.orderList,
+            tableOrderListState = screenData.orderListState,
+            menuList = screenData.menuList,
+            menuListState = screenData.menuListState,
+            totalPrice = screenData.orderTotalPrice,
+            pointUse = screenData.pointUse,
+            mode = screenData.mode,
+            mergeTableState = screenData.mergeTableState,
+            payTableState = screenData.payTableState,
+            addOrderState = screenData.addOrderState,
+            cancelOrderState = screenData.cancelOrderState,
             onTableClick = {
-                controller.run {
-                    clickTable(it)
+                controller.request {
+                    controller.clickTable(it)
                     updateOrderList(it)
                     updateMenuList()
                 }
             },
             onTableLongClick = { controller.setMode(UiTableMode.Merge) },
-            onMergeClick = { controller.mergeTable() },
+            onMergeClick = { controller.request { mergeTable() } },
             onMergeCancelClick = { controller.cancelMergeTable() },
-            onCashClick = { controller.payTableWithCash() },
-            onCardClick = { controller.payTableWithCard() },
+            onCashClick = { controller.request { payTableWithCash() } },
+            onCardClick = { controller.request { payTableWithCard() } },
             onPointClick = { controller.setMode(UiTableMode.PointUse) },
-            onAddClick = { controller.addOrder(it.name, it.price) },
-            onCancelClick = { controller.cancelOrder(it.name, it.price) },
-            onMenuAddClick = { controller.addOrder(it.name, it.price) },
-            onMenuCancelClick = { controller.cancelOrder(it.name, it.price) },
+            onAddClick = { controller.request { addOrder(it.name, it.price) } },
+            onCancelClick = { controller.request { cancelOrder(it.name, it.price) } },
+            onMenuAddClick = { controller.request { addOrder(it.name, it.price) } },
+            onMenuCancelClick = { controller.request { cancelOrder(it.name, it.price) } },
             onPointUseDialogDismissRequest = { controller.setMode(UiTableMode.Order) },
-            onPointUseUserNameChange = { controller.updatePointUse(pointUse.copy(userName =  it)) },
-            onPointUseAccountNumberChange = { controller.updatePointUse(pointUse.copy(accountNumber = it)) },
+            onPointUseUserNameChange = { controller.updatePointUse(screenData.pointUse.copy(userName = it)) },
+            onPointUseAccountNumberChange = { controller.updatePointUse(screenData.pointUse.copy(accountNumber = it)) },
             onPointUseConfirm = {
-                controller.run {
+                controller.request {
                     payTableWithPoint()
                     setMode(UiTableMode.Main)
                 }
@@ -103,12 +106,19 @@ object TableScreen {
 
     @Composable
     fun ScreenContent(
-        tableListState: FlowState<List<UiTable>>,
-        tableOrderListState: FlowState<List<UiTableOrder>>,
-        menuListState: FlowState<List<UiMenu>>,
+        tableList: List<UiTable>,
+        tableListState: UiScreenState,
+        tableOrderList: List<UiTableOrder>,
+        tableOrderListState: UiScreenState,
+        menuList: List<UiMenu>,
+        menuListState: UiScreenState,
         totalPrice: String,
         pointUse: UiPointUse,
         mode: UiTableMode,
+        mergeTableState: UiScreenState,
+        payTableState: UiScreenState,
+        addOrderState: UiScreenState,
+        cancelOrderState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
         onTableLongClick: () -> Unit,
         onMergeClick: () -> Unit,
@@ -127,8 +137,10 @@ object TableScreen {
     ) {
         Column {
             TableLayoutState(
+                tableList = tableList,
                 tableListState = tableListState,
                 mode = mode,
+                mergeTableState = mergeTableState,
                 onTableClick = onTableClick,
                 onTableLongClick = onTableLongClick,
                 onMergeClick = onMergeClick,
@@ -137,8 +149,12 @@ object TableScreen {
 
             if (mode == UiTableMode.Order || mode == UiTableMode.PointUse) {
                 OrderLayoutState(
+                    tableOrderList = tableOrderList,
                     tableOrderListState = tableOrderListState,
                     totalPrice = totalPrice,
+                    payTableState = payTableState,
+                    addOrderState = addOrderState,
+                    cancelOrderState = cancelOrderState,
                     onCardClick = onCardClick,
                     onCashClick = onCashClick,
                     onPointClick = onPointClick,
@@ -147,7 +163,10 @@ object TableScreen {
                 )
 
                 MenuListState(
+                    menuList = menuList,
                     menuListState = menuListState,
+                    addOrderState = addOrderState,
+                    cancelOrderState = cancelOrderState,
                     onAddClick = onMenuAddClick,
                     onCancelClick = onMenuCancelClick
                 )
@@ -156,6 +175,7 @@ object TableScreen {
             if (mode == UiTableMode.PointUse) {
                 PointUseDataInputDialog(
                     pointUse = pointUse,
+                    payTableState = payTableState,
                     onDismissRequest = onPointUseDialogDismissRequest,
                     onUserNameChange = onPointUseUserNameChange,
                     onAccountNumberChange = onPointUseAccountNumberChange,
@@ -167,32 +187,33 @@ object TableScreen {
 
     @Composable
     fun TableLayoutState(
-        tableListState: FlowState<List<UiTable>>,
+        tableList: List<UiTable>,
+        tableListState: UiScreenState,
         mode: UiTableMode,
+        mergeTableState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
         onTableLongClick: () -> Unit,
         onMergeClick: () -> Unit,
         onMergeCancelClick: () -> Unit
     ) {
-        when(tableListState) {
-            is FlowState.Success -> {
-                val tableList = tableListState.data
+        when(tableListState.state) {
+            UiState.COMPLETE -> {
                 TableLayout(
                     tableList = tableList,
                     mode = mode,
+                    mergeTableState = mergeTableState,
                     onTableClick = onTableClick,
                     onTableLongClick = onTableLongClick,
                     onMergeClick = onMergeClick,
                     onMergeCancelClick = onMergeCancelClick
                 )
             }
-            is FlowState.Failed -> {
-                val throwable = tableListState.throwable
-                Fail(throwable = throwable) {
+            UiState.FAIL -> {
+                Fail(failMessage = tableListState.failMessage) {
 
                 }
             }
-            is FlowState.Loading -> {
+            UiState.LOADING -> {
                 Loading()
             }
         }
@@ -202,6 +223,7 @@ object TableScreen {
     fun TableLayout(
         tableList: List<UiTable>,
         mode: UiTableMode,
+        mergeTableState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
         onTableLongClick: () -> Unit,
         onMergeClick: () -> Unit,
@@ -255,20 +277,26 @@ object TableScreen {
 
     @Composable
     fun OrderLayoutState(
-        tableOrderListState: FlowState<List<UiTableOrder>>,
+        tableOrderList: List<UiTableOrder>,
+        tableOrderListState: UiScreenState,
         totalPrice: String,
+        payTableState: UiScreenState,
+        addOrderState: UiScreenState,
+        cancelOrderState: UiScreenState,
         onCardClick: () -> Unit,
         onCashClick: () -> Unit,
         onPointClick: () -> Unit,
         onAddClick: (UiTableOrder) -> Unit,
         onCancelClick: (UiTableOrder) -> Unit
     ) {
-        when(tableOrderListState) {
-            is FlowState.Success -> {
-                val orderList = tableOrderListState.data
+        when(tableOrderListState.state) {
+            UiState.COMPLETE -> {
                 OrderLayout(
-                    tableOrderList = orderList,
+                    tableOrderList = tableOrderList,
                     totalPrice = totalPrice,
+                    payTableState = payTableState,
+                    addOrderState = addOrderState,
+                    cancelOrderState = cancelOrderState,
                     onCardClick = onCardClick,
                     onCashClick = onCashClick,
                     onPointClick = onPointClick,
@@ -276,13 +304,12 @@ object TableScreen {
                     onCancelClick = onCancelClick
                 )
             }
-            is FlowState.Failed -> {
-                val throwable = tableOrderListState.throwable
-                Fail(throwable = throwable) {
+            UiState.FAIL -> {
+                Fail(failMessage = tableOrderListState.failMessage) {
 
                 }
             }
-            is FlowState.Loading -> {
+            UiState.LOADING -> {
                 Loading()
             }
         }
@@ -291,6 +318,9 @@ object TableScreen {
     fun OrderLayout(
         tableOrderList: List<UiTableOrder>,
         totalPrice: String,
+        payTableState: UiScreenState,
+        addOrderState: UiScreenState,
+        cancelOrderState: UiScreenState,
         onCardClick: () -> Unit,
         onCashClick: () -> Unit,
         onPointClick: () -> Unit,
@@ -299,6 +329,7 @@ object TableScreen {
     ) {
         Row {
             PaySelect(
+                payTableState = payTableState,
                 onCardClick = onCardClick,
                 onCashClick = onCashClick,
                 onPointClick = onPointClick
@@ -315,6 +346,7 @@ object TableScreen {
 
     @Composable
     fun PaySelect(
+        payTableState: UiScreenState,
         onCardClick: () -> Unit,
         onCashClick: () -> Unit,
         onPointClick: () -> Unit
@@ -335,6 +367,7 @@ object TableScreen {
     @Composable
     fun PointUseDataInputDialog(
         pointUse: UiPointUse,
+        payTableState: UiScreenState,
         onDismissRequest: () -> Unit,
         onUserNameChange: (String) -> Unit,
         onAccountNumberChange: (String) -> Unit,
@@ -430,26 +463,29 @@ object TableScreen {
 
     @Composable
     fun MenuListState(
-        menuListState: FlowState<List<UiMenu>>,
+        menuList: List<UiMenu>,
+        menuListState: UiScreenState,
+        addOrderState: UiScreenState,
+        cancelOrderState: UiScreenState,
         onAddClick: (UiMenu) -> Unit,
         onCancelClick: (UiMenu) -> Unit
     ) {
-        when(menuListState) {
-            is FlowState.Success -> {
-                val menuList = menuListState.data
+        when(menuListState.state) {
+            UiState.COMPLETE -> {
                 MenuList(
                     menuList = menuList,
+                    addOrderState = addOrderState,
+                    cancelOrderState = cancelOrderState,
                     onAddClick = onAddClick,
                     onCancelClick = onCancelClick
                 )
             }
-            is FlowState.Failed -> {
-                val throwable = menuListState.throwable
-                Fail(throwable = throwable) {
+            UiState.FAIL -> {
+                Fail(failMessage = menuListState.failMessage) {
 
                 }
             }
-            is FlowState.Loading -> {
+            UiState.LOADING -> {
                 Loading()
             }
         }
@@ -457,6 +493,8 @@ object TableScreen {
     @Composable
     fun MenuList(
         menuList: List<UiMenu>,
+        addOrderState: UiScreenState,
+        cancelOrderState: UiScreenState,
         onAddClick: (UiMenu) -> Unit,
         onCancelClick: (UiMenu) -> Unit
     ) {
@@ -504,7 +542,7 @@ object TableScreen {
 
     @Composable
     fun Fail(
-        throwable: Throwable,
+        failMessage: String?,
         onRetryClick: () -> Unit
     ) {
         AlertDialog(
@@ -519,7 +557,7 @@ object TableScreen {
                     Text(text = "Retry")
                 }
             },
-            title = { Text(text = throwable.message?: "unknown error") }
+            title = { Text(text = failMessage ?: "unknown error") }
         )
     }
 }

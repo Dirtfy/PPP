@@ -55,7 +55,7 @@ class TableOrderScreen @Inject constructor(
             }
             is FlowState.Failed -> {
                 val throwable = tableOrderListState.throwable
-                tableScreen.Fail(throwable = throwable) {
+                tableScreen.Fail(failMessage = throwable.message) {
 
                 }
             }
