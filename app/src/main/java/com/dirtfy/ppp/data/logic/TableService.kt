@@ -194,16 +194,16 @@ class TableService @Inject constructor(
 
             val count: Int
             if (isOrderExist(group, menuName)) {
-                val order = readOrder(tableNumber, menuName)
+                val order = readOrder(group, menuName)
                 count = order.count + 1
                 updateOrder(
-                    tableNumber,
+                    group,
                     order.copy(count = count)
                 )
             } else {
                 count = 1
                 createOrder(
-                    tableNumber,
+                    group,
                     menuName,
                     menuPrice
                 )
@@ -231,12 +231,12 @@ class TableService @Inject constructor(
                     0 -> { throw TableException.NonEnoughMenuToCancel() }
                     1 -> {
                         count = 0
-                        deleteOrder(tableNumber, menuName)
+                        deleteOrder(group, menuName)
                     }
                     else -> {
                         count = menuCount-1
                         updateOrder(
-                            tableNumber,
+                            group,
                             DataTableOrder(
                                 menuName,
                                 menuPrice,

@@ -101,10 +101,9 @@ class TableFireStore @Inject constructor(): TableRepository {
         awaitClose { tableSubscription.remove() }
     }
 
-    private suspend fun getOrderRef(tableNumber: Int): CollectionReference {
-        val group = readGroup(tableNumber)
+    private fun getOrderRef(tableNumber: Int): CollectionReference {
         return tableRef
-            .document("$group")
+            .document("$tableNumber")
             .collection(FireStorePath.TABLE_ORDER)
     }
 
@@ -125,6 +124,7 @@ class TableFireStore @Inject constructor(): TableRepository {
     }
     private suspend fun setOrder(tableNumber: Int, order: FireStoreTableOrder) {
         Log.d("WeGlonD", "source setOrder")
+        Log.d("WeGlonD", "$tableNumber")
         Log.d("WeGlonD", order.toString())
         val orderID = getOrderID(tableNumber, order.name!!)
 
@@ -215,7 +215,7 @@ class TableFireStore @Inject constructor(): TableRepository {
     }
 
     override fun orderStream(tableNumber: Int): Flow<List<DataTableOrder>> = callbackFlow {
-        val targetRef = getOrderRef(tableNumber)
+        val targetRef = getOrderRef(readGroup(tableNumber))
         val orderSubscription = targetRef.addSnapshotListener { snapshot, error ->
             if (snapshot == null) return@addSnapshotListener
             try {

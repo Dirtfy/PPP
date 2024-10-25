@@ -424,6 +424,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         ) }
 
         groupColorSet.remove(groupColor)
+        setMode(UiTableMode.Main)
     }
 
     private suspend fun _payTableWithCash(
@@ -435,10 +436,6 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                 _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause.message)) }
             }
             .conflate().collect {
-                // TODO 할 필요 있나? 어차피 스트림에서 빈 리스트 갖고오지 않을까
-//                _orderList.value = it.passMap { data ->
-//                    emptyList()
-//                }
                 _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
                 disbandGroup(tableNumber)
             }
@@ -457,10 +454,6 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                 _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause.message)) }
             }
             .conflate().collect {
-                // TODO 할 필요 있나? 어차피 스트림에서 빈 리스트 갖고오지 않을까
-//                _screenData.update { before ->
-//                    before.copy(orderList = emptyList())
-//                }
                 _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
                 disbandGroup(tableNumber)
             }
@@ -483,10 +476,6 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         ).catch { cause ->
             _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause.message)) }
         }.conflate().collect {
-            // TODO 할 필요 있나? 어차피 스트림에서 빈 리스트 갖고오지 않을까
-//            _orderList.value = it.passMap { data ->
-//                emptyList()
-//            }
             _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
             disbandGroup(tableNumber)
         }
@@ -515,34 +504,6 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             _screenData.update { it.copy(addOrderState = UiScreenState(UiState.FAIL, cause.message)) }
         }.conflate().collect { data ->
             _screenData.update { it.copy(addOrderState = UiScreenState(UiState.COMPLETE)) }
-            // TODO 얘도 변경된 리스트를 stream이 가져오겠지 일단 만들어만 놓고 주석처리.
-            /*var newList = _screenData.value.orderList.toMutableList()
-            val isNewOrder = newList
-                .find { order -> order.name == menuName } == null
-
-            if (isNewOrder) {
-                newList.add(data.convertToUiTableOrder())
-            }
-            else {
-                newList = newList.map { order ->
-                    if (order.name == menuName) {
-                        data.convertToUiTableOrder()
-                    }
-                    else
-                        order
-                }.toMutableList()
-            }
-
-            _screenData.update {
-                it.copy(
-                    orderList = newList,
-                    orderTotalPrice = Utils.currencyFormatting(
-                        newList
-                            .map { order -> order.convertToDataTableOrder() }
-                            .sumOf { order -> order.price * order.count }
-                    )
-                )
-            }*/
         }
     }
     override suspend fun addOrder(name: String, price: String) {
@@ -563,36 +524,6 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.FAIL, cause.message)) }
         }.conflate().collect {
             _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.COMPLETE)) }
-            // TODO 얘도 변경된 리스트를 stream이 가져오겠지 안되면 _addOrder 처럼 만들 예정
-            /*it.passMap { data ->
-                _orderList.value = _orderList.value.passMap { list ->
-                    var newList = list.toMutableList()
-                    val isNoLongerExist = (data.count == 0)
-
-                    if (isNoLongerExist) {
-                        newList.removeIf { order -> order.name == menuName }
-                    }
-                    else {
-                        newList = newList.map { order ->
-                            if (order.name == menuName) {
-                                data.convertToUiTableOrder()
-                            }
-                            else
-                                order
-                        }.toMutableList()
-                    }
-
-                    _orderTotalPrice.value =
-                        Utils
-                            .currencyFormatting(
-                                newList
-                                    .map { order -> order.convertToDataTableOrder() }
-                                    .sumOf { order -> order.price * order.count }
-                            )
-
-                    newList
-                }
-            }*/
         }
     }
     override suspend fun cancelOrder(name: String, price: String) {
