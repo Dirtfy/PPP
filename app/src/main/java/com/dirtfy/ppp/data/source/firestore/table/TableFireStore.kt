@@ -135,9 +135,8 @@ class TableFireStore @Inject constructor(): TableRepository {
         if (orderID == null)
             orderRef.document().set(order).await()
         else {
-            // TODO 의문의 먹통.. 난 코드를 바꾼 게 없다..
-            Log.d("WeGlonD", "orderID not null") // 이 로그는 나옴
-            orderRef.document(orderID).set(order).await() // db에 안써짐 ㅋㅋ
+            Log.d("WeGlonD", "orderID not null")
+            orderRef.document(orderID).set(order).await()
         }
     }
 
