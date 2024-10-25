@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.DataTable
 import com.dirtfy.ppp.data.dto.DataTableOrder
@@ -17,7 +16,6 @@ import com.dirtfy.ppp.ui.dto.UiScreenState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.dto.menu.UiMenu.Companion.convertToUiMenu
-import com.dirtfy.ppp.ui.dto.record.UiRecord
 import com.dirtfy.ppp.ui.dto.table.UiPointUse
 import com.dirtfy.ppp.ui.dto.table.UiTable
 import com.dirtfy.ppp.ui.dto.table.UiTableMode

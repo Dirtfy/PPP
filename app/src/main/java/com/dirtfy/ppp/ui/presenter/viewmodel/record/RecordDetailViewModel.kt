@@ -1,16 +1,13 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel.record
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.data.dto.DataRecordType
 import com.dirtfy.ppp.data.logic.RecordService
 import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
 import com.dirtfy.ppp.ui.dto.UiScreenState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.record.UiRecord
-import com.dirtfy.ppp.ui.dto.record.UiRecordDetail
 import com.dirtfy.ppp.ui.dto.record.UiRecordDetail.Companion.convertToUiRecordDetail
 import com.dirtfy.ppp.ui.dto.record.screen.UiRecordDetailScreenState
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordDetailController
@@ -18,7 +15,6 @@ import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
