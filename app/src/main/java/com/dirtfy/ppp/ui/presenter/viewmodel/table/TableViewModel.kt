@@ -88,6 +88,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         = _screenData
         .combine(tableListFlow) { state, tableList ->
             Log.d(TAG, "screenData combine 1")
+
             var newState = state.copy(
                 // TODO 논의필요: DB에서의 테이블 변경과 로컬에서의 변경을 따로 관리하도록 함.
                 sourceTableList = tableList
@@ -98,10 +99,10 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                 newState = newState.copy(
                     tableListState = UiScreenState(state = UiState.COMPLETE)
                 )
+
             if (state.tableList == emptyList<UiTable>())
-                newState = newState.copy(
-                    tableList = tableList
-                )
+                _screenData.update { it.copy(tableList = tableList, tableListState = UiScreenState(UiState.COMPLETE)) }
+
             newState
         }.combine(menuListFlow) { state, menuList ->
             Log.d(TAG, "screenData combine 2")
@@ -298,21 +299,28 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         }
 
         val newColor = if (selectedTableSet.contains(tableNumber)) {
-            selectedTableSet.removeAll(member.toSet())
+            Log.d(TAG, "table $tableNumber is already selected")
+            selectedTableSet.removeAll(member.toSet()) // 왜 clear가 아니라 removeAll?
 //            _screenData.update { before -> before.copy(mode = UiTableMode.Main) }
             Color(table.color).copy(alpha = 1f)
         } else {
+            Log.d(TAG, "table $tableNumber is not selected yet")
             selectedTableSet.clear()
             selectedTableSet.addAll(member.toSet())
 //            _screenData.update { before -> before.copy(mode = UiTableMode.Order) }
             // TODO 색이 안 연해짐
             Color(table.color).copy(alpha = 0.5f)
         }
+        Log.d(TAG, "newColor.alpha: ${newColor.alpha}")
 
+        Log.d(TAG, "tableList size: ${tableList.size}")
         tableList = tableList.map { nowTable ->
+            Log.d(TAG, "$nowTable")
             if (member.contains(nowTable.number.toInt())) {
+                Log.d(TAG, "this is a member of the group")
                 nowTable.copy(color = newColor.value)
             } else {
+                Log.d(TAG, "this is NOT a member of the group")
                 nowTable
             }
         }
@@ -332,6 +340,9 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             if (groupMap[it] == group)
                 member.add(it)
         }
+        Log.d(TAG, "clickTable - table: $tableNumber, group: $group")
+        Log.d(TAG, "${member.size} member")
+        member.forEach { Log.d(TAG, "$it ") }
 
         if (_screenData.value.mode == UiTableMode.Merge)
             _clickTableOnMergeMode(table, member)
@@ -369,6 +380,9 @@ class TableViewModel: ViewModel(), TableController, Tagger {
 
                 _screenData.update {
                     it.copy(
+                        // TODO 이걸 하면 머지 끝났을 때 머지 모드에서 색깔이 바뀜 but 머지 모드 해제하면 색깔이 바뀜
+                        // 색깔이 바뀌는 이유는 stream 이 변경사항을 가져올 때 마다 랜덤 색깔 생성 후 지정하기 때문.
+                        // 이후 랜덤 컬러가 아닌 컬러 프리셋 정하고 갖고와서 하는 걸로 바꾸면 해결 가능
                         tableList = newList.map { table ->
                             if (tableList.contains(table.number.toInt())){
                                 groupMap[table.number.toInt()] = groupNumber
