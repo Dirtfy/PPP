@@ -114,7 +114,6 @@ class MenuScreen @Inject constructor(
                 }
 
                 UiState.FAIL -> {
-                    val throwable = (menuListState as FlowState.Failed<List<UiMenu>>).throwable
 
                     AlertDialog(
                         onDismissRequest = { },
