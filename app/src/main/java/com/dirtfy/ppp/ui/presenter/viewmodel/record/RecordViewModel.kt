@@ -110,7 +110,7 @@ class RecordViewModel: ViewModel(), RecordController, Tagger {
         else nowRecordFlow.update { rawValue } // TODO issued name 어떻게 주지?
     }
 
-    override fun setMode(mode: UiRecordMode) = request {
+    override fun setMode(mode: UiRecordMode) {
         modeFlow.update { mode }
     }
 

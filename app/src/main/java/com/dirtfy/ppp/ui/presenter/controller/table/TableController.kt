@@ -10,14 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 interface TableController: Controller {
 
     val screenData: StateFlow<UiTableScreenState>
-    /*val tableList: StateFlow<FlowState<List<UiTable>>>
-    val orderList: StateFlow<FlowState<List<UiTableOrder>>>
-    val menuList: StateFlow<List<UiMenu>>
-
-    val orderTotalPrice: StateFlow<String>
-    val pointUse: StateFlow<UiPointUse>
-
-    val mode: StateFlow<UiTableMode>*/
 
     suspend fun updateTableList()
     suspend fun updateOrderList(table: UiTable)

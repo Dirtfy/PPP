@@ -8,12 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface RecordController: Controller {
 
-    /*val recordList: StateFlow<FlowState<List<UiRecord>>>
-
-    val searchClue: StateFlow<String>
-    val nowRecord: StateFlow<UiRecord>
-    val mode: StateFlow<UiRecordMode>*/
-
     val screenData: StateFlow<UiRecordScreenState>
 
     @Deprecated("screen state synchronized with repository")

@@ -3,6 +3,7 @@ package com.dirtfy.ppp.data.logic
 import com.dirtfy.ppp.data.dto.DataRecord
 import com.dirtfy.ppp.data.source.repository.RecordRepository
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class RecordService @Inject constructor(
@@ -21,4 +22,5 @@ class RecordService @Inject constructor(
     }
 
     fun recordStream() = repository.recordStream()
+        .map { it.sortedBy { data -> -data.timestamp } }
 }
