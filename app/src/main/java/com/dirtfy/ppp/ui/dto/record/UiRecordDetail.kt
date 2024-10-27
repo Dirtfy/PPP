@@ -1,6 +1,6 @@
 package com.dirtfy.ppp.ui.dto.record
 
-import com.dirtfy.ppp.data.dto.DataRecordDetail
+import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 
 data class UiRecordDetail(

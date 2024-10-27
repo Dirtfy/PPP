@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.RecordException
-import com.dirtfy.ppp.data.logic.RecordService
-import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
+import com.dirtfy.ppp.data.logic.RecordBusinessLogic
+import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.ui.dto.UiScreenState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.record.UiRecord
@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 
 class RecordViewModel: ViewModel(), RecordController, Tagger {
 
-    private val recordService: RecordService = RecordService(RecordFireStore())
+    private val recordService: RecordBusinessLogic = RecordBusinessLogic(RecordFireStore())
 
     private val searchClueFlow = MutableStateFlow("")
     private val nowRecordFlow = MutableStateFlow(UiRecord())

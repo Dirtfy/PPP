@@ -5,13 +5,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.TableException
-import com.dirtfy.ppp.data.dto.DataTable
-import com.dirtfy.ppp.data.dto.DataTableOrder
-import com.dirtfy.ppp.data.logic.MenuService
-import com.dirtfy.ppp.data.logic.TableService
-import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
-import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
-import com.dirtfy.ppp.data.source.firestore.table.TableFireStore
+import com.dirtfy.ppp.data.dto.feature.table.DataTable
+import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
+import com.dirtfy.ppp.data.logic.MenuBusinessLogic
+import com.dirtfy.ppp.data.logic.TableBusinessLogic
+import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
+import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
+import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
 import com.dirtfy.ppp.ui.dto.UiScreenState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
@@ -39,8 +39,8 @@ import kotlin.random.Random
 
 class TableViewModel: ViewModel(), TableController, Tagger {
 
-    private val tableService: TableService = TableService(TableFireStore(), RecordFireStore())
-    private val menuService: MenuService = MenuService(MenuFireStore())
+    private val tableService: TableBusinessLogic = TableBusinessLogic(TableFireStore(), RecordFireStore())
+    private val menuService: MenuBusinessLogic = MenuBusinessLogic(MenuFireStore())
 
     private val groupColorSet = mutableSetOf<ULong>()
     private val defaultColor = Color.LightGray.value

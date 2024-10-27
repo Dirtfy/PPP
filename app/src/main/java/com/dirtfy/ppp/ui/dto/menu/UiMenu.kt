@@ -1,6 +1,6 @@
 package com.dirtfy.ppp.ui.dto.menu
 
-import com.dirtfy.ppp.data.dto.DataMenu
+import com.dirtfy.ppp.data.dto.feature.menu.DataMenu
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 
 data class UiMenu(

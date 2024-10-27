@@ -1,13 +1,13 @@
 package com.dirtfy.ppp.common.di
 
-import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
-import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
-import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
-import com.dirtfy.ppp.data.source.firestore.table.TableFireStore
-import com.dirtfy.ppp.data.source.repository.AccountRepository
-import com.dirtfy.ppp.data.source.repository.MenuRepository
-import com.dirtfy.ppp.data.source.repository.RecordRepository
-import com.dirtfy.ppp.data.source.repository.TableRepository
+import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
+import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
+import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
+import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
+import com.dirtfy.ppp.data.api.AccountApi
+import com.dirtfy.ppp.data.api.MenuApi
+import com.dirtfy.ppp.data.api.RecordApi
+import com.dirtfy.ppp.data.api.TableApi
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,20 +19,20 @@ abstract class DataModule {
     @Binds
     abstract fun bindsAccountRepository(
         accountImplementation: AccountFireStore
-    ): AccountRepository
+    ): AccountApi
 
     @Binds
     abstract fun bindsMenuRepository(
         menuImplementation: MenuFireStore
-    ): MenuRepository
+    ): MenuApi
 
     @Binds
     abstract fun bindsRecordRepository(
         recordImplementation: RecordFireStore
-    ): RecordRepository
+    ): RecordApi
 
     @Binds
     abstract fun bindsTableRepository(
         tableImplementation: TableFireStore
-    ): TableRepository
+    ): TableApi
 }

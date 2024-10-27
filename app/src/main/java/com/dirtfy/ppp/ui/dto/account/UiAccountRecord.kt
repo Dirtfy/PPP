@@ -1,6 +1,6 @@
 package com.dirtfy.ppp.ui.dto.account
 
-import com.dirtfy.ppp.data.dto.DataAccountRecord
+import com.dirtfy.ppp.data.dto.feature.account.DataAccountRecord
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 
 data class UiAccountRecord(
