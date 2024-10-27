@@ -9,15 +9,16 @@ import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
-import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.ppp.data.logic.MenuBusinessLogic
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
-import com.dirtfy.ppp.ui.controller.common.Utils
+import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
+import com.dirtfy.ppp.ui.controller.common.converter.feature.menu.MenuAtomConverter.convertToUiMenu
+import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToUiTable
+import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToUiTableOrder
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
-import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu.Companion.convertToUiMenu
 import com.dirtfy.ppp.ui.state.feature.table.UiTableScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
@@ -202,7 +203,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         _screenData.update {
             it.copy(
                 orderListState = UiScreenState(UiState.LOADING),
-                orderTotalPrice = Utils.formatCurrency(0)
+                orderTotalPrice = StringFormatConverter.formatCurrency(0)
             )
         }
 
@@ -222,8 +223,8 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                     before.copy(
                         orderList = it,
                         orderListState = UiScreenState(UiState.COMPLETE),
-                        orderTotalPrice = Utils.formatCurrency(
-                            it.sumOf { order -> Utils.parseCurrency(order.price) * order.count.toInt() }
+                        orderTotalPrice = StringFormatConverter.formatCurrency(
+                            it.sumOf { order -> StringFormatConverter.parseCurrency(order.price) * order.count.toInt() }
                         )
                     )
                 }
@@ -513,7 +514,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
     override suspend fun addOrder(name: String, price: String) {
         val tableNumber = selectedTableNumber
-        val menuPrice = Utils.parseCurrency(price)
+        val menuPrice = StringFormatConverter.parseCurrency(price)
         _addOrder(tableNumber, name, menuPrice)
     }
 
@@ -533,7 +534,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
     override suspend fun cancelOrder(name: String, price: String) {
         val tableNumber = selectedTableNumber
-        val menuPrice = Utils.parseCurrency(price)
+        val menuPrice = StringFormatConverter.parseCurrency(price)
         _cancelOrder(tableNumber, name, menuPrice)
     }
 

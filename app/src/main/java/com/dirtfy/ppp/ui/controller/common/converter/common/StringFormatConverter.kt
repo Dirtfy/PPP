@@ -1,11 +1,11 @@
-package com.dirtfy.ppp.ui.controller.common
+package com.dirtfy.ppp.ui.controller.common.converter.common
 
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-object Utils {
+object StringFormatConverter {
 
     fun formatCurrency(price: Int): String {
         return DecimalFormat("#,###").format(price)
