@@ -6,12 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordType
 import com.dirtfy.ppp.data.logic.RecordBusinessLogic
+import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToDataRecordFromRaw
+import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToUiRecordDetail
 import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.UiRecordDetailScreenState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
-import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordDetail.Companion.convertToUiRecordDetail
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
+import com.dirtfy.ppp.ui.controller.common.converter.feature.account.AccountAtomConverter.convertToUiAccount
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.UiAccountScreenState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
-import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount.Companion.convertToUiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.Flow
