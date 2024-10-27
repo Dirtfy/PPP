@@ -31,7 +31,7 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
         }
     }
     @Deprecated("screen state synchronized with repository")
-    override fun updateNewAccount(newAccountData: UiNewAccount) = request {
+    override suspend fun updateNewAccount(newAccountData: UiNewAccount) {
         _updateNewAccount(newAccountData)
     }
 

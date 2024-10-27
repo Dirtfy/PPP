@@ -11,7 +11,11 @@ import com.dirtfy.ppp.data.source.repository.RecordRepository
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 import javax.inject.Inject
@@ -42,13 +46,17 @@ class RecordFireStore @Inject constructor(): RecordRepository, Tagger {
     }
 
     override suspend fun readAll(): List<DataRecord> {
-        return recordRef.get().await().documents.map { document ->
-            document.toObject(FireStoreRecord::class.java)!!
+        val recordSnapshot = recordRef.get().await()
+        return readAll(recordSnapshot)
+    }
+
+    private fun readAll(
+        snapshot: QuerySnapshot
+    ): List<DataRecord> {
+        return snapshot.documents.map {
+            it.toObject(FireStoreRecord::class.java)!!
         }.map { record ->
-            Log.d(TAG, "read: $record: ${record.timestamp}")
-            val v = record.convertToDataRecord()
-            Log.d(TAG, "read: $v: ${v.timestamp}")
-            v
+            record.convertToDataRecord()
         }
     }
 
@@ -72,5 +80,21 @@ class RecordFireStore @Inject constructor(): RecordRepository, Tagger {
             }.map { recordDetail ->
                 recordDetail.convertToDataRecordDetail()
             }
+    }
+
+    override fun recordStream(): Flow<List<DataRecord>> = callbackFlow {
+        val recordSubscription = recordRef.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) { return@addSnapshotListener }
+            try {
+                val recordList = readAll(snapshot)
+                trySend(recordList)
+            } catch (e: Throwable) {
+                // 혹시 모르니까 ㄹㅇㅋㅋ
+            }
+        }
+
+        awaitClose {
+            recordSubscription.remove()
+        }
     }
 }

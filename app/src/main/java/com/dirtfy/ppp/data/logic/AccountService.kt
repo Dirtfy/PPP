@@ -81,6 +81,7 @@ class AccountService @Inject constructor(
         account
     }
 
+    // TODO deprecate 시키기
     fun readAccountRecord(accountNumber: Int) = operate {
         if (!accountRepository.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()

@@ -46,7 +46,7 @@ class AccountCreateScreen @Inject constructor(
 
         ScreenContent(
             newAccount = screen.newAccount,
-            onValueChange = { controller.updateNewAccount(it) },
+            onValueChange = { controller.request { updateNewAccount(it) } },
             onAutoGenerateClick = { controller.request { setRandomValidAccountNumberToNewAccount() } },
             onCreateClick = {
                 controller.request { addAccount(screen.newAccount) }
