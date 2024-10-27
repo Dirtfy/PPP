@@ -23,9 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
 import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountCreateViewModel
+import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 
 object AccountCreateScreen {
 
