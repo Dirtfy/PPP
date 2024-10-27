@@ -1,0 +1,34 @@
+package com.dirtfy.ppp.ui.state.feature.account.atom
+
+import com.dirtfy.ppp.data.dto.feature.account.DataAccount
+import com.dirtfy.ppp.ui.controller.common.Utils
+
+data class UiAccount(
+    val number: String = "",
+    val name: String = "",
+    val phoneNumber: String = "",
+    val balance: String = "",
+    val registerTimestamp: String = ""
+) {
+
+    companion object {
+        fun DataAccount.convertToUiAccount(): UiAccount {
+            return UiAccount(
+                number = number.toString(),
+                name = name,
+                phoneNumber = phoneNumber,
+                balance = Utils.formatCurrency(balance),
+                registerTimestamp = Utils.formatTimestampFromDay(registerTimestamp)
+            )
+        }
+    }
+
+    fun convertToDataAccount(): DataAccount {
+        return DataAccount(
+            number = number.toInt(),
+            name = name,
+            phoneNumber = phoneNumber,
+            registerTimestamp = Utils.parseTimestampFromDay(registerTimestamp)
+        )
+    }
+}
