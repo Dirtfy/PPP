@@ -3,9 +3,9 @@ package com.dirtfy.ppp.ui.presenter.viewmodel.record
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.data.dto.DataRecordType
-import com.dirtfy.ppp.data.logic.RecordService
-import com.dirtfy.ppp.data.source.firestore.record.RecordFireStore
+import com.dirtfy.ppp.data.dto.feature.record.DataRecordType
+import com.dirtfy.ppp.data.logic.RecordBusinessLogic
+import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.ui.dto.UiScreenState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.record.UiRecord
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 class RecordDetailViewModel: ViewModel(), RecordDetailController, Tagger {
 
-    private val recordService: RecordService = RecordService(RecordFireStore())
+    private val recordService: RecordBusinessLogic = RecordBusinessLogic(RecordFireStore())
 
     private val _screenData = MutableStateFlow(UiRecordDetailScreenState())
     override val screenData: StateFlow<UiRecordDetailScreenState>

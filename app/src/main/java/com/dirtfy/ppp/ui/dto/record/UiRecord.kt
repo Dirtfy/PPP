@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.ui.dto.record
 
-import com.dirtfy.ppp.data.dto.DataRecord
-import com.dirtfy.ppp.data.dto.DataRecordType
+import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 
 data class UiRecord(
@@ -23,11 +22,11 @@ data class UiRecord(
             return UiRecord(
                 timestamp = Utils.formatTimestampFromMillis(timestamp),
                 income = Utils.formatCurrency(income),
-                type = if (type == DataRecordType.Cash.name
-                    || type == DataRecordType.Card.name) {
+                type = if (type == com.dirtfy.ppp.data.dto.feature.record.DataRecordType.Cash.name
+                    || type == com.dirtfy.ppp.data.dto.feature.record.DataRecordType.Card.name) {
                     type
                 } else {
-                    DataRecordType.Point.name
+                    com.dirtfy.ppp.data.dto.feature.record.DataRecordType.Point.name
                 }
             )
         }

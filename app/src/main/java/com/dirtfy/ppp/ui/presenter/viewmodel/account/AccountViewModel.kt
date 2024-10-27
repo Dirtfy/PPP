@@ -3,8 +3,8 @@ package com.dirtfy.ppp.ui.presenter.viewmodel.account
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.data.logic.AccountService
-import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
+import com.dirtfy.ppp.data.logic.AccountBusinessLogic
+import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.ui.dto.UiScreenState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.account.UiAccount
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 class AccountViewModel: ViewModel(), AccountController, Tagger {
 
-    private val accountService = AccountService(AccountFireStore()) //TODO 왜 DI 안함? 뷰모델 다 안함
+    private val accountService = AccountBusinessLogic(AccountFireStore()) //TODO 왜 DI 안함? 뷰모델 다 안함
 
     private val accountList: Flow<List<UiAccount>>
             = accountService.accountStream()

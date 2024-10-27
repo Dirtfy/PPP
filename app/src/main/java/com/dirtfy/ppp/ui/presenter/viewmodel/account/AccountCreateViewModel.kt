@@ -3,8 +3,8 @@ package com.dirtfy.ppp.ui.presenter.viewmodel.account
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.data.logic.AccountService
-import com.dirtfy.ppp.data.source.firestore.account.AccountFireStore
+import com.dirtfy.ppp.data.logic.AccountBusinessLogic
+import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.ui.dto.UiScreenState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.account.UiNewAccount
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
 
-    private val accountService = AccountService(AccountFireStore())
+    private val accountService = AccountBusinessLogic(AccountFireStore())
 
     private val _screenData = MutableStateFlow(UiAccountCreateScreenState())
     override val screenData: StateFlow<UiAccountCreateScreenState>

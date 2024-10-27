@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.MenuException
-import com.dirtfy.ppp.data.logic.MenuService
-import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
+import com.dirtfy.ppp.data.logic.MenuBusinessLogic
+import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
 import com.dirtfy.ppp.ui.dto.UiScreenState
 import com.dirtfy.ppp.ui.dto.UiState
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 class MenuViewModel: ViewModel(), MenuController, Tagger {
 
-    private val menuService = MenuService(MenuFireStore())
+    private val menuService = MenuBusinessLogic(MenuFireStore())
 
     private val menuListFlow: Flow<List<UiMenu>> = menuService.menuStream().map {
         it.map { menu -> menu.convertToUiMenu() }
