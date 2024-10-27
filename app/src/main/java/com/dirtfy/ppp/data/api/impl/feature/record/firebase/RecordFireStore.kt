@@ -2,12 +2,12 @@ package com.dirtfy.ppp.data.api.impl.feature.record.firebase
 
 import android.util.Log
 import com.dirtfy.ppp.common.exception.RecordException
-import com.dirtfy.ppp.data.dto.feature.record.DataRecord
-import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
+import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecord.Companion.convertToFireStoreRecord
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecordDetail.Companion.convertToFireStoreRecordDetail
-import com.dirtfy.ppp.data.api.RecordApi
+import com.dirtfy.ppp.data.dto.feature.record.DataRecord
+import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
