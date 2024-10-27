@@ -132,7 +132,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     private fun DataTableOrder.convertToUiTableOrder(): UiTableOrder {
         return UiTableOrder(
             name = name,
-            price = Utils.currencyFormatting(price),
+            price = Utils.formatCurrency(price),
             count = count.toString()
         )
     }
@@ -140,7 +140,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     private fun UiTableOrder.convertToDataTableOrder(): DataTableOrder {
         return DataTableOrder(
             name = name,
-            price = Utils.currencyReformatting(price),
+            price = Utils.parseCurrency(price),
             count = count.toInt()
         )
     }
@@ -226,8 +226,8 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                     before.copy(
                         orderList = it,
                         orderListState = UiScreenState(UiState.COMPLETE),
-                        orderTotalPrice = Utils.currencyFormatting(
-                            it.sumOf { order -> Utils.currencyReformatting(order.price) * order.count.toInt() }
+                        orderTotalPrice = Utils.formatCurrency(
+                            it.sumOf { order -> Utils.parseCurrency(order.price) * order.count.toInt() }
                         )
                     )
                 }
@@ -520,7 +520,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
     override suspend fun addOrder(name: String, price: String) {
         val tableNumber = selectedTableNumber
-        val menuPrice = Utils.currencyReformatting(price)
+        val menuPrice = Utils.parseCurrency(price)
         _addOrder(tableNumber, name, menuPrice)
     }
 
@@ -540,7 +540,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
     override suspend fun cancelOrder(name: String, price: String) {
         val tableNumber = selectedTableNumber
-        val menuPrice = Utils.currencyReformatting(price)
+        val menuPrice = Utils.parseCurrency(price)
         _cancelOrder(tableNumber, name, menuPrice)
     }
 

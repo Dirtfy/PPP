@@ -28,7 +28,11 @@ class RecordDetailViewModel: ViewModel(), RecordDetailController, Tagger {
         get() = _screenData
 
     private suspend fun _updateRecordDetailList(record: UiRecord) {
+        Log.d(TAG, "$record")
+        Log.d(TAG, "${record.convertToDataRecordFromRaw()}")
+        
         _screenData.update { it.copy(recordDetailListState = UiScreenState(UiState.LOADING)) }
+        
         recordService.readRecordDetail(record.convertToDataRecordFromRaw())
             .map { it.map { data -> data.convertToUiRecordDetail() } }
             .catch { cause ->

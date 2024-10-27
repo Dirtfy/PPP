@@ -98,9 +98,9 @@ class RecordViewModel: ViewModel(), RecordController, Tagger {
     }
 
     override fun updateNowRecord(record: UiRecord) {
-        // TODO Utils 함수 바뀌면 substring 길이 바뀌어야함
-        val rawValue = rawRecordListFlow.value.find {
-            it.timestamp.substring(0,16) == record.timestamp
+        val rawValue = _rawRecordList.find {
+            Log.d(TAG,"${it.timestamp} - ${record.timestamp}")
+            it.timestamp == record.timestamp
         }
         if(rawValue == null)
             nowRecordStateFlow.update {

@@ -17,8 +17,8 @@ data class UiAccount(
                 number = number.toString(),
                 name = name,
                 phoneNumber = phoneNumber,
-                balance = Utils.currencyFormatting(balance),
-                registerTimestamp = Utils.timestampFormatting_YMD(registerTimestamp)
+                balance = Utils.formatCurrency(balance),
+                registerTimestamp = Utils.formatTimestampFromDay(registerTimestamp)
             )
         }
     }
@@ -28,7 +28,7 @@ data class UiAccount(
             number = number.toInt(),
             name = name,
             phoneNumber = phoneNumber,
-            registerTimestamp = Utils.timestampReformatting_YMD(registerTimestamp)
+            registerTimestamp = Utils.parseTimestampFromDay(registerTimestamp)
         )
     }
 }
