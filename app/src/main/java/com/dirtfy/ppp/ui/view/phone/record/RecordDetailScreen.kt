@@ -25,11 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.dto.UiScreenState
-import com.dirtfy.ppp.ui.dto.UiState
-import com.dirtfy.ppp.ui.dto.record.UiRecord
-import com.dirtfy.ppp.ui.dto.record.UiRecordDetail
-import com.dirtfy.ppp.ui.presenter.controller.record.RecordDetailController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
+import com.dirtfy.ppp.ui.state.common.UiState
+import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
+import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordDetail
+import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
 import javax.inject.Inject
 
 class RecordDetailScreen @Inject constructor(

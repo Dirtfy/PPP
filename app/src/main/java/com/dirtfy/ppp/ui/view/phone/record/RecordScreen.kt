@@ -18,11 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.dto.UiScreenState
-import com.dirtfy.ppp.ui.dto.UiState
-import com.dirtfy.ppp.ui.dto.record.UiRecord
-import com.dirtfy.ppp.ui.dto.record.UiRecordMode
-import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
+import com.dirtfy.ppp.ui.state.common.UiState
+import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
+import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
+import com.dirtfy.ppp.ui.controller.feature.record.RecordController
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(

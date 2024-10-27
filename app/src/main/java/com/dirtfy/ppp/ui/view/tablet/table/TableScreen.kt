@@ -38,15 +38,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dirtfy.ppp.ui.dto.UiScreenState
-import com.dirtfy.ppp.ui.dto.UiState
-import com.dirtfy.ppp.ui.dto.menu.UiMenu
-import com.dirtfy.ppp.ui.dto.table.UiPointUse
-import com.dirtfy.ppp.ui.dto.table.UiTable
-import com.dirtfy.ppp.ui.dto.table.UiTableMode
-import com.dirtfy.ppp.ui.dto.table.UiTableOrder
-import com.dirtfy.ppp.ui.presenter.controller.table.TableController
-import com.dirtfy.ppp.ui.presenter.viewmodel.table.TableViewModel
+import com.dirtfy.ppp.ui.state.common.UiScreenState
+import com.dirtfy.ppp.ui.state.common.UiState
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
+import com.dirtfy.ppp.ui.controller.feature.table.TableController
+import com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel.TableViewModel
 
 object TableScreen {
 
