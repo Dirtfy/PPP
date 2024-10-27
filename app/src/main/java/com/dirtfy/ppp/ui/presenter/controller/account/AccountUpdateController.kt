@@ -5,11 +5,9 @@ import com.dirtfy.ppp.ui.dto.account.screen.UiAccountUpdateScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
-interface AccountUpdateController: Controller {
-
-    val uiAccountUpdateScreenState: StateFlow<UiAccountUpdateScreenState>
+interface AccountUpdateController
+    : Controller<UiAccountUpdateScreenState, AccountUpdateController> {
 
     suspend fun updateAccount(newAccountData: UiNewAccount)
 
-    fun request(job: suspend AccountUpdateController.() -> Unit)
 }

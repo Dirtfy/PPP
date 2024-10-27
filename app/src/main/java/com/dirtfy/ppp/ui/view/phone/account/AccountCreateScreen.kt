@@ -42,7 +42,7 @@ class AccountCreateScreen @Inject constructor(
         controller: AccountCreateController = accountCreateController,
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
-        val screen by controller.uiAccountCreateScreenState.collectAsStateWithLifecycle()
+        val screen by controller.screenData.collectAsStateWithLifecycle()
 
         ScreenContent(
             newAccount = screen.newAccount,

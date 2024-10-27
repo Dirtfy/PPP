@@ -57,7 +57,7 @@ class AccountScreen @Inject constructor(
     fun Main(
         controller: AccountController = accountController
     ) {
-        val uiAccountScreen by controller.uiAccountScreenState.collectAsStateWithLifecycle()
+        val uiAccountScreen by controller.screenData.collectAsStateWithLifecycle()
 
         val scanLauncher = rememberLauncherForActivityResult(
             contract = ScanContract()

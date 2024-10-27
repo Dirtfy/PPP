@@ -56,7 +56,7 @@ class AccountDetailScreen @Inject constructor(
         account: UiAccount,
         controller: AccountDetailController = accountDetailController
     ) {
-        val screen by controller.uiAccountDetailScreenState.collectAsStateWithLifecycle()
+        val screen by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request {

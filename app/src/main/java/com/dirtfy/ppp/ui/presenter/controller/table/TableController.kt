@@ -7,9 +7,7 @@ import com.dirtfy.ppp.ui.dto.table.screen.UiTableScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
-interface TableController: Controller {
-
-    val screenData: StateFlow<UiTableScreenState>
+interface TableController: Controller<UiTableScreenState, TableController> {
 
     suspend fun updateTableList()
     suspend fun updateOrderList(table: UiTable)
@@ -27,5 +25,4 @@ interface TableController: Controller {
 
     fun setMode(mode: UiTableMode)
 
-    fun request(job: suspend TableController.() -> Unit)
 }

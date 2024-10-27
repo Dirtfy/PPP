@@ -6,9 +6,8 @@ import com.dirtfy.ppp.ui.dto.account.screen.UiAccountScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
-interface AccountController: Controller {
-
-    val uiAccountScreenState: StateFlow<UiAccountScreenState>
+interface AccountController
+    : Controller<UiAccountScreenState, AccountController> {
 
     @Deprecated("screen state synchronized with repository")
     suspend fun updateAccountList()
@@ -16,8 +15,5 @@ interface AccountController: Controller {
     fun updateSearchClue(clue: String)
 
     fun setMode(mode: UiAccountMode)
-
-
-    fun request(job: suspend AccountController.() -> Unit)
 
 }

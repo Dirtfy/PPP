@@ -1,27 +1,11 @@
 package com.dirtfy.ppp.ui.presenter.controller.common
 
-import com.dirtfy.ppp.common.FlowState
+import kotlinx.coroutines.flow.StateFlow
 
-interface Controller {
+interface Controller<ScreenData, Scope: Controller<ScreenData, Scope>> {
 
-    fun <T, U> FlowState<T>.passMap(dataTransform: (data: T) -> U): FlowState<U> {
-        return when(this) {
-            is FlowState.Loading -> FlowState.loading()
-            is FlowState.Failed -> {
-                FlowState.failed(this.throwable)
-            }
-            is FlowState.Success -> {
-                FlowState.success(dataTransform(this.data))
-            }
-        }
-    }
+    val screenData: StateFlow<ScreenData>
 
-    fun <T, U> FlowState<T>.ignoreMap(dataTransform: (data: T) -> U): U? {
-        return when(this) {
-            is FlowState.Loading, is FlowState.Failed -> { null }
-            is FlowState.Success -> {
-                dataTransform(this.data)
-            }
-        }
-    }
+    fun request(job: suspend Scope.() -> Unit)
+
 }

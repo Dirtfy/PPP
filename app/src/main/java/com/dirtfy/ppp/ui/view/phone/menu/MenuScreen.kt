@@ -51,7 +51,7 @@ class MenuScreen @Inject constructor(
     fun Main(
         controller: MenuController = menuController
     ) {
-        val screen by controller.uiMenuScreenState.collectAsStateWithLifecycle()
+        val screen by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request { updateMenuList() }

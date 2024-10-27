@@ -46,7 +46,7 @@ object AccountScreen {
     fun Main(
         controller: AccountController = viewModel<AccountViewModel>()
     ) {
-        val uiAccountScreen by controller.uiAccountScreenState.collectAsStateWithLifecycle()
+        val uiAccountScreen by controller.screenData.collectAsStateWithLifecycle()
 
         val scanLauncher = rememberLauncherForActivityResult(
             contract = ScanContract()

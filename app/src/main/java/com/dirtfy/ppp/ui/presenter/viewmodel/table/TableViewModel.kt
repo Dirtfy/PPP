@@ -206,7 +206,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         _screenData.update {
             it.copy(
                 orderListState = UiScreenState(UiState.LOADING),
-                orderTotalPrice = Utils.currencyFormatting(0)
+                orderTotalPrice = Utils.formatCurrency(0)
             )
         }
 
