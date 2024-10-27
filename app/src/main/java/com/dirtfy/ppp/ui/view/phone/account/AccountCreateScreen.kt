@@ -1,18 +1,24 @@
 package com.dirtfy.ppp.ui.view.phone.account
 
+import android.inputmethodservice.Keyboard
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -20,6 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.ui.dto.account.UiNewAccount
@@ -56,24 +66,38 @@ class AccountCreateScreen @Inject constructor(
         onCreateClick: () -> Unit
     ) {
         Surface(
-            modifier = Modifier.wrapContentHeight(),
+            modifier = Modifier.wrapContentHeight()
+                .background(brush = Brush.verticalGradient(listOf(Color.Cyan, Color.Blue))),
             shape = RoundedCornerShape(12.dp)
         ) {
             Box(modifier = Modifier.padding(15.dp)) {
                 Column(horizontalAlignment = Alignment.End) {
                     Card {
-                        Box(modifier = Modifier.padding(10.dp)) {
+                        Column(
+                            modifier = Modifier.padding(10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "New Account",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+
+                            Spacer(modifier = Modifier.size(10.dp))
+
                             AccountInput(
                                 nowAccount = newAccount,
                                 onValueChange = onValueChange,
                                 onAutoGenerateClick = onAutoGenerateClick
                             )
+
+                            Spacer(modifier = Modifier.size(10.dp))
+
+                            CreateButton(
+                                onClick = onCreateClick
+                            )
                         }
                     }
-
-                    Spacer(modifier = Modifier.size(10.dp))
-
-                    CreateButton(onClick = onCreateClick)
                 }
             }
         }
@@ -120,7 +144,10 @@ class AccountCreateScreen @Inject constructor(
             },
             trailingIcon = {
                 AccountNumberGenerate(onAutoGenerateClick)
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            )
         )
     }
     @Composable
@@ -147,7 +174,10 @@ class AccountCreateScreen @Inject constructor(
             value = nowAccount.name,
             onValueChange = {
                 onValueChange(nowAccount.copy(name = it))
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            )
         )
     }
 
@@ -170,7 +200,9 @@ class AccountCreateScreen @Inject constructor(
         onClick: () -> Unit
     ) {
         Button(
-            onClick = onClick
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
         ) {
             Text(text = "add")
         }
