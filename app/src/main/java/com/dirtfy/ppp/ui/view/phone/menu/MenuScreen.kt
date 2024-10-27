@@ -110,8 +110,6 @@ class MenuScreen @Inject constructor(
                 }
 
                 UiState.FAIL -> {
-                    // TODO 이거 왜 안 지웠지? 누구야~
-//                    val throwable = (menuListState as FlowState.Failed<List<UiMenu>>).throwable
 
                     AlertDialog(
                         onDismissRequest = { },
