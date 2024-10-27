@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel.record
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.dto.DataRecordType

@@ -11,7 +11,6 @@ import com.dirtfy.ppp.ui.presenter.controller.account.AccountUpdateController
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordController
 import com.dirtfy.ppp.ui.presenter.controller.record.RecordDetailController
 import com.dirtfy.ppp.ui.presenter.controller.table.TableController
-import com.dirtfy.ppp.ui.presenter.controller.table.TableOrderController
 import com.dirtfy.ppp.ui.presenter.viewmodel.MenuViewModel
 import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountCreateViewModel
 import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountDetailViewModel
@@ -19,7 +18,6 @@ import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountUpdateViewModel
 import com.dirtfy.ppp.ui.presenter.viewmodel.account.AccountViewModel
 import com.dirtfy.ppp.ui.presenter.viewmodel.record.RecordDetailViewModel
 import com.dirtfy.ppp.ui.presenter.viewmodel.record.RecordViewModel
-import com.dirtfy.ppp.ui.presenter.viewmodel.table.TableOrderViewModel
 import com.dirtfy.ppp.ui.presenter.viewmodel.table.TableViewModel
 import dagger.Module
 import dagger.Provides
@@ -92,14 +90,6 @@ class UiModule {
         @ActivityContext context: Context
     ): TableController {
         val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[TableViewModel::class.java]
-        return viewModel
-    }
-
-    @Provides
-    fun providesTableOrderController(
-        @ActivityContext context: Context
-    ): TableOrderController {
-        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[TableOrderViewModel::class.java]
         return viewModel
     }
 }

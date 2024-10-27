@@ -49,7 +49,7 @@ object AccountDetailScreen {
         account: UiAccount,
         controller: AccountDetailController = viewModel<AccountDetailViewModel>()
     ) {
-        val screen by controller.uiAccountDetailScreenState.collectAsStateWithLifecycle()
+        val screen by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request {

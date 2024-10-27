@@ -36,7 +36,7 @@ class AccountViewModel: ViewModel(), AccountController, Tagger {
     private val modeFlow = MutableStateFlow(UiAccountMode.Main)
     private val nowAccountFlow = MutableStateFlow(UiAccount())
 
-    override val uiAccountScreenState: StateFlow<UiAccountScreenState>
+    override val screenData: StateFlow<UiAccountScreenState>
         = nowAccountFlow
             .combine(searchClueFlow) { nowAccount, searchClue ->
                 UiAccountScreenState(

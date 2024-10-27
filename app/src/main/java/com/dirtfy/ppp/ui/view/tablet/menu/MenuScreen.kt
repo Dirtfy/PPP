@@ -43,7 +43,7 @@ object MenuScreen: Tagger {
     fun Main(
         controller: MenuController = viewModel<MenuViewModel>()
     ) {
-        val screen by controller.uiMenuScreenState.collectAsStateWithLifecycle()
+        val screen by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request { updateMenuList() }

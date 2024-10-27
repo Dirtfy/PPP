@@ -5,8 +5,7 @@ import com.dirtfy.ppp.ui.dto.menu.screen.UiMenuScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
-interface MenuController: Controller {
-    val uiMenuScreenState: StateFlow<UiMenuScreenState>
+interface MenuController: Controller<UiMenuScreenState, MenuController> {
 
     @Deprecated("screen state synchronized with repository")
     suspend fun updateMenuList()
@@ -17,5 +16,4 @@ interface MenuController: Controller {
     suspend fun createMenu(menu: UiMenu)
     suspend fun deleteMenu(menu: UiMenu)
 
-    fun request(job: suspend MenuController.() -> Unit)
 }

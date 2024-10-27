@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.presenter.viewmodel.record
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.RecordException
@@ -98,7 +99,7 @@ class RecordViewModel: ViewModel(), RecordController, Tagger {
     }
 
     override fun updateNowRecord(record: UiRecord) {
-        val rawValue = _rawRecordList.find {
+        val rawValue = rawRecordListFlow.value.find {
             Log.d(TAG,"${it.timestamp} - ${record.timestamp}")
             it.timestamp == record.timestamp
         }

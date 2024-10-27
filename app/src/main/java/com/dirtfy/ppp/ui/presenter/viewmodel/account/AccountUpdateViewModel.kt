@@ -21,9 +21,9 @@ class AccountUpdateViewModel: ViewModel(), AccountUpdateController, Tagger {
 
     private val accountService = AccountService(AccountFireStore())
 
-    private val _uiAccountUpdateScreenState = MutableStateFlow(UiAccountUpdateScreenState())
-    override val uiAccountUpdateScreenState: StateFlow<UiAccountUpdateScreenState>
-        get() = _uiAccountUpdateScreenState
+    private val _screenData = MutableStateFlow(UiAccountUpdateScreenState())
+    override val screenData: StateFlow<UiAccountUpdateScreenState>
+        get() = _screenData
 
     override suspend fun updateAccount(newAccountData: UiNewAccount) {
         val (number, name, phoneNumber) = newAccountData
@@ -34,7 +34,7 @@ class AccountUpdateViewModel: ViewModel(), AccountUpdateController, Tagger {
             phoneNumber = phoneNumber
         ).catch { cause ->
             Log.e(TAG, "updateAccount() - updateAccount failed \n ${cause.message}")
-            _uiAccountUpdateScreenState.update {
+            _screenData.update {
                 it.copy(
                     updateAccountState = UiScreenState(UiState.FAIL, cause.message)
                 )

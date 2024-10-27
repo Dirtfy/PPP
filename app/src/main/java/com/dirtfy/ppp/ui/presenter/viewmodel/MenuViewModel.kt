@@ -37,7 +37,7 @@ class MenuViewModel: ViewModel(), MenuController, Tagger {
     private val newMenuStateFlow = MutableStateFlow(UiScreenState(UiState.COMPLETE))
     private val deleteMenuStateFlow = MutableStateFlow(UiScreenState(UiState.COMPLETE))
 
-    override val uiMenuScreenState: StateFlow<UiMenuScreenState>
+    override val screenData: StateFlow<UiMenuScreenState>
         = searchClueFlow
             .combine(newMenuFlow) { searchClue, newMenu ->
                 UiMenuScreenState(

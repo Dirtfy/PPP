@@ -6,9 +6,7 @@ import com.dirtfy.ppp.ui.dto.record.screen.UiRecordScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
 import kotlinx.coroutines.flow.StateFlow
 
-interface RecordController: Controller {
-
-    val screenData: StateFlow<UiRecordScreenState>
+interface RecordController: Controller<UiRecordScreenState, RecordController> {
 
     @Deprecated("screen state synchronized with repository")
     suspend fun updateRecordList()
@@ -16,5 +14,4 @@ interface RecordController: Controller {
     fun updateNowRecord(record: UiRecord)
     fun setMode(mode: UiRecordMode)
 
-    fun request(job: suspend RecordController.() -> Unit)
 }

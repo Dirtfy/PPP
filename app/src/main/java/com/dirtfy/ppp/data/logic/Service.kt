@@ -1,6 +1,5 @@
 package com.dirtfy.ppp.data.logic
 
-import com.dirtfy.ppp.common.FlowState
 import com.dirtfy.ppp.common.exception.CustomException
 import com.dirtfy.ppp.common.exception.ExternalException
 import kotlinx.coroutines.Dispatchers
@@ -27,14 +26,6 @@ interface Service {
                 }
             }
         }
-
-    fun <T> asFlow(func: suspend () -> T) = flow {
-        emit(FlowState.loading())
-        emit(FlowState.success(func()))
-    }.catch {
-        emit(FlowState.failed(it))
-        println(it.message)
-    }.flowOn(Dispatchers.Default).convertExceptionAsCheckedException()
 
     fun <T> operate(func: suspend () -> T) = flow {
         emit(func())

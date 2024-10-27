@@ -27,10 +27,10 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
 
     private val accountService = AccountService(AccountFireStore())
 
-    private val _uiAccountDetailScreenState: MutableStateFlow<UiAccountDetailScreenState>
+    private val _screenData: MutableStateFlow<UiAccountDetailScreenState>
         = MutableStateFlow(UiAccountDetailScreenState(nowAccount = UiAccount(number = "0")))
-    override val uiAccountDetailScreenState: StateFlow<UiAccountDetailScreenState>
-        get() = _uiAccountDetailScreenState
+    override val screenData: StateFlow<UiAccountDetailScreenState>
+        get() = _screenData
 
     private lateinit var accountRecordListStream: Flow<List<UiAccountRecord>>
 
@@ -40,7 +40,7 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
     }
 
     override suspend fun updateNowAccount(account: UiAccount) {
-        _uiAccountDetailScreenState.update {
+        _screenData.update {
             it.copy(
                 nowAccount = account,
                 accountRecordListState = UiScreenState()
@@ -53,14 +53,14 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
         accountRecordListStream
             .catch { cause ->
                 Log.e(TAG, "updateNowAccount() - stream failed \n ${cause.message}")
-                _uiAccountDetailScreenState.update {
+                _screenData.update {
                     it.copy(
                         accountRecordListState = UiScreenState(UiState.FAIL, cause.message)
                     )
                 }
             }
             .conflate().collect {
-                _uiAccountDetailScreenState.update { before ->
+                _screenData.update { before ->
                     before.copy(
                         accountRecordList = it,
                         accountRecordListState = UiScreenState(UiState.COMPLETE)
@@ -70,7 +70,7 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
     }
 
     override fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord) {
-        _uiAccountDetailScreenState.update {
+        _screenData.update {
             it.copy(
                 newAccountRecord = newAccountRecord
             )
@@ -78,7 +78,7 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
     }
 
     override suspend fun addRecord(newAccountRecord: UiNewAccountRecord) {
-        val accountNumber = _uiAccountDetailScreenState.value.nowAccount.number.toInt()
+        val accountNumber = _screenData.value.nowAccount.number.toInt()
         val (issuedName, difference) = newAccountRecord
         accountService.addAccountRecord(
             accountNumber = accountNumber,
@@ -86,13 +86,13 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
             difference = difference.toInt()
         ).catch { cause ->
             Log.e(TAG, "addRecord() - addAccountRecord failed \n ${cause.message}")
-            _uiAccountDetailScreenState.update {
+            _screenData.update {
                 it.copy(
                     newAccountRecordState = UiScreenState(UiState.FAIL, cause.message)
                 )
             }
         }.collect {
-            _uiAccountDetailScreenState.update {
+            _screenData.update {
                 it.copy(
                     newAccountRecord = UiNewAccountRecord()
                 )

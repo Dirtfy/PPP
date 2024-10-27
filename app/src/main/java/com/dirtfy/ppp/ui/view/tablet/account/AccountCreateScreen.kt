@@ -34,7 +34,7 @@ object AccountCreateScreen {
         controller: AccountCreateController = viewModel<AccountCreateViewModel>(), // TODO DI - tablet UI viewmodel
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
-        val screen by controller.uiAccountCreateScreenState.collectAsStateWithLifecycle()
+        val screen by controller.screenData.collectAsStateWithLifecycle()
 
         ScreenContent(
             newAccount = screen.newAccount,
