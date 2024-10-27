@@ -2,11 +2,11 @@ package com.dirtfy.ppp.data.api.impl.feature.table.firebase
 
 import android.util.Log
 import com.dirtfy.ppp.common.exception.TableException
-import com.dirtfy.ppp.data.dto.feature.table.DataTable
-import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
+import com.dirtfy.ppp.data.api.TableApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
 import com.dirtfy.ppp.data.api.impl.feature.table.firebase.FireStoreTableOrder.Companion.convertToFireStoreTableOrder
-import com.dirtfy.ppp.data.api.TableApi
+import com.dirtfy.ppp.data.dto.feature.table.DataTable
+import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
