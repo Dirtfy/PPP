@@ -3,30 +3,29 @@ package com.dirtfy.ppp.data.logic
 import com.dirtfy.ppp.common.exception.MenuException
 import com.dirtfy.ppp.data.dto.DataMenu
 import com.dirtfy.ppp.data.source.repository.MenuRepository
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class MenuService @Inject constructor(
     private val menuRepository: MenuRepository
 ): Service {
 
-    fun createMenu(menu: DataMenu) = flow {
+    fun createMenu(menu: DataMenu) = operate {
         menuRepository.let {
             if (it.isSameNameExist(menu.name))
                 throw MenuException.NonUniqueName()
 
-            emit(it.create(menu))
+            it.create(menu)
         }
     }
 
-    fun readMenu() = flow {
+    fun readMenu() = operate {
         val menuList = menuRepository.readAll()
-        emit(menuList)
+        menuList
     }
 
-    fun deleteMenu(menu: DataMenu) = flow {
+    fun deleteMenu(menu: DataMenu) = operate {
         val deletedMenu = menuRepository.delete(menu)
-        emit(deletedMenu)
+        deletedMenu
     }
 
     fun menuStream() = menuRepository.menuStream()

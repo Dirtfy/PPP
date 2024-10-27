@@ -108,7 +108,10 @@ class RecordViewModel: ViewModel(), RecordController, Tagger {
                 // TODO 이거 에러 처리 하는 부분 뷰 레이어에 필요함.
                 UiScreenState(UiState.FAIL, RecordException.NonExistQuery().message)
             }
-        else nowRecordFlow.update { rawValue } // TODO issued name 어떻게 주지?
+        else {
+            nowRecordFlow.update { rawValue } // TODO issued name 어떻게 주지?
+            nowRecordStateFlow.update { UiScreenState(UiState.COMPLETE) }
+        }
     }
 
     override fun setMode(mode: UiRecordMode) {

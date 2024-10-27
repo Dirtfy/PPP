@@ -52,11 +52,12 @@ class RecordDetailViewModel: ViewModel(), RecordDetailController, Tagger {
                 }
             }
     }
+
     override suspend fun updateRecordDetailList(record: UiRecord) {
         _updateRecordDetailList(record)
     }
 
-    override fun updateNowRecord(record: UiRecord) {
+    override suspend fun updateNowRecord(record: UiRecord) {
         // TODO 의문 밖에 들지 않는 로직
         val type = record.type.split("-")[0].trim()
         var newValue = if (type == DataRecordType.Card.name ||
@@ -68,7 +69,7 @@ class RecordDetailViewModel: ViewModel(), RecordDetailController, Tagger {
         newValue = newValue.copy(timestamp = newValue.timestamp.substring(0, 16))
 
         _screenData.update { it.copy(nowRecord = newValue) }
-        request { _updateRecordDetailList(record) }
+        _updateRecordDetailList(record)
     }
 
     override fun request(job: suspend RecordDetailController.() -> Unit) {

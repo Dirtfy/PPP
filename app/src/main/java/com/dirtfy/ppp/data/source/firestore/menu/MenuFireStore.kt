@@ -1,9 +1,11 @@
 package com.dirtfy.ppp.data.source.firestore.menu
 
+import android.util.Log
 import com.dirtfy.ppp.data.dto.DataMenu
 import com.dirtfy.ppp.data.source.firestore.FireStorePath
 import com.dirtfy.ppp.data.source.firestore.menu.FireStoreMenu.Companion.convertToFireStoreMenu
 import com.dirtfy.ppp.data.source.repository.MenuRepository
+import com.dirtfy.tagger.Tagger
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -13,7 +15,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class MenuFireStore @Inject constructor(): MenuRepository {
+class MenuFireStore @Inject constructor(): MenuRepository, Tagger {
 
     private val ref = Firebase.firestore.collection(FireStorePath.MENU)
 
@@ -71,7 +73,8 @@ class MenuFireStore @Inject constructor(): MenuRepository {
                 val menuList = readAll(snapshot)
                 trySend(menuList)
             } catch (e: Throwable) {
-                // For something wrong...
+                Log.e(TAG, "menu subscription fail\n${e.message}")
+                throw e
             }
         }
 

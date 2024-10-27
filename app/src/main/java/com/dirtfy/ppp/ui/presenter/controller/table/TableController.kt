@@ -5,7 +5,6 @@ import com.dirtfy.ppp.ui.dto.table.UiTable
 import com.dirtfy.ppp.ui.dto.table.UiTableMode
 import com.dirtfy.ppp.ui.dto.table.screen.UiTableScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
-import kotlinx.coroutines.flow.StateFlow
 
 interface TableController: Controller<UiTableScreenState, TableController> {
 
