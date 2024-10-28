@@ -32,13 +32,16 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordDetail
+import javax.inject.Inject
 
-object RecordDetailScreen {
+class RecordDetailScreen @Inject constructor(
+    val recordDetailController: RecordDetailController
+){
 
     @Composable
     fun Main(
         firstRecord: UiRecord,
-        controller: RecordDetailController = viewModel<RecordDetailViewModel>()
+        controller: RecordDetailController = recordDetailController
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 

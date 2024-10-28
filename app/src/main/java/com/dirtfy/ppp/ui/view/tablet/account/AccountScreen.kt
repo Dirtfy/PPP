@@ -39,12 +39,17 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import javax.inject.Inject
 
-object AccountScreen {
+class AccountScreen @Inject constructor(
+    val accountController: AccountController,
+    val accountCreateScreen: AccountCreateScreen,
+    val accountDetailScreen: AccountDetailScreen
+) {
 
     @Composable
     fun Main(
-        controller: AccountController = viewModel<AccountViewModel>()
+        controller: AccountController = accountController
     ) {
         val uiAccountScreen by controller.screenData.collectAsStateWithLifecycle()
 
@@ -272,7 +277,7 @@ object AccountScreen {
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            AccountCreateScreen.Main(
+            accountCreateScreen.Main(
                 onAccountCreate = onAccountCreate
             )
         }
@@ -284,7 +289,7 @@ object AccountScreen {
         onDismissRequest: () -> Unit
     ) { //TODO maxHeight 설정?
         Dialog(onDismissRequest = onDismissRequest) {
-            AccountDetailScreen.Main(account = account)
+            accountDetailScreen.Main(account = account)
         }
     }
 }

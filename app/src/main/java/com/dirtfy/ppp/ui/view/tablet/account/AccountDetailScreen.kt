@@ -41,13 +41,16 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountRecord
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
+import javax.inject.Inject
 
-object AccountDetailScreen {
+class AccountDetailScreen @Inject constructor(
+    val accountDetailController: AccountDetailController
+) {
 
     @Composable
     fun Main(
         account: UiAccount,
-        controller: AccountDetailController = viewModel<AccountDetailViewModel>()
+        controller: AccountDetailController = accountDetailController
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 

@@ -47,12 +47,15 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
+import javax.inject.Inject
 
-object TableScreen {
+class TableScreen @Inject constructor(
+    val tableController: TableController
+) {
 
     @Composable
     fun Main(
-        controller: TableController = viewModel<TableViewModel>()
+        controller: TableController = tableController
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 

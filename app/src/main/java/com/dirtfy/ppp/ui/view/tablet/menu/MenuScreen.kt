@@ -36,12 +36,15 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger
+import javax.inject.Inject
 
-object MenuScreen: Tagger {
+class MenuScreen @Inject constructor(
+    val menuController: MenuController
+): Tagger {
 
     @Composable
     fun Main(
-        controller: MenuController = viewModel<MenuViewModel>()
+        controller: MenuController = menuController
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
