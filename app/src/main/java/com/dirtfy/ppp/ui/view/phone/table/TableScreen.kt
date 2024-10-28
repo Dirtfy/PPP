@@ -43,14 +43,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.dto.UiScreenState
-import com.dirtfy.ppp.ui.dto.UiState
-import com.dirtfy.ppp.ui.dto.menu.UiMenu
-import com.dirtfy.ppp.ui.dto.table.UiPointUse
-import com.dirtfy.ppp.ui.dto.table.UiTable
-import com.dirtfy.ppp.ui.dto.table.UiTableMode
-import com.dirtfy.ppp.ui.dto.table.UiTableOrder
-import com.dirtfy.ppp.ui.presenter.controller.table.TableController
+import com.dirtfy.ppp.ui.controller.feature.table.TableController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
+import com.dirtfy.ppp.ui.state.common.UiState
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import javax.inject.Inject
 
 class TableScreen @Inject constructor(
