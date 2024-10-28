@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -28,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -88,8 +90,8 @@ class TableScreen @Inject constructor(
                     updateMenuList()
                 }
             },
-            onTableLongClick = { controller.setMode(UiTableMode.Merge) },
-            onMergeClick = { controller.request { mergeTable() } },
+            onMergeClick = {controller.setMode(UiTableMode.Merge)},
+            onMergeOkClick = { controller.request { mergeTable() } },
             onMergeCancelClick = { controller.cancelMergeTable() },
             onCashClick = { controller.request { payTableWithCash() } },
             onCardClick = { controller.request { payTableWithCard() } },
@@ -126,8 +128,8 @@ class TableScreen @Inject constructor(
         addOrderState: UiScreenState,
         cancelOrderState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
-        onTableLongClick: () -> Unit,
-        onMergeClick: () -> Unit,
+        onMergeClick : () -> Unit,
+        onMergeOkClick: () -> Unit,
         onMergeCancelClick: () -> Unit,
         onCashClick: () -> Unit,
         onCardClick: () -> Unit,
@@ -156,8 +158,8 @@ class TableScreen @Inject constructor(
                     mode = mode,
                     mergeTableState = mergeTableState,
                     onTableClick = onTableClick,
-                    onTableLongClick = onTableLongClick,
                     onMergeClick = onMergeClick,
+                    onMergeOkClick = onMergeOkClick,
                     onMergeCancelClick = onMergeCancelClick
                 )
             }
@@ -222,8 +224,8 @@ class TableScreen @Inject constructor(
         mode: UiTableMode,
         mergeTableState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
-        onTableLongClick: () -> Unit,
         onMergeClick: () -> Unit,
+        onMergeOkClick: () -> Unit,
         onMergeCancelClick: () -> Unit
     ) {
         when(tableListState.state) {
@@ -233,8 +235,8 @@ class TableScreen @Inject constructor(
                     mode = mode,
                     mergeTableState = mergeTableState,
                     onTableClick = onTableClick,
-                    onTableLongClick = onTableLongClick,
                     onMergeClick = onMergeClick,
+                    onMergeOkClick = onMergeOkClick,
                     onMergeCancelClick = onMergeCancelClick
                 )
             }
@@ -255,37 +257,63 @@ class TableScreen @Inject constructor(
         mode: UiTableMode,
         mergeTableState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
-        onTableLongClick: () -> Unit,
         onMergeClick: () -> Unit,
+        onMergeOkClick: () -> Unit,
         onMergeCancelClick: () -> Unit
     ) {
-        Box {
-            Column(
-                modifier = Modifier.padding(10.dp)
-            ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(10)
-                ) {
-                    items(tableList) {
-                        Box(
-                            modifier = Modifier.padding(2.dp)
-                        ) {
-                            Table(
-                                table = it,
-                                onClick = { onTableClick(it) },
-                                onLongClick = onTableLongClick
-                            )
+        Box{
+            ConstraintLayout(modifier = Modifier.padding(10.dp)) {
+                val (tables,mergeButtonRow) = createRefs()
+
+                Box(
+                    modifier = Modifier
+                        .constrainAs(tables){
+                            top.linkTo(parent.top)
+                        }
+                ){
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(10)
+                    ) {
+                        items(tableList) {
+                            Box(
+                                modifier = Modifier.padding(2.dp)
+                            ) {
+                                Table(
+                                    table = it,
+                                    onClick = { onTableClick(it) }
+                                )
+                            }
                         }
                     }
                 }
-
-                if (mode == UiTableMode.Merge) {
-                    Row {
-                        Button(onClick = onMergeClick) {
-                            Text(text = "Merge")
+                Box(modifier = Modifier
+                    .constrainAs(mergeButtonRow){
+                        bottom.linkTo(tables.bottom)
+                    }
+                ) {
+                    if (mode == UiTableMode.Merge) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(text = "Please select a table", style = MaterialTheme.typography.bodyMedium)
+                            Row {
+                                Button(onClick = {
+                                    onMergeOkClick()
+                                }) {
+                                    Text(text = "OK")
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(onClick = {
+                                    onMergeCancelClick()
+                                }) {
+                                    Text(text = "Cancel")
+                                }
+                            }
                         }
-                        Button(onClick = onMergeCancelClick) {
-                            Text(text = "Cancel")
+                    }
+                    else{
+                        Row {
+                            Button(onClick = onMergeClick) {
+                                Text(text = "Merge")
+                            }
                         }
                     }
                 }
@@ -293,12 +321,12 @@ class TableScreen @Inject constructor(
         }
     }
 
+
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun Table(
         table: UiTable,
-        onClick: () -> Unit,
-        onLongClick: () -> Unit
+        onClick: () -> Unit
     ){
         if (table.number != "0") {
             Box(
@@ -309,8 +337,7 @@ class TableScreen @Inject constructor(
                         shape = RoundedCornerShape(12.dp)
                     )
                     .combinedClickable(
-                        onClick = onClick,
-                        onLongClick = onLongClick
+                        onClick = onClick
                     ),
                 contentAlignment = Alignment.Center
             ) {
