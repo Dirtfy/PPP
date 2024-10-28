@@ -4,7 +4,6 @@ import com.dirtfy.ppp.ui.dto.record.UiRecord
 import com.dirtfy.ppp.ui.dto.record.UiRecordMode
 import com.dirtfy.ppp.ui.dto.record.screen.UiRecordScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
-import kotlinx.coroutines.flow.StateFlow
 
 interface RecordController: Controller<UiRecordScreenState, RecordController> {
 

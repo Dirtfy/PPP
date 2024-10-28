@@ -31,5 +31,4 @@ interface Service {
         emit(func())
     }.flowOn(Dispatchers.Default).convertExceptionAsCheckedException()
 
-
 }

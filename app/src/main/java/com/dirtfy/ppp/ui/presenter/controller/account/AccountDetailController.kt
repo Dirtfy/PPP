@@ -4,7 +4,6 @@ import com.dirtfy.ppp.ui.dto.account.UiAccount
 import com.dirtfy.ppp.ui.dto.account.UiNewAccountRecord
 import com.dirtfy.ppp.ui.dto.account.screen.UiAccountDetailScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
-import kotlinx.coroutines.flow.StateFlow
 
 interface AccountDetailController
     : Controller<UiAccountDetailScreenState, AccountDetailController> {

@@ -43,7 +43,7 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
         _screenData.update {
             it.copy(
                 nowAccount = account,
-                accountRecordListState = UiScreenState()
+                accountRecordListState = UiScreenState(UiState.LOADING)
             )
         }
         accountRecordListStream = accountService.accountRecordStream(account.number.toInt())
@@ -80,6 +80,7 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
     override suspend fun addRecord(newAccountRecord: UiNewAccountRecord) {
         val accountNumber = _screenData.value.nowAccount.number.toInt()
         val (issuedName, difference) = newAccountRecord
+        _screenData.update { it.copy(newAccountRecordState = UiScreenState(UiState.LOADING)) }
         accountService.addAccountRecord(
             accountNumber = accountNumber,
             issuedName = issuedName,
@@ -94,7 +95,8 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
         }.collect {
             _screenData.update {
                 it.copy(
-                    newAccountRecord = UiNewAccountRecord()
+                    newAccountRecord = UiNewAccountRecord(),
+                    newAccountRecordState = UiScreenState(UiState.COMPLETE)
                 )
             }
         }

@@ -3,7 +3,6 @@ package com.dirtfy.ppp.ui.presenter.controller
 import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.dto.menu.screen.UiMenuScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Controller
-import kotlinx.coroutines.flow.StateFlow
 
 interface MenuController: Controller<UiMenuScreenState, MenuController> {
 

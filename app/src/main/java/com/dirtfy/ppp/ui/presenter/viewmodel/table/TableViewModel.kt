@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.DataTable
-import com.dirtfy.ppp.data.dto.DataTableOrder
 import com.dirtfy.ppp.data.logic.MenuService
 import com.dirtfy.ppp.data.logic.TableService
 import com.dirtfy.ppp.data.source.firestore.menu.MenuFireStore
@@ -18,8 +17,10 @@ import com.dirtfy.ppp.ui.dto.menu.UiMenu
 import com.dirtfy.ppp.ui.dto.menu.UiMenu.Companion.convertToUiMenu
 import com.dirtfy.ppp.ui.dto.table.UiPointUse
 import com.dirtfy.ppp.ui.dto.table.UiTable
+import com.dirtfy.ppp.ui.dto.table.UiTable.Companion.convertToUiTable
 import com.dirtfy.ppp.ui.dto.table.UiTableMode
 import com.dirtfy.ppp.ui.dto.table.UiTableOrder
+import com.dirtfy.ppp.ui.dto.table.UiTableOrder.Companion.convertToUiTableOrder
 import com.dirtfy.ppp.ui.dto.table.screen.UiTableScreenState
 import com.dirtfy.ppp.ui.presenter.controller.common.Utils
 import com.dirtfy.ppp.ui.presenter.controller.table.TableController
@@ -122,29 +123,6 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             initialValue = _screenData.value
         )
 
-    private fun DataTable.convertToUiTable(): UiTable {
-        return UiTable(
-            number = number.toString(),
-            color = defaultColor
-        )
-    }
-
-    private fun DataTableOrder.convertToUiTableOrder(): UiTableOrder {
-        return UiTableOrder(
-            name = name,
-            price = Utils.formatCurrency(price),
-            count = count.toString()
-        )
-    }
-
-    private fun UiTableOrder.convertToDataTableOrder(): DataTableOrder {
-        return DataTableOrder(
-            name = name,
-            price = Utils.parseCurrency(price),
-            count = count.toInt()
-        )
-    }
-
     private fun _updateTableList(dbTableList: List<DataTable>): List<UiTable> {
         val newList = dbTableList.map { data -> data.convertToUiTable() }.toMutableList()
         val groupMemberCount = MutableList(12) { 0 }
@@ -175,6 +153,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
                 }
             }
 
+        _screenData.update { it.copy(tableListState = UiScreenState(UiState.COMPLETE)) }
         return tableFormation.map { tableNumber ->
             if (tableNumber == 0)
                 UiTable("0", Color.Transparent.value)
@@ -270,7 +249,6 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             Color(table.color).copy(alpha = 1f)
         } else {
             selectedTableSet.addAll(member.toSet())
-            // TODO 색이 안 연해짐
             Color(table.color).copy(alpha = 0.5f)
         }
 
@@ -301,14 +279,11 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         val newColor = if (selectedTableSet.contains(tableNumber)) {
             Log.d(TAG, "table $tableNumber is already selected")
             selectedTableSet.removeAll(member.toSet()) // 왜 clear가 아니라 removeAll?
-//            _screenData.update { before -> before.copy(mode = UiTableMode.Main) }
             Color(table.color).copy(alpha = 1f)
         } else {
             Log.d(TAG, "table $tableNumber is not selected yet")
             selectedTableSet.clear()
             selectedTableSet.addAll(member.toSet())
-//            _screenData.update { before -> before.copy(mode = UiTableMode.Order) }
-            // TODO 색이 안 연해짐
             Color(table.color).copy(alpha = 0.5f)
         }
         Log.d(TAG, "newColor.alpha: ${newColor.alpha}")
@@ -332,6 +307,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         else
             setMode(UiTableMode.Order)
     }
+
     override fun clickTable(table: UiTable) {
         val tableNumber = table.number.toInt()
         val group = groupMap[tableNumber]

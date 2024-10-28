@@ -89,7 +89,8 @@ class RecordFireStore @Inject constructor(): RecordRepository, Tagger {
                 val recordList = readAll(snapshot)
                 trySend(recordList)
             } catch (e: Throwable) {
-                // 혹시 모르니까 ㄹㅇㅋㅋ
+                Log.e(TAG, "record subscription\n${e.message}")
+                throw e
             }
         }
 

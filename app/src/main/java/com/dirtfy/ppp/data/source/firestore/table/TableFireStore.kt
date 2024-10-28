@@ -7,6 +7,7 @@ import com.dirtfy.ppp.data.dto.DataTableOrder
 import com.dirtfy.ppp.data.source.firestore.FireStorePath
 import com.dirtfy.ppp.data.source.firestore.table.FireStoreTableOrder.Companion.convertToFireStoreTableOrder
 import com.dirtfy.ppp.data.source.repository.TableRepository
+import com.dirtfy.tagger.Tagger
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -17,7 +18,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class TableFireStore @Inject constructor(): TableRepository {
+class TableFireStore @Inject constructor(): TableRepository, Tagger {
 
     private val tableRef = Firebase.firestore.collection(FireStorePath.TABLE)
 
@@ -94,7 +95,8 @@ class TableFireStore @Inject constructor(): TableRepository {
                 val tableList = readAllTable(snapshot)
                 trySend(tableList)
             } catch (e: Throwable) {
-                // 혹시 모르니까 ㄹㅇㅋㅋ
+                Log.e(TAG, "table subscription fail\n${e.message}")
+                throw e
             }
         }
 
@@ -221,7 +223,8 @@ class TableFireStore @Inject constructor(): TableRepository {
                 val orderList = readAllOrder(snapshot)
                 trySend(orderList)
             } catch (e: Throwable) {
-                // 혹시 모르니까 ㄹㅇㅋㅋ
+                Log.e(TAG, "order subscription fail\n${e.message}")
+                throw e
             }
         }
 

@@ -28,6 +28,7 @@ class AccountUpdateViewModel: ViewModel(), AccountUpdateController, Tagger {
     override suspend fun updateAccount(newAccountData: UiNewAccount) {
         val (number, name, phoneNumber) = newAccountData
 
+        _screenData.update { it.copy(updateAccountState = UiScreenState(UiState.LOADING)) }
         accountService.updateAccount(
             number = number.toInt(),
             name = name,
@@ -39,7 +40,9 @@ class AccountUpdateViewModel: ViewModel(), AccountUpdateController, Tagger {
                     updateAccountState = UiScreenState(UiState.FAIL, cause.message)
                 )
             }
-        }.collect { }
+        }.collect {
+            _screenData.update { it.copy(updateAccountState = UiScreenState(UiState.COMPLETE)) }
+        }
     }
 
     override fun request(job: suspend AccountUpdateController.() -> Unit) {

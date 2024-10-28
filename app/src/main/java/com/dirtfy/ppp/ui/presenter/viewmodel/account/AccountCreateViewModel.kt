@@ -37,6 +37,7 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
 
     override suspend fun addAccount(newAccountData: UiNewAccount) {
         val (number, name, phoneNumber) = newAccountData
+        _screenData.update { it.copy(newAccountState = UiScreenState(UiState.LOADING)) }
         accountService.createAccount(
             number = number.toInt(),
             name = name,
@@ -50,7 +51,10 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
             }
         }.collect {
             _screenData.update { before ->
-                before.copy(newAccount = UiNewAccount())
+                before.copy(
+                    newAccount = UiNewAccount(),
+                    newAccountState = UiScreenState(UiState.COMPLETE)
+                )
             }
         }
     }
@@ -58,7 +62,7 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
     override suspend fun setRandomValidAccountNumberToNewAccount() {
         _screenData.update {
             it.copy(
-                numberGeneratingState = UiScreenState()
+                numberGeneratingState = UiScreenState(UiState.LOADING)
             )
         }
         accountService.createAccountNumber()

@@ -103,6 +103,7 @@ class MenuViewModel: ViewModel(), MenuController, Tagger {
     }
 
     override suspend fun createMenu(menu: UiMenu) {
+        newMenuStateFlow.update { UiScreenState(UiState.LOADING) }
         if (menu.name == "") {
             newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankName().message) }
             return
@@ -111,8 +112,6 @@ class MenuViewModel: ViewModel(), MenuController, Tagger {
             newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankPrice().message) }
             return
         }
-
-        newMenuStateFlow.update { UiScreenState(UiState.LOADING) }
 
         menuService.createMenu(
             menu.convertToDataMenu()

@@ -152,7 +152,8 @@ class AccountFireStore @Inject constructor(): AccountRepository, Tagger {
                 val accountList = readAllAccount(snapshot, recordSnapshot)
                 trySend(accountList)
             } catch (e: Throwable) {
-                // 혹시 모르니까 ㄹㅇㅋㅋ
+                Log.e(TAG, "account subscription fail\n${e.message}")
+                throw e
             }
         }
 
@@ -173,7 +174,8 @@ class AccountFireStore @Inject constructor(): AccountRepository, Tagger {
                 val accountRecordList = readAllRecord(snapshot)
                 trySend(accountRecordList)
             } catch (e: Throwable) {
-                // 혹시 모르니까 ㄹㅇㅋㅋ
+                Log.e(TAG, "record subscription fail\n${e.message}")
+                throw e
             }
         }
 
