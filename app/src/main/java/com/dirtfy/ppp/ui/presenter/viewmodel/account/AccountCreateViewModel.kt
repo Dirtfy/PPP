@@ -35,8 +35,22 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
         _updateNewAccount(newAccountData)
     }
 
+    private fun formatPhoneNumber(phoneNumber: String): String {
+        val cleaned = phoneNumber.replace("-", "")
+        return when {
+            (cleaned.length == 10 || cleaned.length == 11) && cleaned.startsWith("010") -> {
+                val lastFourDigits = cleaned.takeLast(4)
+                val middlePart = cleaned.substring(3, cleaned.length - 4)
+                "${cleaned.substring(0, 3)}-$middlePart-$lastFourDigits"
+            }
+            else -> phoneNumber
+        }
+    }
+
     override suspend fun addAccount(newAccountData: UiNewAccount) {
-        val (number, name, phoneNumber) = newAccountData
+        val (number, name, beforePhoneNumber) = newAccountData
+        val phoneNumber = formatPhoneNumber(beforePhoneNumber)
+        Log.e(TAG, "phoneNumber : ${phoneNumber}")
         accountService.createAccount(
             number = number.toInt(),
             name = name,
