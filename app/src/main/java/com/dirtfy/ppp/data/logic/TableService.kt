@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.data.logic
 
+import android.util.Log
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.DataRecord
 import com.dirtfy.ppp.data.dto.DataRecordDetail
@@ -7,6 +8,7 @@ import com.dirtfy.ppp.data.dto.DataRecordType
 import com.dirtfy.ppp.data.dto.DataTableOrder
 import com.dirtfy.ppp.data.source.repository.RecordRepository
 import com.dirtfy.ppp.data.source.repository.TableRepository
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class TableService @Inject constructor(
@@ -18,20 +20,27 @@ class TableService @Inject constructor(
         return tableNumber !in 1..11
     }
 
-    fun readTables() = asFlow {
-        tableRepository.readAllTable()
+    // TODO stream 적용 후 deprecate 시키기
+    fun readTables() = flow {
+        val tableList = tableRepository.readAllTable()
+        emit(tableList)
     }
 
-    fun readOrders(tableNumber: Int) = asFlow {
+    // TODO stream 적용 후 deprecate 시키기
+    fun readOrders(tableNumber: Int) = flow {
         if (isInValidTableNumber(tableNumber))
             throw TableException.InvalidTableNumber()
 
         val group = tableRepository.readTable(tableNumber).group
 
-        tableRepository.readAllOrder(group)
+        val tableOrderList = tableRepository.readAllOrder(group)
+        emit(tableOrderList)
     }
 
-    fun mergeTables(tableNumberList: List<Int>) = asFlow {
+    fun tableStream() = tableRepository.tableStream()
+    fun orderStream(tableNumber: Int) = tableRepository.orderStream(tableNumber)
+
+    fun mergeTables(tableNumberList: List<Int>) = flow {
         if (tableNumberList.size <= 1)
             throw TableException.NonEnoughMergingTargets()
 
@@ -85,6 +94,8 @@ class TableService @Inject constructor(
         }.forEach {
             tableRepository.updateTable(it.copy(group = baseGroup))
         }
+
+        emit(baseGroup)
     }
 
     private suspend fun cleanGroup(group: Int) {
@@ -113,12 +124,12 @@ class TableService @Inject constructor(
 
     fun payTableWithCash(
         tableNumber: Int
-    ) = asFlow {
+    ) = flow {
         val group = tableRepository.readTable(tableNumber).group
 
         val orderList = tableRepository.readAllOrder(group)
 
-        recordRepository.create(
+        val payment = recordRepository.create(
             record = DataRecord(
                 income = orderList.calcTotalPrice(),
                 type = DataRecordType.Cash.name
@@ -128,15 +139,16 @@ class TableService @Inject constructor(
         // TODO 다른 DB간 transaction 처리
 
         cleanGroup(group)
+        emit(payment)
     }
     fun payTableWithCard(
         tableNumber: Int
-    ) = asFlow {
+    ) = flow {
         val group = tableRepository.readTable(tableNumber).group
 
         val orderList = tableRepository.readAllOrder(group)
 
-        recordRepository.create(
+        val payment = recordRepository.create(
             record = DataRecord(
                 income = orderList.calcTotalPrice(),
                 type = DataRecordType.Card.name
@@ -146,17 +158,18 @@ class TableService @Inject constructor(
         // TODO 다른 DB간 transaction 처리
 
         cleanGroup(group)
+        emit(payment)
     }
     fun payTableWithPoint(
         tableNumber: Int,
         accountNumber: Int,
         issuedName: String
-    ) = asFlow {
+    ) = flow {
         val group = tableRepository.readTable(tableNumber).group
 
         val orderList = tableRepository.readAllOrder(group)
 
-        recordRepository.create(
+        val payment = recordRepository.create(
             record = DataRecord(
                 income = -orderList.calcTotalPrice(),
                 type = accountNumber.toString(),
@@ -167,45 +180,48 @@ class TableService @Inject constructor(
         // TODO 다른 DB간 transaction 처리
 
         cleanGroup(group)
+        emit(payment)
     }
 
     fun addOrder(
         tableNumber: Int,
         menuName: String,
         menuPrice: Int
-    ) = asFlow {
+    ) = flow {
+        Log.d("WeGlonD", "service addOrder")
         tableRepository.run {
             val group = readTable(tableNumber).group
 
             val count: Int
             if (isOrderExist(group, menuName)) {
-                val order = readOrder(tableNumber, menuName)
+                val order = readOrder(group, menuName)
                 count = order.count + 1
                 updateOrder(
-                    tableNumber,
+                    group,
                     order.copy(count = count)
                 )
             } else {
                 count = 1
                 createOrder(
-                    tableNumber,
+                    group,
                     menuName,
                     menuPrice
                 )
             }
 
-            DataTableOrder(
+            val order = DataTableOrder(
                 menuName,
                 menuPrice,
                 count
             )
+            emit(order)
         }
     }
     fun cancelOrder(
         tableNumber: Int,
         menuName: String,
         menuPrice: Int
-    ) = asFlow {
+    ) = flow {
         tableRepository.run {
             val group = readTable(tableNumber).group
 
@@ -215,12 +231,12 @@ class TableService @Inject constructor(
                     0 -> { throw TableException.NonEnoughMenuToCancel() }
                     1 -> {
                         count = 0
-                        deleteOrder(tableNumber, menuName)
+                        deleteOrder(group, menuName)
                     }
                     else -> {
                         count = menuCount-1
                         updateOrder(
-                            tableNumber,
+                            group,
                             DataTableOrder(
                                 menuName,
                                 menuPrice,
@@ -232,16 +248,18 @@ class TableService @Inject constructor(
             }
             else throw TableException.InvalidOrderName()
 
-            DataTableOrder(
+            val order = DataTableOrder(
                 menuName,
                 menuPrice,
                 count
             )
+            emit(order)
         }
 
     }
 
-    fun getGroup(tableNumber: Int) = asFlow {
-        tableRepository.readTable(tableNumber).group
+    fun getGroup(tableNumber: Int) = flow {
+        val group = tableRepository.readTable(tableNumber).group
+        emit(group)
     }
 }

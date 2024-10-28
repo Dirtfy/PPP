@@ -21,17 +21,17 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
 
     private val accountService = AccountService(AccountFireStore())
 
-    private val _uiAccountCreateScreenState = MutableStateFlow(UiAccountCreateScreenState())
-    override val uiAccountCreateScreenState: StateFlow<UiAccountCreateScreenState>
-        get() = _uiAccountCreateScreenState
+    private val _screenData = MutableStateFlow(UiAccountCreateScreenState())
+    override val screenData: StateFlow<UiAccountCreateScreenState>
+        get() = _screenData
 
     private fun _updateNewAccount(newAccountData: UiNewAccount) {
-        _uiAccountCreateScreenState.update {
+        _screenData.update {
             it.copy(newAccount = newAccountData)
         }
     }
     @Deprecated("screen state synchronized with repository")
-    override fun updateNewAccount(newAccountData: UiNewAccount) = request {
+    override suspend fun updateNewAccount(newAccountData: UiNewAccount) {
         _updateNewAccount(newAccountData)
     }
 
@@ -43,20 +43,20 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
             phoneNumber = phoneNumber
         ).catch { cause ->
             Log.e(TAG, "addAccount() - createAccount failed \n ${cause.message}")
-            _uiAccountCreateScreenState.update {
+            _screenData.update {
                 it.copy(
                     newAccountState = UiScreenState(UiState.FAIL, cause.message)
                 )
             }
         }.collect {
-            _uiAccountCreateScreenState.update { before ->
+            _screenData.update { before ->
                 before.copy(newAccount = UiNewAccount())
             }
         }
     }
 
     override suspend fun setRandomValidAccountNumberToNewAccount() {
-        _uiAccountCreateScreenState.update {
+        _screenData.update {
             it.copy(
                 numberGeneratingState = UiScreenState()
             )
@@ -64,14 +64,14 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
         accountService.createAccountNumber()
             .catch { cause ->
                 Log.e(TAG, "setRandomValidAccountNumberToNewAccount() - createAccountNumber failed \n ${cause.message}")
-                _uiAccountCreateScreenState.update {
+                _screenData.update {
                     it.copy(
                         numberGeneratingState = UiScreenState(UiState.FAIL, cause.message)
                     )
                 }
             }
             .collect {
-                _uiAccountCreateScreenState.update { before ->
+                _screenData.update { before ->
                     before.copy(
                         newAccount = before.newAccount.copy(number = it.toString()),
                         numberGeneratingState = UiScreenState(UiState.COMPLETE)

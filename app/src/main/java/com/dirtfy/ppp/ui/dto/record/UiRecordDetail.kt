@@ -13,7 +13,7 @@ data class UiRecordDetail(
         fun DataRecordDetail.convertToUiRecordDetail(): UiRecordDetail {
             return UiRecordDetail(
                 name = name,
-                price = Utils.currencyFormatting(amount),
+                price = Utils.formatCurrency(amount),
                 count = count.toString()
             )
         }

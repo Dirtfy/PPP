@@ -13,9 +13,9 @@ data class UiAccountRecord(
         fun DataAccountRecord.convertToUiAccountRecord(): UiAccountRecord {
             return UiAccountRecord(
                 issuedName = issuedName,
-                difference = Utils.currencyFormatting(difference),
-                result = Utils.currencyFormatting(result),
-                timestamp = Utils.timestampFormatting_YMDHm(timestamp)
+                difference = Utils.formatCurrency(difference),
+                result = Utils.formatCurrency(result),
+                timestamp = Utils.formatTimestampFromMinute(timestamp)
             )
         }
     }
@@ -23,9 +23,9 @@ data class UiAccountRecord(
     fun convertToDataAccountRecord(): DataAccountRecord {
         return DataAccountRecord(
             issuedName = issuedName,
-            difference = Utils.currencyReformatting(difference),
-            result = Utils.currencyReformatting(result),
-            timestamp = Utils.timestampReformatting_YMDHm(timestamp)
+            difference = Utils.parseCurrency(difference),
+            result = Utils.parseCurrency(result),
+            timestamp = Utils.parseTimestampFromMinute(timestamp)
         )
     }
 }

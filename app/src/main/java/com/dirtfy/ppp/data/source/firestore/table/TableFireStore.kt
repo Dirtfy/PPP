@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.data.source.firestore.table
 
+import android.util.Log
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.DataTable
 import com.dirtfy.ppp.data.dto.DataTableOrder
@@ -7,8 +8,12 @@ import com.dirtfy.ppp.data.source.firestore.FireStorePath
 import com.dirtfy.ppp.data.source.firestore.table.FireStoreTableOrder.Companion.convertToFireStoreTableOrder
 import com.dirtfy.ppp.data.source.repository.TableRepository
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -44,8 +49,15 @@ class TableFireStore @Inject constructor(): TableRepository {
     }
 
     override suspend fun readAllTable(): List<DataTable> {
+        val snapshot = tableRef.get().await()
+        return readAllTable(snapshot)
+    }
+
+    private fun readAllTable(
+        tableSnapshot: QuerySnapshot
+    ): List<DataTable> {
         val resultList = mutableListOf<DataTable>()
-        tableRef.get().await().documents.forEach { document ->
+        tableSnapshot.documents.forEach { document ->
             val group = document.toObject(FireStoreGroup::class.java)!!
             val memberList = group.member ?: throw TableException.MemberLoss()
 
@@ -58,7 +70,6 @@ class TableFireStore @Inject constructor(): TableRepository {
                 )
             }
         }
-
         return resultList
     }
 
@@ -76,6 +87,20 @@ class TableFireStore @Inject constructor(): TableRepository {
         ).await()
     }
 
+    override fun tableStream(): Flow<List<DataTable>> = callbackFlow {
+        val tableSubscription = tableRef.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) return@addSnapshotListener
+            try {
+                val tableList = readAllTable(snapshot)
+                trySend(tableList)
+            } catch (e: Throwable) {
+                // 혹시 모르니까 ㄹㅇㅋㅋ
+            }
+        }
+
+        awaitClose { tableSubscription.remove() }
+    }
+
     private fun getOrderRef(tableNumber: Int): CollectionReference {
         return tableRef
             .document("$tableNumber")
@@ -86,6 +111,10 @@ class TableFireStore @Inject constructor(): TableRepository {
         val orderRef = getOrderRef(tableNumber)
         val query = orderRef.whereEqualTo("name", menuName)
         val documents = query.get().await().documents
+        Log.d("WeGlonD", "documents count: ${documents.size}")
+        documents.forEach {
+            Log.d("WeGlonD", "${it.id} - ${it.data}")
+        }
 
         return when (documents.size) {
             1 -> documents[0].id
@@ -94,6 +123,9 @@ class TableFireStore @Inject constructor(): TableRepository {
         }
     }
     private suspend fun setOrder(tableNumber: Int, order: FireStoreTableOrder) {
+        Log.d("WeGlonD", "source setOrder")
+        Log.d("WeGlonD", "$tableNumber")
+        Log.d("WeGlonD", order.toString())
         val orderID = getOrderID(tableNumber, order.name!!)
 
         val orderRef = tableRef
@@ -102,11 +134,14 @@ class TableFireStore @Inject constructor(): TableRepository {
 
         if (orderID == null)
             orderRef.document().set(order).await()
-        else
+        else {
+            Log.d("WeGlonD", "orderID not null")
             orderRef.document(orderID).set(order).await()
+        }
     }
 
     override suspend fun createOrder(tableNumber: Int, menuName: String, menuPrice: Int) {
+        Log.d("WeGlonD", "fireStore createOrder")
         val orderRef = getOrderRef(tableNumber)
 
         orderRef.document().set(
@@ -136,14 +171,18 @@ class TableFireStore @Inject constructor(): TableRepository {
     }
 
     override suspend fun readAllOrder(tableNumber: Int): List<DataTableOrder> {
-        return getOrderRef(tableNumber)
-            .get().await()
-            .documents
+        val snapshot = getOrderRef(tableNumber).get().await()
+        return readAllOrder(snapshot)
+    }
+
+    private fun readAllOrder(orderSnapshot: QuerySnapshot): List<DataTableOrder> {
+        return orderSnapshot.documents
             .map { it.toObject(FireStoreTableOrder::class.java)!! }
             .map { it.convertToDataTableOrder() }
     }
 
     override suspend fun updateOrder(tableNumber: Int, order: DataTableOrder) {
+        Log.d("WeGlonD", "source updateOrder")
         getOrderID(tableNumber, order.name)
             ?: throw TableException.InvalidOrderName()
 
@@ -172,6 +211,21 @@ class TableFireStore @Inject constructor(): TableRepository {
 
     override suspend fun isOrderExist(tableNumber: Int, menuName: String): Boolean {
         return getOrderID(tableNumber, menuName) != null
+    }
+
+    override fun orderStream(tableNumber: Int): Flow<List<DataTableOrder>> = callbackFlow {
+        val targetRef = getOrderRef(readGroup(tableNumber))
+        val orderSubscription = targetRef.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) return@addSnapshotListener
+            try {
+                val orderList = readAllOrder(snapshot)
+                trySend(orderList)
+            } catch (e: Throwable) {
+                // 혹시 모르니까 ㄹㅇㅋㅋ
+            }
+        }
+
+        awaitClose { orderSubscription.remove() }
     }
 
 }
