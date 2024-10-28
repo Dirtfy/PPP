@@ -8,31 +8,46 @@ import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
+import com.dirtfy.ppp.data.logic.AccountBusinessLogic
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
+
     @Binds
-    abstract fun bindsAccountRepository(
+    abstract fun bindsAccountApi(
         accountImplementation: AccountFireStore
     ): AccountApi
 
     @Binds
-    abstract fun bindsMenuRepository(
+    abstract fun bindsMenuApi(
         menuImplementation: MenuFireStore
     ): MenuApi
 
     @Binds
-    abstract fun bindsRecordRepository(
+    abstract fun bindsRecordApi(
         recordImplementation: RecordFireStore
     ): RecordApi
 
     @Binds
-    abstract fun bindsTableRepository(
+    abstract fun bindsTableApi(
         tableImplementation: TableFireStore
     ): TableApi
+
+    companion object {
+
+        @Provides
+        fun providesAccountBusinessLogic(
+            accountApi: AccountApi
+        ): AccountBusinessLogic {
+            return AccountBusinessLogic(accountApi)
+        }
+
+
+    }
 }
