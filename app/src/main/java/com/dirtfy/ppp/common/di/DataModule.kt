@@ -9,6 +9,7 @@ import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
+import com.dirtfy.ppp.data.logic.MenuBusinessLogic
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -48,6 +49,12 @@ abstract class DataModule {
             return AccountBusinessLogic(accountApi)
         }
 
+        @Provides
+        fun providesMenuBusinessLogic(
+            menuApi: MenuApi
+        ): MenuBusinessLogic {
+            return MenuBusinessLogic(menuApi)
+        }
 
     }
 }

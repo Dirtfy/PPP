@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.MenuException
-import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
 import com.dirtfy.ppp.data.logic.MenuBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.menu.MenuAtomConverter.convertToDataMenu
 import com.dirtfy.ppp.ui.controller.common.converter.feature.menu.MenuAtomConverter.convertToUiMenu
@@ -14,6 +13,7 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,12 +24,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MenuViewModel: ViewModel(), MenuController, Tagger {
+@HiltViewModel
+class MenuViewModel @Inject constructor(
+    private val menuBusinessLogic: MenuBusinessLogic
+): ViewModel(), MenuController, Tagger {
 
-    private val menuService = MenuBusinessLogic(MenuFireStore())
-
-    private val menuListFlow: Flow<List<UiMenu>> = menuService.menuStream().map {
+    private val menuListFlow: Flow<List<UiMenu>> = menuBusinessLogic.menuStream().map {
         it.map { menu -> menu.convertToUiMenu() }
     }
 
@@ -114,7 +116,7 @@ class MenuViewModel: ViewModel(), MenuController, Tagger {
             return
         }
 
-        menuService.createMenu(
+        menuBusinessLogic.createMenu(
             menu.convertToDataMenu()
         ).catch { cause ->
             Log.e(TAG, "createMenu() - createMenu failed")
@@ -128,7 +130,7 @@ class MenuViewModel: ViewModel(), MenuController, Tagger {
     override suspend fun deleteMenu(menu: UiMenu) {
         deleteMenuStateFlow.update { UiScreenState(UiState.LOADING) }
 
-        menuService.deleteMenu(
+        menuBusinessLogic.deleteMenu(
             menu.convertToDataMenu()
         ).catch { cause ->
             Log.e(TAG, "deleteMenu() - deleteMenu failed")
