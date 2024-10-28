@@ -8,6 +8,6 @@ interface RecordDetailController
     : Controller<UiRecordDetailScreenState, RecordDetailController> {
 
     suspend fun updateRecordDetailList(record: UiRecord)
-    fun updateNowRecord(record: UiRecord)
+    suspend fun updateNowRecord(record: UiRecord)
 
 }
