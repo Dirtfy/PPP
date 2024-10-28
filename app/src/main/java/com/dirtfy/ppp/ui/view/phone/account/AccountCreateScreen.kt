@@ -29,8 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.dto.account.UiNewAccount
-import com.dirtfy.ppp.ui.presenter.controller.account.AccountCreateController
+import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
+import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import javax.inject.Inject
 
 class AccountCreateScreen @Inject constructor(
