@@ -62,38 +62,32 @@ class AccountCreateScreen @Inject constructor(
         onAutoGenerateClick: () -> Unit,
         onCreateClick: () -> Unit
     ) {
-        Surface(
-            modifier = Modifier.wrapContentHeight()
-                .background(brush = Brush.verticalGradient(listOf(Color.Cyan, Color.Blue))),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Box(modifier = Modifier.padding(15.dp)) {
-                Column(horizontalAlignment = Alignment.End) {
-                    Card {
-                        Column(
-                            modifier = Modifier.padding(10.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "New Account",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+        Box(modifier = Modifier.wrapContentHeight().background(Color.White).padding(15.dp)) {
+            Column(horizontalAlignment = Alignment.End) {
+                Card {
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "New Account",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-                            Spacer(modifier = Modifier.size(10.dp))
+                        Spacer(modifier = Modifier.size(10.dp))
 
-                            AccountInput(
-                                nowAccount = newAccount,
-                                onValueChange = onValueChange,
-                                onAutoGenerateClick = onAutoGenerateClick
-                            )
+                        AccountInput(
+                            nowAccount = newAccount,
+                            onValueChange = onValueChange,
+                            onAutoGenerateClick = onAutoGenerateClick
+                        )
 
-                            Spacer(modifier = Modifier.size(10.dp))
+                        Spacer(modifier = Modifier.size(10.dp))
 
-                            CreateButton(
-                                onClick = onCreateClick
-                            )
-                        }
+                        CreateButton(
+                            onClick = onCreateClick
+                        )
                     }
                 }
             }
@@ -171,10 +165,7 @@ class AccountCreateScreen @Inject constructor(
             value = nowAccount.name,
             onValueChange = {
                 onValueChange(nowAccount.copy(name = it))
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            )
+            }
         )
     }
 
@@ -188,7 +179,10 @@ class AccountCreateScreen @Inject constructor(
             value = nowAccount.phoneNumber,
             onValueChange = {
                 onValueChange(nowAccount.copy(phoneNumber = it))
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            )
         )
     }
 
