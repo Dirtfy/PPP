@@ -11,6 +11,7 @@ import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
 import com.dirtfy.ppp.data.logic.MenuBusinessLogic
 import com.dirtfy.ppp.data.logic.RecordBusinessLogic
+import com.dirtfy.ppp.data.logic.TableBusinessLogic
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -63,5 +64,14 @@ abstract class DataModule {
         ): RecordBusinessLogic {
             return RecordBusinessLogic(recordApi)
         }
+
+        @Provides
+        fun providesTableBusinessLogic(
+            tableApi: TableApi,
+            recordApi: RecordApi
+        ): TableBusinessLogic {
+            return TableBusinessLogic(tableApi, recordApi)
+        }
+
     }
 }
