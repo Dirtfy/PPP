@@ -3,7 +3,6 @@ package com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.account.AccountAtomConverter.convertToUiAccount
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
@@ -13,6 +12,7 @@ import com.dirtfy.ppp.ui.state.feature.account.UiAccountScreenState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,13 +23,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AccountViewModel: ViewModel(), AccountController, Tagger {
-
-    private val accountService = AccountBusinessLogic(AccountFireStore()) //TODO 왜 DI 안함? 뷰모델 다 안함
+@HiltViewModel
+class AccountViewModel @Inject constructor(
+    accountBusinessLogic: AccountBusinessLogic
+): ViewModel(), AccountController, Tagger {
 
     private val accountList: Flow<List<UiAccount>>
-            = accountService.accountStream()
+            = accountBusinessLogic.accountStream()
         .map { it.map { account -> account.convertToUiAccount() } }
 
     private val searchClueFlow = MutableStateFlow("")

@@ -28,9 +28,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
-import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountViewModel
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
@@ -39,12 +37,17 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import javax.inject.Inject
 
-object AccountScreen {
+class AccountScreen @Inject constructor(
+    val accountController: AccountController,
+    val accountCreateScreen: AccountCreateScreen,
+    val accountDetailScreen: AccountDetailScreen
+) {
 
     @Composable
     fun Main(
-        controller: AccountController = viewModel<AccountViewModel>()
+        controller: AccountController = accountController
     ) {
         val uiAccountScreen by controller.screenData.collectAsStateWithLifecycle()
 
@@ -272,7 +275,7 @@ object AccountScreen {
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            AccountCreateScreen.Main(
+            accountCreateScreen.Main(
                 onAccountCreate = onAccountCreate
             )
         }
@@ -284,7 +287,7 @@ object AccountScreen {
         onDismissRequest: () -> Unit
     ) { //TODO maxHeight 설정?
         Dialog(onDismissRequest = onDismissRequest) {
-            AccountDetailScreen.Main(account = account)
+            accountDetailScreen.Main(account = account)
         }
     }
 }

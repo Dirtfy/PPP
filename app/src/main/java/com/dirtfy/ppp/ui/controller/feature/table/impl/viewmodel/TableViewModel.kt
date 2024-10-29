@@ -5,9 +5,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.TableException
-import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
-import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
-import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.data.logic.MenuBusinessLogic
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
@@ -25,6 +22,7 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,12 +34,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.random.Random
 
-class TableViewModel: ViewModel(), TableController, Tagger {
-
-    private val tableService: TableBusinessLogic = TableBusinessLogic(TableFireStore(), RecordFireStore())
-    private val menuService: MenuBusinessLogic = MenuBusinessLogic(MenuFireStore())
+@HiltViewModel
+class TableViewModel @Inject constructor(
+    private val tableBusinessLogic: TableBusinessLogic,
+    private val menuBusinessLogic: MenuBusinessLogic
+): ViewModel(), TableController, Tagger {
 
     private val groupColorSet = mutableSetOf<ULong>()
     private val defaultColor = Color.LightGray.value
@@ -62,7 +62,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     private val _screenData: MutableStateFlow<UiTableScreenState>
     = MutableStateFlow(UiTableScreenState())
 
-    private val tableListFlow = tableService.tableStream()
+    private val tableListFlow = tableBusinessLogic.tableStream()
         .catch { cause ->
             Log.e(TAG, "tableList load failed")
             _screenData.update { it.copy(tableListState = UiScreenState(UiState.FAIL, cause.message)) }
@@ -75,7 +75,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
 
     private lateinit var orderListFlow: Flow<List<UiTableOrder>>
 
-    private val menuListFlow = menuService.menuStream()
+    private val menuListFlow = menuBusinessLogic.menuStream()
         .catch { cause ->
             Log.e(TAG, "menuList load failed")
             _screenData.update { it.copy(menuListState = UiScreenState(UiState.FAIL, cause.message)) }
@@ -191,7 +191,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
             )
         }
 
-        orderListFlow = tableService.orderStream(tableNumber).map { it.map { data -> data.convertToUiTableOrder() } }
+        orderListFlow = tableBusinessLogic.orderStream(tableNumber).map { it.map { data -> data.convertToUiTableOrder() } }
 
         orderListFlow
             .catch { cause ->
@@ -220,7 +220,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     }
 
     private suspend fun _updateMenuList() {
-        menuService.readMenu().conflate().collect { menuList ->
+        menuBusinessLogic.readMenu().conflate().collect { menuList ->
             _screenData.update {
                 it.copy(
                     menuList = menuList.map {
@@ -339,7 +339,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
 
     private suspend fun _mergeTable(tableList: List<Int>) {
         _screenData.update { it.copy(mergeTableState = UiScreenState(UiState.LOADING)) }
-        tableService.mergeTables(tableList)
+        tableBusinessLogic.mergeTables(tableList)
             .catch { cause ->
                 Log.e(TAG, "table merge failed - ${cause.message}")
                 _screenData.update { it.copy(mergeTableState = UiScreenState(UiState.FAIL, cause.message)) }
@@ -421,7 +421,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         tableNumber: Int
     ) {
         _screenData.update { it.copy(payTableState = UiScreenState(UiState.LOADING)) }
-        tableService.payTableWithCash(tableNumber)
+        tableBusinessLogic.payTableWithCash(tableNumber)
             .catch { cause ->
                 _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause.message)) }
             }
@@ -439,7 +439,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         tableNumber: Int
     ) {
         _screenData.update { it.copy(payTableState = UiScreenState(UiState.LOADING)) }
-        tableService.payTableWithCard(tableNumber)
+        tableBusinessLogic.payTableWithCard(tableNumber)
             .catch { cause ->
                 _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause.message)) }
             }
@@ -459,7 +459,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         issuedName: String
     ) {
         _screenData.update { it.copy(payTableState = UiScreenState(UiState.LOADING)) }
-        tableService.payTableWithPoint(
+        tableBusinessLogic.payTableWithPoint(
             tableNumber = tableNumber,
             accountNumber = accountNumber,
             issuedName = issuedName
@@ -488,7 +488,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
     ) {
         Log.d("WeGlonD", "viewmodel addorder")
         _screenData.update { it.copy(addOrderState = UiScreenState(UiState.LOADING)) }
-        tableService.addOrder(
+        tableBusinessLogic.addOrder(
             tableNumber, menuName, menuPrice
         ).catch { cause ->
             _screenData.update { it.copy(addOrderState = UiScreenState(UiState.FAIL, cause.message)) }
@@ -508,7 +508,7 @@ class TableViewModel: ViewModel(), TableController, Tagger {
         menuPrice: Int
     ) {
         _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.LOADING)) }
-        tableService.cancelOrder(
+        tableBusinessLogic.cancelOrder(
             tableNumber, menuName, menuPrice
         ).catch { cause ->
             _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.FAIL, cause.message)) }
