@@ -186,6 +186,7 @@ class AccountCreateScreen @Inject constructor(
         val areaCodes = arrayOf("031", "032", "033", "041", "043", "044", "051", "052", "053", "054", "055", "061", "062", "063", "064")
         val newText = StringBuilder()
 
+
         fun formatNumber(prefix: String, startIndex: Int, middleIndex: Int, endIndex: Int): String {
             return when {
                 cleaned.length <= startIndex -> cleaned

@@ -9,7 +9,7 @@ interface AccountCreateController
     : Controller<UiAccountCreateScreenState, AccountCreateController> {
 
     suspend fun updateNewAccount(newAccountData: UiNewAccount)
-    fun updateNewPhoneNumber(newPhoneNumber: String): Pair<String,Int>
+    fun updateNewPhoneNumber(newPhoneNumber: String): String
     suspend fun addAccount(newAccountData: UiNewAccount)
     suspend fun setRandomValidAccountNumberToNewAccount()
 

@@ -25,24 +25,23 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
     override val screenData: StateFlow<UiAccountCreateScreenState>
         get() = _screenData
 
-    override fun updateNewPhoneNumber(newPhoneNumber: String): Pair<String,Int> {
+    override fun updateNewPhoneNumber(newPhoneNumber: String): String {
         val cleaned = newPhoneNumber.replace("-", "")
         val areaCodes = arrayOf("031", "032", "033", "041", "043", "044", "051", "052", "053", "054", "055", "061", "062", "063", "064" )
 
-        fun formatNumber(prefix: String, startIndex: Int, middleIndex: Int, endIndex: Int): Pair<String,Int> {
+        fun formatNumber(prefix: String, startIndex: Int, middleIndex: Int, endIndex: Int): String {
             return when {
-                cleaned.length <= startIndex -> Pair(cleaned, 0)
-                cleaned.length in (startIndex + 1)..middleIndex -> Pair("$prefix-${cleaned.substring(startIndex)}", 1)
-                cleaned.length in (middleIndex + 1)..endIndex -> Pair("$prefix-${cleaned.substring(startIndex, middleIndex)}-${cleaned.substring(middleIndex)}", 2)
-                else -> Pair("$prefix-${cleaned.substring(startIndex, startIndex + 4)}-${cleaned.substring(startIndex+4)}", 2)
+                cleaned.length <= startIndex -> cleaned
+                cleaned.length in (startIndex + 1)..middleIndex -> "$prefix-${cleaned.substring(startIndex)}"
+                cleaned.length in (middleIndex + 1)..endIndex -> "$prefix-${cleaned.substring(startIndex, middleIndex)}-${cleaned.substring(middleIndex)}"
+                else -> "$prefix-${cleaned.substring(startIndex, startIndex + 4)}-${cleaned.substring(startIndex+4)}"
             }
         }
-
         return when {
             cleaned.startsWith("02") -> formatNumber("02", 2, 5, 9)
             cleaned.startsWith("010") -> formatNumber("010", 3, 7, 11)
             areaCodes.any { cleaned.startsWith(it) } -> formatNumber(cleaned.substring(0, 3), 3, 6, 10)
-            else -> Pair(cleaned, 0)
+            else -> cleaned
         }
     }
 

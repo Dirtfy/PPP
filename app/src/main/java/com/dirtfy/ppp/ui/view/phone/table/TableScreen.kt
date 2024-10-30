@@ -264,7 +264,6 @@ class TableScreen @Inject constructor(
         Box{
             ConstraintLayout(modifier = Modifier.padding(10.dp)) {
                 val (tables,mergeButtonRow) = createRefs()
-
                 Box(
                     modifier = Modifier
                         .constrainAs(tables){
@@ -291,36 +290,51 @@ class TableScreen @Inject constructor(
                         bottom.linkTo(tables.bottom)
                     }
                 ) {
-                    if (mode == UiTableMode.Merge) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = "Please select a table", style = MaterialTheme.typography.bodyMedium)
-                            Row {
-                                Button(onClick = {
-                                    onMergeOkClick()
-                                }) {
-                                    Text(text = "OK")
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Button(onClick = {
-                                    onMergeCancelClick()
-                                }) {
-                                    Text(text = "Cancel")
-                                }
-                            }
-                        }
-                    }
-                    else{
-                        Row {
-                            Button(onClick = onMergeClick) {
-                                Text(text = "Merge")
-                            }
-                        }
-                    }
+                    MergeButtonLayout(
+                        mode = mode,
+                        onMergeClick = onMergeClick,
+                        onMergeOkClick = onMergeOkClick,
+                        onMergeCancelClick = onMergeCancelClick
+                    )
                 }
             }
         }
     }
 
+    @Composable
+    fun MergeButtonLayout(
+        mode: UiTableMode,
+        onMergeClick: () -> Unit,
+        onMergeOkClick: () -> Unit,
+        onMergeCancelClick: () -> Unit
+
+    ){
+        if (mode == UiTableMode.Merge) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = "Please select a table", style = MaterialTheme.typography.bodyMedium)
+                Row {
+                    Button(onClick = {
+                        onMergeOkClick()
+                    }) {
+                        Text(text = "OK")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = {
+                        onMergeCancelClick()
+                    }) {
+                        Text(text = "Cancel")
+                    }
+                }
+            }
+        }
+        else{
+            Row {
+                Button(onClick = onMergeClick) {
+                    Text(text = "Merge")
+                }
+            }
+        }
+    }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
