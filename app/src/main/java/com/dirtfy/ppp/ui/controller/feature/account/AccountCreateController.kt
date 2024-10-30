@@ -12,5 +12,4 @@ interface AccountCreateController
     fun updateNewPhoneNumber(newPhoneNumber: String): String
     suspend fun addAccount(newAccountData: UiNewAccount)
     suspend fun setRandomValidAccountNumberToNewAccount()
-
 }
