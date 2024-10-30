@@ -38,7 +38,7 @@ class RecordScreen @Inject constructor(
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
-            controller.updateRecordList()
+            //controller.updateRecordList()
         }
 
         ScreenContent(
@@ -59,7 +59,7 @@ class RecordScreen @Inject constructor(
                 controller.setMode(UiRecordMode.Main)
             },
             onRetryClick = {
-                controller.request { updateRecordList() }
+                //controller.request { updateRecordList() }
             }
         )
 

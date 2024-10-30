@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
+import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.controller.common.converter.feature.account.AccountAtomConverter.convertToUiAccountRecord
 import com.dirtfy.ppp.ui.controller.feature.account.AccountDetailController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
@@ -63,10 +64,13 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
                     )
                 }
             }
-            .conflate().collect {
+            .conflate().collect { listUiRecord ->
                 _screenData.update { before ->
                     before.copy(
-                        accountRecordList = it,
+                        nowAccount = account.copy(
+                            balance = listUiRecord.sumOf { uiRecord -> StringFormatConverter.parseCurrency(uiRecord.difference) }.toString()///////////////////////////
+                        ),
+                        accountRecordList = listUiRecord,
                         accountRecordListState = UiScreenState(UiState.COMPLETE)
                     )
                 }

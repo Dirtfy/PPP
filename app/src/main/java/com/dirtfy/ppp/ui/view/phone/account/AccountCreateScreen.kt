@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view.phone.account
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -22,11 +24,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
@@ -169,6 +181,64 @@ class AccountCreateScreen @Inject constructor(
         )
     }
 
+    private val phoneNumberVisualTransformation = VisualTransformation { text ->
+        val cleaned = text.text.replace("-", "")
+        val areaCodes = arrayOf("031", "032", "033", "041", "043", "044", "051", "052", "053", "054", "055", "061", "062", "063", "064")
+        val newText = StringBuilder()
+
+        fun formatNumber(prefix: String, startIndex: Int, middleIndex: Int, endIndex: Int): String {
+            return when {
+                cleaned.length <= startIndex -> cleaned
+                cleaned.length in (startIndex + 1)..middleIndex -> "$prefix-${cleaned.substring(startIndex)}"
+                cleaned.length in (middleIndex + 1)..endIndex -> "$prefix-${cleaned.substring(startIndex, middleIndex)}-${cleaned.substring(middleIndex)}"
+                else -> "$prefix-${cleaned.substring(startIndex, startIndex + 4)}-${cleaned.substring(startIndex + 4)}"
+            }
+        }
+
+        newText.append(
+            when {
+                cleaned.startsWith("02") -> formatNumber("02", 2, 5, 9)
+                cleaned.startsWith("010") -> formatNumber("010", 3, 7, 11)
+                areaCodes.any { cleaned.startsWith(it) } -> formatNumber(cleaned.substring(0, 3), 3, 6, 10)
+                else -> cleaned
+            }
+        )
+
+        val transformedText = newText.toString()
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                var transformedOffset = 0
+                var originalCount = 0
+
+                for (i in 0 until transformedText.length) {
+                    if (originalCount == offset) {
+                        break
+                    }
+                    transformedOffset++
+                    if (transformedText[i] != '-') originalCount++
+                }
+                return transformedOffset
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {//커서 위치 옮길 때
+                var originalOffset = 0
+                var transformedCount = 0
+
+                for (i in 0 until offset) {
+                    if (i < transformedText.length) {
+                        if (transformedText[i] != '-') {
+                            originalOffset++
+                        }
+                        transformedCount++
+                    }
+                }
+                return originalOffset
+            }
+        }
+        TransformedText(AnnotatedString(transformedText), offsetMapping)
+    }
+
     @Composable
     fun AccountPhoneNumberInput(
         nowAccount: UiNewAccount,
@@ -182,7 +252,8 @@ class AccountCreateScreen @Inject constructor(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
-            )
+            ),
+            visualTransformation = phoneNumberVisualTransformation
         )
     }
 

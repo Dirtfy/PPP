@@ -54,7 +54,6 @@ object AccountDetailScreen {
         LaunchedEffect(key1 = controller) {
             controller.request {
                 updateNowAccount(account)
-                updateAccountRecordList()
             }
         }
 
@@ -70,7 +69,7 @@ object AccountDetailScreen {
                 controller.request { addRecord(it) }
             },
             onRetryClick = {
-                controller.request { updateAccountRecordList() }
+                //controller.request { updateAccountRecordList() }
             }
         )
     }

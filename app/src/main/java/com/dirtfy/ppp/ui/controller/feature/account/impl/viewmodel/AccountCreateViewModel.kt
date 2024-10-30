@@ -25,32 +25,39 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
     override val screenData: StateFlow<UiAccountCreateScreenState>
         get() = _screenData
 
+    override fun updateNewPhoneNumber(newPhoneNumber: String): Pair<String,Int> {
+        val cleaned = newPhoneNumber.replace("-", "")
+        val areaCodes = arrayOf("031", "032", "033", "041", "043", "044", "051", "052", "053", "054", "055", "061", "062", "063", "064" )
+
+        fun formatNumber(prefix: String, startIndex: Int, middleIndex: Int, endIndex: Int): Pair<String,Int> {
+            return when {
+                cleaned.length <= startIndex -> Pair(cleaned, 0)
+                cleaned.length in (startIndex + 1)..middleIndex -> Pair("$prefix-${cleaned.substring(startIndex)}", 1)
+                cleaned.length in (middleIndex + 1)..endIndex -> Pair("$prefix-${cleaned.substring(startIndex, middleIndex)}-${cleaned.substring(middleIndex)}", 2)
+                else -> Pair("$prefix-${cleaned.substring(startIndex, startIndex + 4)}-${cleaned.substring(startIndex+4)}", 2)
+            }
+        }
+
+        return when {
+            cleaned.startsWith("02") -> formatNumber("02", 2, 5, 9)
+            cleaned.startsWith("010") -> formatNumber("010", 3, 7, 11)
+            areaCodes.any { cleaned.startsWith(it) } -> formatNumber(cleaned.substring(0, 3), 3, 6, 10)
+            else -> Pair(cleaned, 0)
+        }
+    }
+
     private fun _updateNewAccount(newAccountData: UiNewAccount) {
         _screenData.update {
             it.copy(newAccount = newAccountData)
         }
     }
-    @Deprecated("screen state synchronized with repository")
+
     override suspend fun updateNewAccount(newAccountData: UiNewAccount) {
         _updateNewAccount(newAccountData)
     }
 
-    private fun formatPhoneNumber(phoneNumber: String): String {
-        val cleaned = phoneNumber.replace("-", "")
-        return when {
-            (cleaned.length == 10 || cleaned.length == 11) && cleaned.startsWith("010") -> {
-                val lastFourDigits = cleaned.takeLast(4)
-                val middlePart = cleaned.substring(3, cleaned.length - 4)
-                "${cleaned.substring(0, 3)}-$middlePart-$lastFourDigits"
-            }
-            else -> phoneNumber
-        }
-    }
-
     override suspend fun addAccount(newAccountData: UiNewAccount) {
-        val (number, name, beforePhoneNumber) = newAccountData
-        val phoneNumber = formatPhoneNumber(beforePhoneNumber)
-        Log.e(TAG, "phoneNumber : ${phoneNumber}")
+        val (number, name, phoneNumber) = newAccountData
         _screenData.update { it.copy(newAccountState = UiScreenState(UiState.LOADING)) }
         accountService.createAccount(
             number = number.toInt(),

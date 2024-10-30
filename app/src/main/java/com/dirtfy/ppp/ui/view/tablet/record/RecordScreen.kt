@@ -35,7 +35,7 @@ object RecordScreen {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
-            controller.updateRecordList()
+            //controller.updateRecordList()
         }
 
         ScreenContent(
@@ -56,7 +56,7 @@ object RecordScreen {
                 controller.setMode(UiRecordMode.Main)
             },
             onRetryClick = {
-                controller.request { updateRecordList() }
+                //controller.request { updateRecordList() }
             }
         )
 
