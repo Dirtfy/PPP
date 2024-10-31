@@ -307,21 +307,16 @@ class TableScreen @Inject constructor(
         onMergeClick: () -> Unit,
         onMergeOkClick: () -> Unit,
         onMergeCancelClick: () -> Unit
-
     ){
         if (mode == UiTableMode.Merge) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = "Please select a table", style = MaterialTheme.typography.bodyMedium)
                 Row {
-                    Button(onClick = {
-                        onMergeOkClick()
-                    }) {
+                    Button(onClick = onMergeOkClick ) {
                         Text(text = "OK")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = {
-                        onMergeCancelClick()
-                    }) {
+                    Button(onClick = onMergeCancelClick ) {
                         Text(text = "Cancel")
                     }
                 }
