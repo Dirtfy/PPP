@@ -29,7 +29,7 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
 
     override fun getPhoneNumberVisualTransformation(): VisualTransformation {
         return VisualTransformation { phoneNumber ->
-            PhoneNumberFormatConverter.formatPhoneNumber(phoneNumber.text)
+            PhoneNumberFormatConverter.getPhoneNumberTransfomred(phoneNumber.text)
         }
     }
 

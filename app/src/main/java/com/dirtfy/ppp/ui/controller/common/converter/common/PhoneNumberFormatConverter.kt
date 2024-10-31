@@ -7,9 +7,8 @@ import androidx.compose.ui.text.input.TransformedText
 object PhoneNumberFormatConverter {
     private val areaCodes = arrayOf("031", "032", "033", "041", "043", "044", "051", "052", "053", "054", "055", "061", "062", "063", "064")
 
-    fun formatPhoneNumber(input: String): TransformedText {
+    fun formatPhoneNumber(input: String): String {
         val cleaned = input.replace("-", "")
-        val newText = StringBuilder()
 
         fun formatNumber(prefix: String, startIndex: Int, middleIndex: Int, endIndex: Int): String {
             return when {
@@ -20,17 +19,17 @@ object PhoneNumberFormatConverter {
             }
         }
 
-        newText.append(
-            when {
-                cleaned.startsWith("02") -> formatNumber("02", 2, 5, 9)
-                cleaned.startsWith("010") -> formatNumber("010", 3, 7, 11)
-                areaCodes.any { cleaned.startsWith(it) } -> formatNumber(cleaned.substring(0, 3), 3, 6, 10)
-                else -> cleaned
-            }
-        )
 
-        val transformedText = newText.toString()
+        return when {
+            cleaned.startsWith("02") -> formatNumber("02", 2, 5, 9)
+            cleaned.startsWith("010") -> formatNumber("010", 3, 7, 11)
+            areaCodes.any { cleaned.startsWith(it) } -> formatNumber(cleaned.substring(0, 3), 3, 6, 10)
+            else -> cleaned
+        }
+    }
 
+    fun getPhoneNumberTransfomred(input: String): TransformedText {
+        val transformedText = formatPhoneNumber(input)
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
                 var transformedOffset = 0
