@@ -37,10 +37,10 @@ class RecordScreen @Inject constructor(
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
+        /*LaunchedEffect(key1 = controller) {
             //controller.updateRecordList()
         }
-
+        */
         ScreenContent(
             searchClue = screenData.searchClue,
             recordList = screenData.recordList,

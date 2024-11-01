@@ -41,6 +41,8 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter
+import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import javax.inject.Inject
@@ -63,8 +65,7 @@ class AccountCreateScreen @Inject constructor(
             onCreateClick = {
                 controller.request { addAccount(screen.newAccount) }
                 onAccountCreate(screen.newAccount)
-            },
-            getPhoneNumberVisualTransformation = {controller.getPhoneNumberVisualTransformation()}
+            }
         )
     }
 
@@ -73,8 +74,7 @@ class AccountCreateScreen @Inject constructor(
         newAccount: UiNewAccount,
         onValueChange: (UiNewAccount) -> Unit,
         onAutoGenerateClick: () -> Unit,
-        onCreateClick: () -> Unit,
-        getPhoneNumberVisualTransformation: () -> VisualTransformation
+        onCreateClick: () -> Unit
     ) {
         Box(modifier = Modifier.wrapContentHeight().background(Color.White).padding(15.dp)) {
             Column(horizontalAlignment = Alignment.End) {
@@ -94,8 +94,7 @@ class AccountCreateScreen @Inject constructor(
                         AccountInput(
                             nowAccount = newAccount,
                             onValueChange = onValueChange,
-                            onAutoGenerateClick = onAutoGenerateClick,
-                            getPhoneNumberVisualTransformation = getPhoneNumberVisualTransformation
+                            onAutoGenerateClick = onAutoGenerateClick
                         )
 
                         Spacer(modifier = Modifier.size(10.dp))
@@ -113,8 +112,7 @@ class AccountCreateScreen @Inject constructor(
     fun AccountInput(
         nowAccount: UiNewAccount,
         onValueChange: (UiNewAccount) -> Unit,
-        onAutoGenerateClick: () -> Unit,
-        getPhoneNumberVisualTransformation: () -> VisualTransformation
+        onAutoGenerateClick: () -> Unit
     ) {
         Column {
             AccountNumberInput(
@@ -132,8 +130,7 @@ class AccountCreateScreen @Inject constructor(
 
             AccountPhoneNumberInput(
                 nowAccount = nowAccount,
-                onValueChange = onValueChange,
-                getPhoneNumberVisualTransformation = getPhoneNumberVisualTransformation
+                onValueChange = onValueChange
             )
         }
     }
@@ -186,11 +183,41 @@ class AccountCreateScreen @Inject constructor(
         )
     }
 
+    fun getPhoneNumberTransfomred(input: String): TransformedText {
+        val transformedText = formatPhoneNumber(input)
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                var transformedOffset = 0
+                var originalCount = 0
+
+                for (i in 0 until transformedText.length) {
+                    if (originalCount == offset) break
+                    transformedOffset++
+                    if (transformedText[i] != '-') originalCount++
+                }
+                return transformedOffset
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                var originalOffset = 0
+                var transformedCount = 0
+
+                for (i in 0 until offset) {
+                    if (i < transformedText.length && transformedText[i] != '-') {
+                        originalOffset++
+                    }
+                    transformedCount++
+                }
+                return originalOffset
+            }
+        }
+        return TransformedText(AnnotatedString(transformedText), offsetMapping)
+    }
+
     @Composable
     fun AccountPhoneNumberInput(
         nowAccount: UiNewAccount,
-        onValueChange: (UiNewAccount) -> Unit,
-        getPhoneNumberVisualTransformation: () -> VisualTransformation
+        onValueChange: (UiNewAccount) -> Unit
     ) {
         TextField(
             label = { Text(text = "phone number") },
@@ -201,7 +228,9 @@ class AccountCreateScreen @Inject constructor(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             ),
-            visualTransformation = getPhoneNumberVisualTransformation()
+            visualTransformation = VisualTransformation { phoneNumber ->
+                getPhoneNumberTransfomred(phoneNumber.text)
+            }
         )
     }
 

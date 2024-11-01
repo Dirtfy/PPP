@@ -1,12 +1,10 @@
 package com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel
 
 import android.util.Log
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
-import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -26,12 +24,6 @@ class AccountCreateViewModel: ViewModel(), AccountCreateController, Tagger {
     private val _screenData = MutableStateFlow(UiAccountCreateScreenState())
     override val screenData: StateFlow<UiAccountCreateScreenState>
         get() = _screenData
-
-    override fun getPhoneNumberVisualTransformation(): VisualTransformation {
-        return VisualTransformation { phoneNumber ->
-            PhoneNumberFormatConverter.getPhoneNumberTransfomred(phoneNumber.text)
-        }
-    }
 
     private fun _updateNewAccount(newAccountData: UiNewAccount) {
         _screenData.update {
