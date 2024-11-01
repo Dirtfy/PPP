@@ -103,7 +103,7 @@ class RecordViewModel @Inject constructor(
     override fun updateNowRecord(record: UiRecord) {
         val rawValue = rawRecordListFlow.value.find {
             Log.d(TAG,"${it.timestamp} - ${record.timestamp}")
-            it.timestamp == record.timestamp
+            it.id == record.id
         }
         if(rawValue == null)
             nowRecordStateFlow.update {
