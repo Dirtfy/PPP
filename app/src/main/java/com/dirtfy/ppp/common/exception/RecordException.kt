@@ -4,6 +4,7 @@ sealed class RecordException(
     massage: String
 ): CustomException(massage) {
 
+    class IdLoss: RecordException("id is not found")
     class IssuedNameLoss: RecordException("issued name is not found")
     class IncomeLoss: RecordException("income is not found")
     class TypeLoss: RecordException("type is not found")

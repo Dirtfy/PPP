@@ -8,6 +8,7 @@ import com.google.firebase.Timestamp
 import java.util.Date
 
 data class FireStoreRecord(
+    val id: Int?,
     val timestamp: Timestamp?,
     val amount: Int?,
     val type: String?,
@@ -18,11 +19,13 @@ data class FireStoreRecord(
         null,
         null,
         null,
+        null,
     )
 
     companion object {
         fun DataRecord.convertToFireStoreRecord(): FireStoreRecord {
             return FireStoreRecord(
+                id = id,
                 timestamp = Timestamp(Date(timestamp)),
                 amount = income,
                 type = type,
@@ -33,6 +36,7 @@ data class FireStoreRecord(
 
     fun convertToDataRecord(): DataRecord {
         return DataRecord(
+            id = id ?: throw RecordException.IdLoss(),
             income = amount ?: throw RecordException.IncomeLoss(),
             type = type?: throw RecordException.TypeLoss(),
             issuedBy = issuedName?: throw RecordException.IssuedNameLoss(),
