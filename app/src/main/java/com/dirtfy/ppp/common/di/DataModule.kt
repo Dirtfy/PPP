@@ -16,23 +16,26 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
+
     @Binds
-    abstract fun bindsAccountRepository(
+    abstract fun bindsAccountApi(
         accountImplementation: AccountFireStore
     ): AccountApi
 
     @Binds
-    abstract fun bindsMenuRepository(
+    abstract fun bindsMenuApi(
         menuImplementation: MenuFireStore
     ): MenuApi
 
     @Binds
-    abstract fun bindsRecordRepository(
+    abstract fun bindsRecordApi(
         recordImplementation: RecordFireStore
     ): RecordApi
 
     @Binds
-    abstract fun bindsTableRepository(
+    abstract fun bindsTableApi(
         tableImplementation: TableFireStore
     ): TableApi
+
+
 }

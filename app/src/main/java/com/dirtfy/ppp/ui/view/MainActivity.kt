@@ -25,6 +25,8 @@ class MainActivity: ComponentActivity() {
 
     @Inject
     lateinit var phoneScreen : PhoneScreen
+    @Inject
+    lateinit var tabletScreen: TabletScreen
 
     companion object {
         enum class Destination {
@@ -66,7 +68,7 @@ class MainActivity: ComponentActivity() {
             }
 
             if (isTablet) {
-                TabletScreen.Main(
+                tabletScreen.Main(
                     navController = navController,
                     destinationList = destinationList,
                     selectedIndex = selectedIndex,

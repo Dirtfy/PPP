@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.common.exception.RecordException
-import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.data.logic.RecordBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToRawUiRecord
 import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToUiRecord
@@ -15,6 +14,7 @@ import com.dirtfy.ppp.ui.state.feature.record.UiRecordScreenState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,10 +24,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RecordViewModel: ViewModel(), RecordController, Tagger {
-
-    private val recordService: RecordBusinessLogic = RecordBusinessLogic(RecordFireStore())
+@HiltViewModel
+class RecordViewModel @Inject constructor(
+    recordBusinessLogic: RecordBusinessLogic
+): ViewModel(), RecordController, Tagger {
 
     private val searchClueFlow = MutableStateFlow("")
     private val nowRecordFlow = MutableStateFlow(UiRecord())
@@ -35,7 +37,7 @@ class RecordViewModel: ViewModel(), RecordController, Tagger {
     private val rawRecordListFlow = MutableStateFlow(emptyList<UiRecord>())
     private val nowRecordStateFlow = MutableStateFlow(UiScreenState(UiState.COMPLETE))
 
-    private val recordStream = recordService.recordStream()
+    private val recordStream = recordBusinessLogic.recordStream()
         .map {
             rawRecordListFlow.value = it.map { data -> data.convertToRawUiRecord() }
             it.map { data -> data.convertToUiRecord() }

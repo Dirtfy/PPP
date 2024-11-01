@@ -3,7 +3,6 @@ package com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.controller.common.converter.feature.account.AccountAtomConverter.convertToUiAccountRecord
@@ -15,6 +14,7 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountRecord
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
 import com.dirtfy.tagger.Tagger
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,10 +23,12 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
-
-    private val accountService = AccountBusinessLogic(AccountFireStore())
+@HiltViewModel
+class AccountDetailViewModel @Inject constructor(
+    private val accountBusinessLogic: AccountBusinessLogic
+): ViewModel(), AccountDetailController, Tagger {
 
     private val _screenData: MutableStateFlow<UiAccountDetailScreenState>
         = MutableStateFlow(
@@ -51,7 +53,7 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
                 accountRecordListState = UiScreenState(UiState.LOADING)
             )
         }
-        accountRecordListStream = accountService.accountRecordStream(account.number.toInt())
+        accountRecordListStream = accountBusinessLogic.accountRecordStream(account.number.toInt())
             .map { it.map { account -> account.convertToUiAccountRecord() } }
 
         // TODO 더 나은 해결책 강구
@@ -89,7 +91,7 @@ class AccountDetailViewModel: ViewModel(), AccountDetailController, Tagger {
         val accountNumber = _screenData.value.nowAccount.number.toInt()
         val (issuedName, difference) = newAccountRecord
         _screenData.update { it.copy(newAccountRecordState = UiScreenState(UiState.LOADING)) }
-        accountService.addAccountRecord(
+        accountBusinessLogic.addAccountRecord(
             accountNumber = accountNumber,
             issuedName = issuedName,
             difference = difference.toInt()
