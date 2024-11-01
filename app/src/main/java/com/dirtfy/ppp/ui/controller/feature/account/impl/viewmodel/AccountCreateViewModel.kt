@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
+import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -43,7 +44,7 @@ class AccountCreateViewModel @Inject constructor(
         accountBusinessLogic.createAccount(
             number = number.toInt(),
             name = name,
-            phoneNumber = phoneNumber
+            phoneNumber = formatPhoneNumber(phoneNumber)
         ).catch { cause ->
             Log.e(TAG, "addAccount() - createAccount failed \n ${cause.message}")
             _screenData.update {

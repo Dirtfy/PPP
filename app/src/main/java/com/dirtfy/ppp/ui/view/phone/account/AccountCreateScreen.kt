@@ -183,17 +183,17 @@ class AccountCreateScreen @Inject constructor(
         )
     }
 
-    fun getPhoneNumberTransfomred(input: String): TransformedText {
+    private fun getPhoneNumberTransfomred(input: String): TransformedText {
         val transformedText = formatPhoneNumber(input)
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
                 var transformedOffset = 0
                 var originalCount = 0
 
-                for (i in 0 until transformedText.length) {
+                for (element in transformedText) {
                     if (originalCount == offset) break
                     transformedOffset++
-                    if (transformedText[i] != '-') originalCount++
+                    if (element != '-') originalCount++
                 }
                 return transformedOffset
             }
