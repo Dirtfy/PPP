@@ -14,7 +14,6 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
-import com.google.firebase.firestore.ktx.firestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

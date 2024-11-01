@@ -15,7 +15,6 @@ import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
