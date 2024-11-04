@@ -10,6 +10,8 @@ interface RecordApi {
     suspend fun readAll(): List<DataRecord>
     suspend fun readDetail(record: DataRecord): List<DataRecordDetail>
 
+    suspend fun getNextId(): Int
+
     fun recordStream(): Flow<List<DataRecord>>
 
 }

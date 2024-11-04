@@ -13,6 +13,7 @@ import com.dirtfy.tagger.Tagger
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -40,17 +41,28 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
         return account
     }
 
+    private suspend fun getNextRecordId(): Int {
+        return Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT).get().await()
+            .getLong("count")!!.toInt() + 1
+    }
+
     override suspend fun createRecord(
         accountNumber: Int,
         record: DataAccountRecord
     ): DataAccountRecord {
+        val nextRecordId = getNextRecordId()
+
         Firebase.firestore.runTransaction {
             val newRecord = recordRef.document()
 
             Log.d(TAG, "$record")
 
+            Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
+                .update("count", FieldValue.increment(1))
+
             newRecord.set(
                 FireStoreRecord(
+                    id = nextRecordId,
                     timestamp = Timestamp(Date(record.timestamp)),
                     amount = record.difference,
                     type = accountNumber.toString(),

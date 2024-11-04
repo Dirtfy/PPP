@@ -11,6 +11,7 @@ import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.channels.awaitClose
@@ -31,6 +32,9 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
         Firebase.firestore.runTransaction {
             val newRecord = recordRef.document()
 
+            Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
+                .update("count", FieldValue.increment(1))
+
             newRecord.set(
                 record.convertToFireStoreRecord()
             )
@@ -42,7 +46,9 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
             }
         }.await()
 
-        return record
+        val currentId = getNextId()-1
+
+        return record.copy(id = currentId)
     }
 
     override suspend fun readAll(): List<DataRecord> {
@@ -80,6 +86,11 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
             }.map { recordDetail ->
                 recordDetail.convertToDataRecordDetail()
             }
+    }
+
+    override suspend fun getNextId(): Int {
+        return Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT).get().await()
+            .getLong("count")!!.toInt() + 1
     }
 
     override fun recordStream(): Flow<List<DataRecord>> = callbackFlow {
