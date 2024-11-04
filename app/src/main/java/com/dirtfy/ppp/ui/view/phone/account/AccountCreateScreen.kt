@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view.phone.account
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -22,13 +24,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter
+import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import javax.inject.Inject
@@ -62,38 +76,32 @@ class AccountCreateScreen @Inject constructor(
         onAutoGenerateClick: () -> Unit,
         onCreateClick: () -> Unit
     ) {
-        Surface(
-            modifier = Modifier.wrapContentHeight()
-                .background(brush = Brush.verticalGradient(listOf(Color.Cyan, Color.Blue))),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Box(modifier = Modifier.padding(15.dp)) {
-                Column(horizontalAlignment = Alignment.End) {
-                    Card {
-                        Column(
-                            modifier = Modifier.padding(10.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "New Account",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+        Box(modifier = Modifier.wrapContentHeight().background(Color.White).padding(15.dp)) {
+            Column(horizontalAlignment = Alignment.End) {
+                Card {
+                    Column(
+                        modifier = Modifier.padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "New Account",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-                            Spacer(modifier = Modifier.size(10.dp))
+                        Spacer(modifier = Modifier.size(10.dp))
 
-                            AccountInput(
-                                nowAccount = newAccount,
-                                onValueChange = onValueChange,
-                                onAutoGenerateClick = onAutoGenerateClick
-                            )
+                        AccountInput(
+                            nowAccount = newAccount,
+                            onValueChange = onValueChange,
+                            onAutoGenerateClick = onAutoGenerateClick
+                        )
 
-                            Spacer(modifier = Modifier.size(10.dp))
+                        Spacer(modifier = Modifier.size(10.dp))
 
-                            CreateButton(
-                                onClick = onCreateClick
-                            )
-                        }
+                        CreateButton(
+                            onClick = onCreateClick
+                        )
                     }
                 }
             }
@@ -171,11 +179,39 @@ class AccountCreateScreen @Inject constructor(
             value = nowAccount.name,
             onValueChange = {
                 onValueChange(nowAccount.copy(name = it))
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            )
+            }
         )
+    }
+
+    private fun getPhoneNumberTransfomred(input: String): TransformedText {
+        val transformedText = formatPhoneNumber(input)
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                var transformedOffset = 0
+                var originalCount = 0
+
+                for (element in transformedText) {
+                    if (originalCount == offset) break
+                    transformedOffset++
+                    if (element != '-') originalCount++
+                }
+                return transformedOffset
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                var originalOffset = 0
+                var transformedCount = 0
+
+                for (i in 0 until offset) {
+                    if (i < transformedText.length && transformedText[i] != '-') {
+                        originalOffset++
+                    }
+                    transformedCount++
+                }
+                return originalOffset
+            }
+        }
+        return TransformedText(AnnotatedString(transformedText), offsetMapping)
     }
 
     @Composable
@@ -188,6 +224,12 @@ class AccountCreateScreen @Inject constructor(
             value = nowAccount.phoneNumber,
             onValueChange = {
                 onValueChange(nowAccount.copy(phoneNumber = it))
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
+            visualTransformation = VisualTransformation { phoneNumber ->
+                getPhoneNumberTransfomred(phoneNumber.text)
             }
         )
     }

@@ -205,7 +205,7 @@ class AccountScreen @Inject constructor(
         onRetryClick: () -> Unit
     ) {
         when(accountListState.state) {
-            UiState.COMPLETE -> {
+            UiState.COMPLETE -> {//이거처럼 다이얼로그도 state확인해서 할 필요 있을듯!!!!!!!!!
                 AccountList(
                     accountList = accountList,
                     onItemClick = onItemClick
@@ -214,7 +214,7 @@ class AccountScreen @Inject constructor(
             UiState.LOADING -> {
                 AccountListLoading()
             }
-            UiState.FAIL -> {
+            UiState.FAIL -> {//일단 이부분 절대 호출이 안됨..
                 AccountListLoadFail(
                     failMessage = accountListState.failMessage,
                     onRetryClick = onRetryClick

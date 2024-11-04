@@ -12,7 +12,5 @@ interface AccountDetailController
     suspend fun updateAccountRecordList()
     suspend fun updateNowAccount(account: UiAccount)
     fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord)
-
     suspend fun addRecord(newAccountRecord: UiNewAccountRecord)
-
 }

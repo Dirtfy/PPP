@@ -55,7 +55,6 @@ class AccountDetailScreen @Inject constructor(
         LaunchedEffect(key1 = controller) {
             controller.request {
                 updateNowAccount(account)
-                updateAccountRecordList()
             }
         }
 
@@ -71,7 +70,7 @@ class AccountDetailScreen @Inject constructor(
                 controller.request { addRecord(it) }
             },
             onRetryClick = {
-                controller.request { updateAccountRecordList() }
+                //controller.request { updateAccountRecordList() }
             }
         )
     }
