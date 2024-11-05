@@ -8,7 +8,6 @@ import com.dirtfy.ppp.data.api.impl.feature.account.firebase.FireStoreAccount.Co
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecord
 import com.dirtfy.ppp.data.dto.feature.account.DataAccount
 import com.dirtfy.ppp.data.dto.feature.account.DataAccountRecord
-import com.dirtfy.ppp.data.dto.feature.record.DataRecordType
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.AggregateField
