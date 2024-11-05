@@ -40,6 +40,7 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
         return account
     }
 
+    @Deprecated("moved to record api")
     override suspend fun createRecord(
         accountNumber: Int,
         record: DataAccountRecord
@@ -52,9 +53,9 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
             newRecord.set(
                 FireStoreRecord(
                     timestamp = Timestamp(Date(record.timestamp)),
-                    amount = record.difference,
+                    income = record.difference,
                     type = accountNumber.toString(),
-                    issuedName = record.issuedName,
+                    issuedBy = record.issuedName,
                 )
             )
         }.await()
@@ -63,15 +64,10 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
     }
 
     override suspend fun readAllAccount(): List<DataAccount> {
-        val cap = recordRef
-            .whereNotIn(
-                "type",
-                DataRecordType.entries.map { it.name }
-            ).get().await()
-
-        return readAllAccount(accountRef.get().await(), cap)
+        return readAllAccount(accountRef.get().await())
     }
 
+    @Deprecated("moved to record api")
     override suspend fun readAccountBalance(accountNumber: Int): Int {
         val query = recordRef.whereEqualTo("type", "$accountNumber")
         val aggregation = query.aggregate(AggregateField.sum("amount"))
@@ -88,11 +84,10 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
         val document = query.get().await().documents[0]
 
         return document.toObject(FireStoreAccount::class.java)!!
-            .convertToDataAccount(
-                readAccountBalance(accountNumber)
-            )
+            .convertToDataAccount()
     }
 
+    @Deprecated("moved to record api")
     override suspend fun readAllRecord(accountNumber: Int): List<DataAccountRecord> {
         val query = recordRef
             .whereEqualTo("type", "$accountNumber")
@@ -149,7 +144,7 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
         val accountSubscription = accountRef.addSnapshotListener { snapshot, error ->
             if (snapshot == null) { return@addSnapshotListener }
             try {
-                val accountList = readAllAccount(snapshot, recordSnapshot)
+                val accountList = readAllAccount(snapshot)
                 trySend(accountList)
             } catch (e: Throwable) {
                 Log.e(TAG, "account subscription fail\n${e.message}")
@@ -163,6 +158,7 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
         }
     }
 
+    @Deprecated("moved to record api")
     override fun accountRecordStream(accountNumber: Int): Flow<List<DataAccountRecord>> = callbackFlow {
         val targetRecordRef = recordRef
             .whereEqualTo("type", "$accountNumber")
@@ -185,23 +181,12 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
     }
 
     private fun readAllAccount(
-        accountSnapshot: QuerySnapshot,
-        recordSnapshot: QuerySnapshot
+        accountSnapshot: QuerySnapshot
     ): List<DataAccount> {
         return accountSnapshot.documents.map {
             it.toObject(FireStoreAccount::class.java)!!
         }.map { account ->
-            val balance = recordSnapshot.documents
-                .map {
-                    it.toObject(FireStoreRecord::class.java)!!
-                }
-                .filter {
-                    it.type == "${account.number}"
-                }
-                .sumOf {
-                    it.amount!!
-                }
-            account.convertToDataAccount(balance)
+            account.convertToDataAccount()
         }
     }
 
@@ -212,7 +197,7 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
         return recordSnapshot.documents.map {
             it.toObject(FireStoreRecord::class.java)!!
         }.map {
-            result += it.amount ?: throw RecordException.DifferenceLoss()
+            result += it.income ?: throw RecordException.DifferenceLoss()
             it.convertToDataAccountRecord(result = result)
         }
     }

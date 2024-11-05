@@ -9,9 +9,9 @@ import java.util.Date
 
 data class FireStoreRecord(
     val timestamp: Timestamp?,
-    val amount: Int?,
+    val income: Int?,
     val type: String?,
-    val issuedName: String?
+    val issuedBy: String?
 ) {
     constructor() : this(
         null,
@@ -24,18 +24,18 @@ data class FireStoreRecord(
         fun DataRecord.convertToFireStoreRecord(): FireStoreRecord {
             return FireStoreRecord(
                 timestamp = Timestamp(Date(timestamp)),
-                amount = income,
+                income = income,
                 type = type,
-                issuedName = issuedBy
+                issuedBy = issuedBy
             )
         }
     }
 
     fun convertToDataRecord(): DataRecord {
         return DataRecord(
-            income = amount ?: throw RecordException.IncomeLoss(),
+            income = income ?: throw RecordException.IncomeLoss(),
             type = type?: throw RecordException.TypeLoss(),
-            issuedBy = issuedName?: throw RecordException.IssuedNameLoss(),
+            issuedBy = issuedBy ?: throw RecordException.IssuedNameLoss(),
             timestamp = timestamp?.convertToMilliseconds()?: throw RecordException.TimestampLoss()
         )
     }
@@ -44,8 +44,8 @@ data class FireStoreRecord(
         result: Int
     ): DataAccountRecord {
         return DataAccountRecord(
-            issuedName = issuedName ?: throw RecordException.IssuedNameLoss(),
-            difference = amount ?: throw RecordException.DifferenceLoss(),
+            issuedName = issuedBy ?: throw RecordException.IssuedNameLoss(),
+            difference = income ?: throw RecordException.DifferenceLoss(),
             result = result,
             timestamp = timestamp?.convertToMilliseconds()?: throw RecordException.TimestampLoss()
         )

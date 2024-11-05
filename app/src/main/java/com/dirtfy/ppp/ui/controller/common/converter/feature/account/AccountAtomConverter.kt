@@ -10,7 +10,9 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiUpdateAccount
 
 object AccountAtomConverter {
 
-    fun DataAccount.convertToUiAccount(): UiAccount {
+    fun DataAccount.convertToUiAccount(
+        balance: Int
+    ): UiAccount {
         return UiAccount(
             number = number.toString(),
             name = name,
@@ -65,19 +67,23 @@ object AccountAtomConverter {
         )
     }
 
-    fun UiNewAccount.convertToUiAccount(): UiAccount {
+    fun UiNewAccount.convertToUiAccount(
+        balance: Int
+    ): UiAccount {
         return DataAccount(
             number = number.toInt(),
             name = name,
             phoneNumber = phoneNumber
-        ).convertToUiAccount()
+        ).convertToUiAccount(balance)
     }
 
-    fun UiUpdateAccount.convertToUiAccount(): UiAccount {
+    fun UiUpdateAccount.convertToUiAccount(
+        balance: Int
+    ): UiAccount {
         return DataAccount(
             number = number.toInt(),
             name = name,
             phoneNumber = phoneNumber
-        ).convertToUiAccount()
+        ).convertToUiAccount(balance)
     }
 }

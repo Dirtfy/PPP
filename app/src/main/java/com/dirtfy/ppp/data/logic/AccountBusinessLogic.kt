@@ -2,15 +2,19 @@ package com.dirtfy.ppp.data.logic
 
 import com.dirtfy.ppp.common.exception.AccountException
 import com.dirtfy.ppp.data.api.AccountApi
+import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.dto.feature.account.DataAccount
 import com.dirtfy.ppp.data.dto.feature.account.DataAccountRecord
+import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.logic.common.BusinessLogic
+import com.dirtfy.ppp.data.logic.common.converter.RecordDataConverter.convertToDataAccountRecord
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.random.Random
 
 class AccountBusinessLogic @Inject constructor(
-    private val accountApi: AccountApi
+    private val accountApi: AccountApi,
+    private val recordApi: RecordApi
 ): BusinessLogic {
 
     private fun isValidPhoneNumber(phoneNumber: String): Boolean {
@@ -90,6 +94,30 @@ class AccountBusinessLogic @Inject constructor(
         accountApi.readAllRecord(accountNumber).sortedBy { -it.timestamp }
     }
 
+    private suspend fun readBalance(
+        accountNumber: Int
+    ): Int {
+        return recordApi.readSumOf(
+            "type", "$accountNumber",
+            "income"
+        )
+    }
+
+    private suspend fun createAccountRecord(
+        accountNumber: Int,
+        accountRecord: DataAccountRecord
+    ): DataAccountRecord {
+        val record = DataRecord(
+            income = accountRecord.difference,
+            type = accountNumber.toString(),
+            issuedBy = accountRecord.issuedName
+        )
+
+        recordApi.create(record, emptyList())
+
+        return accountRecord
+    }
+
     fun addAccountRecord(
         accountNumber: Int,
         issuedName: String,
@@ -98,15 +126,15 @@ class AccountBusinessLogic @Inject constructor(
         if (!accountApi.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()
 
-        val currentBalance = accountApi.readAccountBalance(accountNumber)
+        val currentBalance = readBalance(accountNumber)
 
         val result = currentBalance + difference
         if (result < 0)
             throw AccountException.InvalidBalance()
 
-        val record = accountApi.createRecord(
+        val record = createAccountRecord(
             accountNumber = accountNumber,
-            record = DataAccountRecord(
+            accountRecord = DataAccountRecord(
                 issuedName = issuedName,
                 difference = difference,
                 result = result
@@ -119,6 +147,24 @@ class AccountBusinessLogic @Inject constructor(
     fun accountStream() = accountApi.accountStream()
 
     fun accountRecordStream(accountNumber: Int) =
-        accountApi.accountRecordStream(accountNumber)
+        recordApi.recordStreamWith("type", "$accountNumber")
             .map { it.sortedBy { data -> -data.timestamp } }
+            .map {
+                var result = 0
+                val accountRecordList = mutableListOf<DataAccountRecord>()
+                for (record in it) {
+                    result += record.income
+
+                    accountRecordList.add(
+                        record.convertToDataAccountRecord(result)
+                    )
+                }
+
+                accountRecordList
+            }
+
+    fun accountBalanceStream(accountNumber: Int) =
+        recordApi.recordStreamSumOf("type", "$accountNumber", "income") {
+            it.sumOf { record -> record.income }
+        }
 }

@@ -6,11 +6,14 @@ import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecord.Companion.convertToFireStoreRecord
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecordDetail.Companion.convertToFireStoreRecordDetail
+import com.dirtfy.ppp.data.dto.feature.account.DataAccountRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.AggregateField
+import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.channels.awaitClose
@@ -48,6 +51,19 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     override suspend fun readAll(): List<DataRecord> {
         val recordSnapshot = recordRef.get().await()
         return readAll(recordSnapshot)
+    }
+
+    override suspend fun <ValueType> readSumOf(
+        key: String, value: ValueType, target: String
+    ): Int {
+        val query = recordRef.whereEqualTo(key, value)
+        val aggregation = query.aggregate(AggregateField.sum(target))
+        val result = aggregation.get(AggregateSource.SERVER).await()
+        val receive = result.get(AggregateField.sum(target))
+
+        Log.d(TAG, "$result\n$receive")
+
+        return (receive as Long).toInt()
     }
 
     private fun readAll(
@@ -90,6 +106,84 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
                 trySend(recordList)
             } catch (e: Throwable) {
                 Log.e(TAG, "record subscription\n${e.message}")
+                throw e
+            }
+        }
+
+        awaitClose {
+            recordSubscription.remove()
+        }
+    }
+
+    //TODO 이거 이러면 DB 데이터 전체를 메모리에 올리는거잖아 좀 위험하지 않나?
+    private fun readAllRecord(
+        recordSnapshot: QuerySnapshot
+    ): List<DataRecord> {
+        return recordSnapshot.documents.map {
+            it.toObject(FireStoreRecord::class.java)!!
+        }.map {
+            it.convertToDataRecord()
+        }
+    }
+
+    override fun <ValueType> recordStreamWith(
+        key: String,
+        value: ValueType
+    ): Flow<List<DataRecord>> = callbackFlow {
+        val targetRecordRef = recordRef
+            .whereEqualTo(key, value)
+
+        val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) { return@addSnapshotListener }
+            try {
+                val accountRecordList = readAllRecord(snapshot)
+                trySend(accountRecordList)
+            } catch (e: Throwable) {
+                Log.e(TAG, "record subscription fail\n${e.message}")
+                throw e
+            }
+        }
+
+        awaitClose {
+            recordSubscription.remove()
+        }
+    }
+
+    private fun <ValueType> readAllRecordWith(
+        recordSnapshot: QuerySnapshot,
+        key: String, value: ValueType
+    ): List<DataRecord> {
+        return recordSnapshot.documents.filter {
+            it[key] == value
+        }.map {
+            it.toObject(FireStoreRecord::class.java)!!
+        }.map {
+            it.convertToDataRecord()
+        }
+    }
+
+    override fun <ValueType, ReturnType> recordStreamSumOf(
+        key: String,
+        value: ValueType,
+        target: String,
+        sum: (List<DataRecord>) -> ReturnType
+    ): Flow<ReturnType> = callbackFlow {
+        val targetRecordRef = recordRef
+            .whereEqualTo(key, value)
+
+        val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
+            if (snapshot == null) { return@addSnapshotListener }
+            try {
+                val result = sum(
+                    readAllRecordWith(
+                        snapshot,
+                        key, value
+                    )
+                )
+
+                trySend(result)
+            } catch (e: Throwable) {
+                Log.e(TAG, "record subscription fail\n${e.message}")
                 throw e
             }
         }
