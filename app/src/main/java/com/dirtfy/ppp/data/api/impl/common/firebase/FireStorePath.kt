@@ -2,13 +2,14 @@ package com.dirtfy.ppp.data.api.impl.common.firebase
 
 object FireStorePath {
 
-    private const val CONSTANT: String = "constant"
+    private const val CONSTANT: String = "constant_exp"
 
     const val MAX_ACCOUNT_NUMBER: String = "$CONSTANT/MAX_ACCOUNT_NUMBER"
+    const val RECORD_ID_COUNT: String = "$CONSTANT/RECORD_ID_COUNT"
 
     const val ACCOUNT: String = "account_exp"
 
-    const val MENU: String = "menu"
+    const val MENU: String = "menu_exp"
 
     const val RECORD: String = "record_exp"
     const val RECORD_DETAIL: String = "detail"

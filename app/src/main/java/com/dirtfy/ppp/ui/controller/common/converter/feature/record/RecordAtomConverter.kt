@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.controller.common.converter.feature.record
 
+import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordType
@@ -11,6 +12,7 @@ object RecordAtomConverter {
 
     fun DataRecord.convertToRawUiRecord(): UiRecord {
         return UiRecord(
+            id = id.toString(),
             timestamp = StringFormatConverter.formatTimestampFromMillis(timestamp),
             income = StringFormatConverter.formatCurrency(income),
             type = "$type - $issuedBy"
@@ -19,6 +21,7 @@ object RecordAtomConverter {
 
     fun DataRecord.convertToUiRecord(): UiRecord {
         return UiRecord(
+            id = id.toString(),
             timestamp = StringFormatConverter.formatTimestampFromMillis(timestamp),
             income = StringFormatConverter.formatCurrency(income),
             type = if (type == DataRecordType.Cash.name
@@ -42,6 +45,7 @@ object RecordAtomConverter {
 
     fun UiRecord.convertToDataRecord(): DataRecord {
         return DataRecord(
+            id = try { id.toInt() } catch (e: Exception) { throw RecordException.IdLoss() },
             income = StringFormatConverter.parseCurrency(income),
             type = type.split("-")[0],
             issuedBy = type.split("-")[1],
@@ -51,6 +55,7 @@ object RecordAtomConverter {
 
     fun UiRecord.convertToDataRecordFromRaw(): DataRecord {
         return DataRecord(
+            id = try { id.toInt() } catch (e: Exception) { throw RecordException.IdLoss() },
             income = StringFormatConverter.parseCurrency(income),
             type = type.split("-")[0],
             issuedBy = type.split("-")[1],
