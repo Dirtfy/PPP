@@ -129,17 +129,6 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
     }
 
     override fun accountStream(): Flow<List<DataAccount>> = callbackFlow {
-        val targetRecordRef = recordRef
-            .whereNotIn(
-                "type",
-                DataRecordType.entries.map { it.name }
-            )
-        var recordSnapshot = targetRecordRef.get().await()
-
-        val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) { return@addSnapshotListener }
-            recordSnapshot = snapshot
-        }
 
         val accountSubscription = accountRef.addSnapshotListener { snapshot, error ->
             if (snapshot == null) { return@addSnapshotListener }
@@ -153,7 +142,6 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
         }
 
         awaitClose {
-            recordSubscription.remove()
             accountSubscription.remove()
         }
     }
