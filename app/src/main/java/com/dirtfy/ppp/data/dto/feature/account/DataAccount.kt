@@ -1,6 +1,5 @@
 package com.dirtfy.ppp.data.dto.feature.account
 
-import com.dirtfy.ppp.common.exception.AccountException
 import java.util.Calendar
 
 data class DataAccount(

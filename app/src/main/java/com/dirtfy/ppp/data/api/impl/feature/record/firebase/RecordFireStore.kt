@@ -6,7 +6,6 @@ import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecord.Companion.convertToFireStoreRecord
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecordDetail.Companion.convertToFireStoreRecordDetail
-import com.dirtfy.ppp.data.dto.feature.account.DataAccountRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.tagger.Tagger
