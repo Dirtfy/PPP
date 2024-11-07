@@ -47,6 +47,7 @@ class TableMergeControllerImpl @Inject constructor(
         .map {
             Log.d(TAG, _screenData.value.toString())
             val tableList = _updateTableList(it)
+            _screenData.update { it.copy(sourceTableList = tableList) }
             tableList
         }
 
@@ -69,7 +70,7 @@ class TableMergeControllerImpl @Inject constructor(
             if (state.tableList == emptyList<UiTable>())
                 _screenData.update {
                     it.copy(
-                        tableList = tableList,
+                        tableList = tableList.map { table -> table },
                         tableListState = UiScreenState(UiState.COMPLETE)
                     )
                 }
@@ -133,6 +134,12 @@ class TableMergeControllerImpl @Inject constructor(
     // TODO deprecate
     override suspend fun updateTableList() {
 //        _updateTableList()
+    }
+
+    private fun syncTableList() {
+        _screenData.update { before ->
+            before.copy(tableList = before.sourceTableList.map { it })
+        }
     }
 
     private fun getRandomColor(): ULong {
@@ -206,7 +213,8 @@ class TableMergeControllerImpl @Inject constructor(
 
         _screenData.update { it.copy(tableList = tableList) }
 
-        return if (newColor.alpha > 0.7f) 0 else group
+        return if (newColor.alpha < 0.7f) group
+               else { syncTableList(); 0 }
 
     }
 
@@ -227,6 +235,7 @@ class TableMergeControllerImpl @Inject constructor(
                 _screenData.update { it.copy(mergeTableState = UiScreenState(UiState.FAIL, cause.message)) }
             }
             .conflate().collect { groupNumber ->
+                // TODO 아래 코드 state 변경만 빼고 다 지우고 syncTableList() 호출하면 바로 아래 색깔 문제도 해결.
                 val newList = _screenData.value.tableList
                 var groupColor = getRandomColor()
                 while (groupColorSet.contains(groupColor)) {
@@ -261,12 +270,8 @@ class TableMergeControllerImpl @Inject constructor(
     }
 
     override fun cancelMergeTable() {
-        val tableList = _screenData.value.tableList.map { nowTable ->
-            val nowColor = Color(nowTable.color)
-            nowTable.copy(color = nowColor.copy(alpha = 1f).value)
-        }
         selectedTableSet.clear()
-        _screenData.update { it.copy(tableList = tableList) }
+        syncTableList()
     }
 
     override fun disbandGroup(tableNumber: Int) {
@@ -282,19 +287,10 @@ class TableMergeControllerImpl @Inject constructor(
         if (selectedTableSet.contains(tableNumber))
             selectedTableSet.removeAll(member.toSet())
 
-        var groupColor: ULong = 0u
-
-        _screenData.update { it.copy(
-            tableList = it.tableList.map { table ->
-                if(member.contains(table.number.toInt())){
-                    groupColor = table.color
-                    table.copy(color = defaultColor)
-                }
-                else table
-            }
-        ) }
-
+        val groupColor = _screenData.value.tableList.find { it.number.toInt() == tableNumber }!!.color
         groupColorSet.remove(groupColor)
+
+        syncTableList()
     }
 
 }
