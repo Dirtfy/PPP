@@ -29,8 +29,7 @@ class TableMergeControllerImpl @Inject constructor(
     private val groupColorSet = mutableSetOf<ULong>()
     private val defaultColor = Color.LightGray.value
 
-    private val tableFormation: List<Int>
-            = listOf(
+    private val tableFormation: List<Int> = listOf(
         11, 10, 9, 8, 7, 6, 5, 4, 3, 0,
         0,  0, 0, 0, 0, 0, 0, 0, 0, 2,
         0,  0, 0, 0, 0, 0, 0, 0, 0, 1
@@ -68,9 +67,12 @@ class TableMergeControllerImpl @Inject constructor(
                 )
 
             if (state.tableList == emptyList<UiTable>())
-                _screenData.update { it.copy(tableList = tableList, tableListState = UiScreenState(
-                    UiState.COMPLETE)
-                ) }
+                _screenData.update {
+                    it.copy(
+                        tableList = tableList,
+                        tableListState = UiScreenState(UiState.COMPLETE)
+                    )
+                }
 
             newState
         }
@@ -204,7 +206,7 @@ class TableMergeControllerImpl @Inject constructor(
 
         _screenData.update { it.copy(tableList = tableList) }
 
-        return if (newColor.alpha > 0.7f) group else 0
+        return if (newColor.alpha > 0.7f) 0 else group
 
     }
 

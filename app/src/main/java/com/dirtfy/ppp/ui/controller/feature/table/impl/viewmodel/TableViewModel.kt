@@ -547,8 +547,9 @@ class TableViewModel @Inject constructor(
     }
 
     override suspend fun updateOrderList(table: UiTable) {
-        orderController.updateOrderList(table)
         selectedTableNumber = table.number.toInt()
+        println(selectedTableNumber.toString())
+        orderController.updateOrderList(table)
     }
 
     override suspend fun updateMenuList() {
