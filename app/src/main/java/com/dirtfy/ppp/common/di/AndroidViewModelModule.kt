@@ -27,7 +27,7 @@ import dagger.hilt.android.qualifiers.ActivityContext
 
 @Module
 @InstallIn(ActivityComponent::class)
-class UiModule {
+class AndroidViewModelModule {
 
     @Provides
     fun providesMenuController(
