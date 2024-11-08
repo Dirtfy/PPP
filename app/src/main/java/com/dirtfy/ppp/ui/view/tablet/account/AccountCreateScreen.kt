@@ -22,17 +22,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
+import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import javax.inject.Inject
 
 class AccountCreateScreen @Inject constructor(
-    val accountCreateController: AccountCreateController
+    val accountController: AccountController
 ){
 
     @Composable
     fun Main(
-        controller: AccountCreateController = accountCreateController,
+        controller: AccountController = accountController,
         onAccountCreate: (UiNewAccount) -> Unit = {},
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()

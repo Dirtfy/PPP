@@ -287,7 +287,7 @@ class AccountScreen @Inject constructor(
         onDismissRequest: () -> Unit
     ) { //TODO maxHeight 설정?
         Dialog(onDismissRequest = onDismissRequest) {
-            accountDetailScreen.Main(account = account)
+            accountDetailScreen.Main()
         }
     }
 }
