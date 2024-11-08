@@ -4,12 +4,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
-import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
-import com.dirtfy.ppp.ui.controller.feature.account.AccountDetailController
-import com.dirtfy.ppp.ui.controller.feature.account.AccountUpdateController
-import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountCreateViewModel
-import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountDetailViewModel
-import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountUpdateViewModel
 import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountViewModel
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.controller.feature.menu.impl.viewmodel.MenuViewModel
@@ -42,30 +36,6 @@ class AndroidViewModelModule {
         @ActivityContext context: Context
     ): AccountController {
         val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[AccountViewModel::class.java]
-        return viewModel
-    }
-
-    @Provides
-    fun providesAccountCreateController(
-        @ActivityContext context: Context
-    ): AccountCreateController {
-        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[AccountCreateViewModel::class.java]
-        return viewModel
-    }
-
-    @Provides
-    fun providesAccountDetailController(
-        @ActivityContext context: Context
-    ): AccountDetailController {
-        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[AccountDetailViewModel::class.java]
-        return viewModel
-    }
-
-    @Provides
-    fun providesAccountUpdateController(
-        @ActivityContext context: Context
-    ): AccountUpdateController {
-        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[AccountUpdateViewModel::class.java]
         return viewModel
     }
 
