@@ -29,14 +29,11 @@ data class FireStoreAccount(
         }
     }
 
-    fun convertToDataAccount(
-        balance: Int
-    ): DataAccount {
+    fun convertToDataAccount(): DataAccount {
         return DataAccount(
             number = number?: throw AccountException.NumberLoss(),
             name = name?: throw AccountException.NameLoss(),
             phoneNumber = phoneNumber?: throw AccountException.PhoneNumberLoss(),
-            balance = balance,
             registerTimestamp = registerTimestamp?.seconds?.times(1000L)
                 ?: throw AccountException.RegisterTimestampLoss()
         )

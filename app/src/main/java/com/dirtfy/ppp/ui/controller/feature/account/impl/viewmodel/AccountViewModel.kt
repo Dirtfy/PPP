@@ -32,7 +32,7 @@ class AccountViewModel @Inject constructor(
 
     private val accountList: Flow<List<UiAccount>>
             = accountBusinessLogic.accountStream()
-        .map { it.map { account -> account.convertToUiAccount() } }
+        .map { it.map { account -> account.convertToUiAccount(0) } }
 
     private val searchClueFlow = MutableStateFlow("")
     private val modeFlow = MutableStateFlow(UiAccountMode.Main)
