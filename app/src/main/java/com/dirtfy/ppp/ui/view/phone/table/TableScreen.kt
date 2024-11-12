@@ -45,15 +45,18 @@ import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class TableScreen @Inject constructor(
@@ -72,13 +75,19 @@ class TableScreen @Inject constructor(
 
         when (screenData.mergeTableState.state) {
             UiState.LOADING -> {
-                Loading()
+                Component.Loading()
             }
             UiState.COMPLETE -> {}
             UiState.FAIL -> {
-                Fail(screenData.mergeTableState.failMessage,{
-                    // TODO retry click & cancel click -> determine action what to do !
-                })
+                Component.Fail(
+                    {controller.setMergeMode(UiScreenState(UiState.COMPLETE))},
+                    screenData.mergeTableState.failMessage,
+                    {
+                        if(ExceptionRetryHandling.isTableRetry(screenData.mergeTableState.failMessage)){
+                            controller.request { mergeTable() }
+                        }
+                    }
+                )
             }
         }
 
@@ -255,12 +264,11 @@ class TableScreen @Inject constructor(
                 )
             }
             UiState.FAIL -> {
-                Fail(failMessage = tableListState.failMessage) {
-
-                }
+                //Component.Fail(failMessage = tableListState.failMessage,null)
+                // TODO RetryCLick add or not
             }
             UiState.LOADING -> {
-                Loading()
+                Component.Loading()
             }
         }
     }
@@ -399,12 +407,11 @@ class TableScreen @Inject constructor(
                 )
             }
             UiState.FAIL -> {
-                Fail(failMessage = tableOrderListState.failMessage) {
-
-                }
+                //Component.Fail(failMessage = tableOrderListState.failMessage,null)
+                // TODO RetryCLick add or not
             }
             UiState.LOADING -> {
-                Loading()
+                Component.Loading()
             }
         }
     }
@@ -608,12 +615,11 @@ class TableScreen @Inject constructor(
                 )
             }
             UiState.FAIL -> {
-                Fail(failMessage = menuListState.failMessage) {
-
-                }
+                //Component.Fail(failMessage = menuListState.failMessage,null)
+                // TODO RetryCLick add or not
             }
             UiState.LOADING -> {
-                Loading()
+                Component.Loading()
             }
         }
     }
@@ -667,9 +673,9 @@ class TableScreen @Inject constructor(
         }
     }
 
-    @Composable
+    /*@Composable
     fun Loading() {
-        Dialog(onDismissRequest = { /*TODO*/ }) {
+        Dialog(onDismissRequest = { *//*TODO*//* }) {
             CircularProgressIndicator(
                 modifier = Modifier.fillMaxSize()
             )
@@ -695,5 +701,5 @@ class TableScreen @Inject constructor(
             },
             title = { Text(text = failMessage ?: "unknown error") }
         )
-    }
+    }*/
 }

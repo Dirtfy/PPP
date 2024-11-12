@@ -11,6 +11,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -293,4 +294,7 @@ class TableMergeControllerImpl @Inject constructor(
         syncTableList()
     }
 
+    override fun setMode(mode: UiScreenState) {
+        _screenData.update { it.copy(mergeTableState = mode) }
+    }
 }
