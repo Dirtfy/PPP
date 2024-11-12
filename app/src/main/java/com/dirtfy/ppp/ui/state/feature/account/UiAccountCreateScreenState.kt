@@ -7,5 +7,5 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 data class UiAccountCreateScreenState(
     val newAccount: UiNewAccount = UiNewAccount(),
     val newAccountState: UiScreenState = UiScreenState(UiState.COMPLETE),
-    val numberGeneratingState: UiScreenState = UiScreenState()
+    val numberGeneratingState: UiScreenState = UiScreenState(UiState.COMPLETE)
 )

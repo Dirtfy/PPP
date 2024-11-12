@@ -244,7 +244,10 @@ class AccountScreen @Inject constructor(
                     ListItem(
                         modifier = Modifier
                             .clickable { onItemClick(account) }
-                            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp)),
+                            .background(
+                                MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(8.dp)
+                            ),
                         overlineContent = { Text(text = "ID : ${account.number}") },
                         headlineContent = { Text(text = account.name) },
                         supportingContent = { Text(text = account.phoneNumber) },
@@ -321,7 +324,7 @@ class AccountScreen @Inject constructor(
         onDismissRequest: () -> Unit
     ) { //TODO maxHeight 설정?
         Dialog(onDismissRequest = onDismissRequest) {
-            accountDetailScreen.Main(account = account)
+            accountDetailScreen.Main()
         }
     }
 }
