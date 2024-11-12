@@ -23,7 +23,7 @@ class AccountListControllerImpl @Inject constructor(
         .catch { cause ->
             _screenData.update { it.copy(accountListState = UiScreenState(UiState.FAIL, cause.message)) }
         }
-        .map { it.map { account -> account.convertToUiAccount() } }
+        .map { it.map { account -> account.convertToUiAccount(0) } }
 
     private val _screenData: MutableStateFlow<UiAccountListScreenState>
         = MutableStateFlow(UiAccountListScreenState())
