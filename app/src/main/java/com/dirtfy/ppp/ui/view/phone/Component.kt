@@ -74,8 +74,6 @@ object Component {
                 }
             }
         }
-
-
     }
 
     @Composable
