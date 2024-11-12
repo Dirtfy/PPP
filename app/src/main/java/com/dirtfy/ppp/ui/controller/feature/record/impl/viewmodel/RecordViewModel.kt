@@ -84,7 +84,7 @@ class RecordViewModel @Inject constructor(
                     mode = modeFlow.value,
                     nowRecord = nowRecordFlow.value,
                     nowRecordState = nowRecordStateFlow.value,
-                    recordListState = UiScreenState(UiState.FAIL, cause.message)
+                    recordListState = UiScreenState(UiState.FAIL, cause)
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -108,7 +108,7 @@ class RecordViewModel @Inject constructor(
         if(rawValue == null)
             nowRecordStateFlow.update {
                 // TODO 이거 에러 처리 하는 부분 뷰 레이어에 필요함.
-                UiScreenState(UiState.FAIL, RecordException.NonExistQuery().message)
+                UiScreenState(UiState.FAIL, RecordException.NonExistQuery())
             }
         else {
             nowRecordFlow.update { rawValue } // TODO issued name 어떻게 주지?

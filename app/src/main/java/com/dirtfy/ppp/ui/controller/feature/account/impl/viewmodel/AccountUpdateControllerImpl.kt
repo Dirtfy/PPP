@@ -34,7 +34,7 @@ class AccountUpdateControllerImpl @Inject constructor(
             Log.e(TAG, "updateAccount() - updateAccount failed \n ${cause.message}")
             _screenData.update {
                 it.copy(
-                    updateAccountState = UiScreenState(UiState.FAIL, cause.message)
+                    updateAccountState = UiScreenState(UiState.FAIL, cause)
                 )
             }
         }.collect {

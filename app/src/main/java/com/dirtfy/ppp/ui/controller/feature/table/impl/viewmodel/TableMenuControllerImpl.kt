@@ -24,7 +24,7 @@ class TableMenuControllerImpl @Inject constructor(
     private val menuListFlow = menuBusinessLogic.menuStream()
         .catch { cause ->
             Log.e(TAG, "menuList load failed")
-            _screenData.update { it.copy(menuListState = UiScreenState(UiState.FAIL, cause.message)) }
+            _screenData.update { it.copy(menuListState = UiScreenState(UiState.FAIL, cause)) }
         }
         .map {
             val menuList = it.map { data -> data.convertToUiMenu() }

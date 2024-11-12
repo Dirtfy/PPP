@@ -39,6 +39,7 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountRecord
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class AccountDetailScreen @Inject constructor(
@@ -245,14 +246,11 @@ class AccountDetailScreen @Inject constructor(
                 RecordList(recordList = recordList)
             }
             UiState.LOADING -> {
-                RecordListLoading()
+                Component.Loading()
             }
             UiState.FAIL -> {
-                val failMessage = recordListState.failMessage
-                RecordListLoadFail(
-                    failMessage = failMessage,
-                    onRetryClick = onRetryClick
-                )
+                Component.Fail({},recordListState.errorException,{})
+                // TODO Retry 어떻게 할지 생각 필요...
             }
         }
     }
@@ -275,7 +273,7 @@ class AccountDetailScreen @Inject constructor(
         }
     }
 
-    @Composable
+    /*@Composable
     fun RecordListLoading() {
         Column(
             modifier = Modifier.height(300.dp)
@@ -305,5 +303,5 @@ class AccountDetailScreen @Inject constructor(
             },
             title = { Text(text = failMessage ?: "unknown error") }
         )
-    }
+    }*/
 }

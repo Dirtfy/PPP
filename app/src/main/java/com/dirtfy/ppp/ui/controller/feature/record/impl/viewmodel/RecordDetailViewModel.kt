@@ -42,7 +42,7 @@ class RecordDetailViewModel @Inject constructor(
             .catch { cause ->
                 _screenData.update {
                     it.copy(
-                        recordDetailListState = UiScreenState(UiState.FAIL, cause.message)
+                        recordDetailListState = UiScreenState(UiState.FAIL, cause)
                     )
                 }
             }

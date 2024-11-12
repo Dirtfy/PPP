@@ -53,7 +53,7 @@ class AccountDetailControllerImpl @Inject constructor(
                 Log.e(TAG, "updateAccountRecordList() - stream failed \n ${cause.message}")
                 _screenData.update {
                     it.copy(
-                        accountRecordListState = UiScreenState(UiState.FAIL, cause.message)
+                        accountRecordListState = UiScreenState(UiState.FAIL, cause)
                     )
                 }
             }
@@ -93,7 +93,7 @@ class AccountDetailControllerImpl @Inject constructor(
             Log.e(TAG, "addRecord() - addAccountRecord failed \n ${cause.message}")
             _screenData.update {
                 it.copy(
-                    newAccountRecordState = UiScreenState(UiState.FAIL, cause.message)
+                    newAccountRecordState = UiScreenState(UiState.FAIL, cause)
                 )
             }
         }.collect {

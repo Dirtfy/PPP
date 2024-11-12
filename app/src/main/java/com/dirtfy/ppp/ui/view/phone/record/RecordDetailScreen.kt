@@ -30,6 +30,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordDetail
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class RecordDetailScreen @Inject constructor(
@@ -126,13 +127,11 @@ class RecordDetailScreen @Inject constructor(
                     RecordDetailList(recordDetailList = recordDetailList)
             }
             UiState.LOADING -> {
-                RecordDetailListLoading()
+                Component.Loading()
             }
             UiState.FAIL -> {
-                RecordDetailListLoadFail(
-                    failMessage = recordDetailListState.failMessage,
-                    onRetryClick = onRetryClick
-                )
+                Component.Fail({},recordDetailListState.errorException,{})
+                // TODO Retry 어떻게 할지 생각 필요...
             }
         }
     }
@@ -164,7 +163,7 @@ class RecordDetailScreen @Inject constructor(
 
     }
 
-    @Composable
+    /*@Composable
     fun RecordDetailListLoading() {
         CircularProgressIndicator(
             modifier = Modifier.fillMaxWidth()
@@ -190,5 +189,5 @@ class RecordDetailScreen @Inject constructor(
             },
             title = { Text(text = failMessage ?: "unknown error") }
         )
-    }
+    }*/
 }

@@ -44,7 +44,7 @@ class AccountCreateControllerImpl @Inject constructor(
             Log.e(TAG, "addAccount() - createAccount failed \n ${cause.message}")
             _screenData.update {
                 it.copy(
-                    newAccountState = UiScreenState(UiState.FAIL, cause.message)
+                    newAccountState = UiScreenState(UiState.FAIL, cause)
                 )
             }
         }.collect {
@@ -68,7 +68,7 @@ class AccountCreateControllerImpl @Inject constructor(
                 Log.e(TAG, "setRandomValidAccountNumberToNewAccount() - createAccountNumber failed \n ${cause.message}")
                 _screenData.update {
                     it.copy(
-                        numberGeneratingState = UiScreenState(UiState.FAIL, cause.message)
+                        numberGeneratingState = UiScreenState(UiState.FAIL, cause)
                     )
                 }
             }

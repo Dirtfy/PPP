@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
 
 object Component {
 
@@ -88,9 +89,11 @@ object Component {
     @Composable
     fun Fail(
         onDismissRequest: () -> Unit,
-        failMessage: String?,
-        onRetryClick: (() -> Unit)? = null,
+        errorException: Throwable?,
+        onRetryAction: (() -> Unit)? = null
     ) {
+        val shouldRetry = errorException?.let { ExceptionRetryHandling.isRetry(it) } ?: false
+
         AlertDialog(
             onDismissRequest = { },
             confirmButton = {
@@ -99,13 +102,14 @@ object Component {
                 }
             },
             dismissButton = {
-                onRetryClick?.let {
-                    Button(onClick = it) {
+                if (shouldRetry) {
+                    Button(onClick = { onRetryAction?.invoke() }) {
                         Text(text = "Retry")
                     }
                 }
             },
-            title = { Text(text = failMessage ?: "Unknown error") }
+            title = { Text(text = errorException?.message ?: "Unknown error") }
         )
     }
+
 }

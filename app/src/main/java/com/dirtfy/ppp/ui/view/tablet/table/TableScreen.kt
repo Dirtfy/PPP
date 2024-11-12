@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -45,6 +46,7 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class TableScreen @Inject constructor(
@@ -59,6 +61,20 @@ class TableScreen @Inject constructor(
 
         LaunchedEffect(key1 = controller) {
             controller.updateTableList()
+        }
+
+        when (screenData.mergeTableState.state) {
+            UiState.LOADING -> {
+                Component.Loading()
+            }
+            UiState.COMPLETE -> {}
+            UiState.FAIL -> {
+                Component.Fail(
+                    { controller.setMergeMode(UiScreenState(UiState.COMPLETE)) },
+                    screenData.mergeTableState.errorException,
+                    {controller.request { mergeTable() }}
+                )
+            }
         }
 
         ScreenContent(
@@ -209,12 +225,11 @@ class TableScreen @Inject constructor(
                 )
             }
             UiState.FAIL -> {
-                Fail(failMessage = tableListState.failMessage) {
-
-                }
+                Component.Fail({},tableListState.errorException,{})
+                // TODO Retry 어떻게 할지 생각 필요...
             }
             UiState.LOADING -> {
-                Loading()
+                Component.Loading()
             }
         }
     }
@@ -305,12 +320,11 @@ class TableScreen @Inject constructor(
                 )
             }
             UiState.FAIL -> {
-                Fail(failMessage = tableOrderListState.failMessage) {
-
-                }
+                Component.Fail({},tableOrderListState.errorException,{})
+                // TODO Retry 어떻게 할지 생각 필요...
             }
             UiState.LOADING -> {
-                Loading()
+                Component.Loading()
             }
         }
     }
@@ -481,12 +495,11 @@ class TableScreen @Inject constructor(
                 )
             }
             UiState.FAIL -> {
-                Fail(failMessage = menuListState.failMessage) {
-
-                }
+                Component.Fail({},menuListState.errorException,{})
+                // TODO Retry 어떻게 할지 생각 필요...
             }
             UiState.LOADING -> {
-                Loading()
+                Component.Loading()
             }
         }
     }
@@ -531,9 +544,9 @@ class TableScreen @Inject constructor(
 
     }
 
-    @Composable
+    /*@Composable
     fun Loading() {
-        Dialog(onDismissRequest = { /*TODO*/ }) {
+        Dialog(onDismissRequest = { *//*TODO*//* }) {
             CircularProgressIndicator(
                 modifier = Modifier.fillMaxWidth()
             )
@@ -559,5 +572,5 @@ class TableScreen @Inject constructor(
             },
             title = { Text(text = failMessage ?: "unknown error") }
         )
-    }
+    }*/
 }

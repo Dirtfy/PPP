@@ -204,13 +204,11 @@ class AccountScreen @Inject constructor(
                 )
             }
             UiState.LOADING -> {
-                AccountListLoading()
+                Component.Loading()
             }
             UiState.FAIL -> {
-                AccountListLoadFail(
-                    failMessage = accountListState.failMessage,
-                    onRetryClick = onRetryClick
-                )
+                Component.Fail({},accountListState.errorException,{})
+                // TODO Retry 어떻게 할지 생각 필요...
             }
         }
     }
@@ -241,7 +239,7 @@ class AccountScreen @Inject constructor(
         }
     }
 
-    @Composable
+    /*@Composable
     fun AccountListLoading() {
         CircularProgressIndicator(
             modifier = Modifier.fillMaxWidth()
@@ -267,7 +265,7 @@ class AccountScreen @Inject constructor(
             },
             title = { Text(text = failMessage ?: "unknown error") }
         )
-    }
+    }*/
     
     @Composable
     fun AccountCreateDialog(

@@ -118,7 +118,7 @@ class MenuScreen @Inject constructor(
                                 Text(text = "Retry")
                             }
                         },
-                        title = { Text(text = screen.menuListState.failMessage ?: "unknown error") }
+                        title = { Text(text = screen.menuListState.errorException?.message ?: "unknown error") }
                     )
                 }
             }

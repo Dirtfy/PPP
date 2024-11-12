@@ -83,7 +83,7 @@ class MenuViewModel @Inject constructor(
                 UiMenuScreenState(
                     searchClue = searchClueFlow.value,
                     newMenu = newMenuFlow.value,
-                    menuListState = UiScreenState(UiState.FAIL, cause.message)
+                    menuListState = UiScreenState(UiState.FAIL, cause)
                 )
             }
             .stateIn(
@@ -108,11 +108,11 @@ class MenuViewModel @Inject constructor(
     override suspend fun createMenu(menu: UiMenu) {
         newMenuStateFlow.update { UiScreenState(UiState.LOADING) }
         if (menu.name == "") {
-            newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankName().message) }
+            newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankName()) }
             return
         }
         if (menu.price == "") {
-            newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankPrice().message) }
+            newMenuStateFlow.update { UiScreenState(UiState.FAIL, MenuException.BlankPrice()) }
             return
         }
 
@@ -120,7 +120,7 @@ class MenuViewModel @Inject constructor(
             menu.convertToDataMenu()
         ).catch { cause ->
             Log.e(TAG, "createMenu() - createMenu failed")
-            newMenuStateFlow.update { UiScreenState(UiState.FAIL, cause.message) }
+            newMenuStateFlow.update { UiScreenState(UiState.FAIL, cause) }
         }.collect {
             newMenuFlow.update { UiMenu() }
             newMenuStateFlow.update { UiScreenState(UiState.COMPLETE) }
@@ -134,7 +134,7 @@ class MenuViewModel @Inject constructor(
             menu.convertToDataMenu()
         ).catch { cause ->
             Log.e(TAG, "deleteMenu() - deleteMenu failed")
-            deleteMenuStateFlow.update { UiScreenState(UiState.FAIL, cause.message) }
+            deleteMenuStateFlow.update { UiScreenState(UiState.FAIL, cause) }
         }.collect {
             deleteMenuStateFlow.update { UiScreenState(UiState.COMPLETE) }
         }

@@ -23,6 +23,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(
@@ -118,13 +119,10 @@ class RecordScreen @Inject constructor(
                 )
             }
             UiState.LOADING -> {
-                RecordListLoading()
+                Component.Loading()
             }
             UiState.FAIL -> {
-                RecordListLoadFail(
-                    failMessage = recordListState.failMessage,
-                    onRetryClick = onRetryClick
-                )
+                Component.Fail({},recordListState.errorException,{})
             }
         }
     }
@@ -148,7 +146,7 @@ class RecordScreen @Inject constructor(
         }
     }
 
-    @Composable
+    /*@Composable
     fun RecordListLoading() {
         CircularProgressIndicator(
             modifier = Modifier.fillMaxWidth()
@@ -174,7 +172,7 @@ class RecordScreen @Inject constructor(
             },
             title = { Text(text = failMessage ?: "unknown error") }
         )
-    }
+    }*/
 
     @Composable
     fun RecordDetailDialog(
