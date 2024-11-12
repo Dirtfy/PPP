@@ -2,6 +2,7 @@ package com.dirtfy.ppp.data.logic
 
 import android.util.Log
 import com.dirtfy.ppp.common.exception.TableException
+import com.dirtfy.ppp.data.api.AccountApi
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.TableApi
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
@@ -12,6 +13,7 @@ import com.dirtfy.ppp.data.logic.common.BusinessLogic
 import javax.inject.Inject
 
 class TableBusinessLogic @Inject constructor(
+    private val accountApi: AccountApi,
     private val tableApi: TableApi,
     private val recordApi: RecordApi
 ): BusinessLogic {
@@ -175,12 +177,18 @@ class TableBusinessLogic @Inject constructor(
 
         val orderList = tableApi.readAllOrder(group)
 
+        val nowBalance = accountApi.readAccountBalance(accountNumber)
+        val totalPrice = orderList.calcTotalPrice()
+
+        if (nowBalance < totalPrice)
+            throw TableException.InvalidPay()
+
         val nextRecordId = recordApi.getNextId()
 
         val payment = recordApi.create(
             record = DataRecord(
                 id = nextRecordId,
-                income = -orderList.calcTotalPrice(),
+                income = -totalPrice,
                 type = accountNumber.toString(),
                 issuedBy = issuedName
             ),

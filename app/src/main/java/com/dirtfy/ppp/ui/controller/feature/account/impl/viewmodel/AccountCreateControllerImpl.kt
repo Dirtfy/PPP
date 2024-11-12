@@ -1,8 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
@@ -11,22 +9,19 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.UiAccountCreateScreenState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.tagger.Tagger
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class AccountCreateViewModel @Inject constructor(
+class AccountCreateControllerImpl @Inject constructor(
     private val accountBusinessLogic: AccountBusinessLogic
-): ViewModel(), AccountCreateController, Tagger {
+): AccountCreateController, Tagger {
 
     private val _screenData = MutableStateFlow(UiAccountCreateScreenState())
-    override val screenData: StateFlow<UiAccountCreateScreenState>
-        get() = _screenData
+    override val screenData: Flow<UiAccountCreateScreenState>
+        get() = _screenData // 안될거같음
 
     private fun _updateNewAccount(newAccountData: UiNewAccount) {
         _screenData.update {
@@ -87,9 +82,4 @@ class AccountCreateViewModel @Inject constructor(
             }
     }
 
-    override fun request(job: suspend AccountCreateController.() -> Unit) {
-        viewModelScope.launch {
-            job()
-        }
-    }
 }

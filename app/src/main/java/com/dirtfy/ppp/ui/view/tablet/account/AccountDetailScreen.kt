@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.controller.feature.account.AccountDetailController
+import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
@@ -42,19 +42,18 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
 import javax.inject.Inject
 
 class AccountDetailScreen @Inject constructor(
-    val accountDetailController: AccountDetailController
+    val accountController: AccountController
 ) {
 
     @Composable
     fun Main(
-        account: UiAccount,
-        controller: AccountDetailController = accountDetailController
+        controller: AccountController = accountController
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
         LaunchedEffect(key1 = controller) {
             controller.request {
-                updateNowAccount(account)
+                updateAccountRecordList()
             }
         }
 

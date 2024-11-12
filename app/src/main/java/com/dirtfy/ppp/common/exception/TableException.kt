@@ -4,6 +4,7 @@ sealed class TableException(
     massage: String
 ): CustomException(massage) {
     class InvalidTableNumber: TableException("it's invalid table number")
+    class InvalidPay: TableException("it's invalid pay")
 
     class GroupLoss: TableException("group is not found")
     class NumberLoss: TableException("number is not found")
