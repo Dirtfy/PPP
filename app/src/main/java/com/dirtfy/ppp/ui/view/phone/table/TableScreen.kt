@@ -73,7 +73,7 @@ class TableScreen @Inject constructor(
             controller.updateTableList()
         }
 
-        when (screenData.mergeTableState.state) {
+        when (screenData.mergeTableState.state) { // merge 사용시 loading
             UiState.LOADING -> {
                 Component.Loading()
             }
@@ -86,6 +86,22 @@ class TableScreen @Inject constructor(
                 )
             }
         }
+
+        //TODO screenData.payTableState screenData.cancelOrderStat screenData.addOrderState.state
+        /*when () {
+            //  // e
+            UiState.LOADING -> {
+                Component.Loading()
+            }
+            UiState.COMPLETE -> {}
+            UiState.FAIL -> {
+                *//*Component.Fail(
+                    { controller.setMergeMode(UiScreenState(UiState.COMPLETE)) },
+                    screenData.addOrderState.errorException,
+                    {controller.request { addOrder(it.name,it.price) }}
+                )*//*
+            }
+        }*/
 
         ScreenContent(
             tableList = screenData.tableList,

@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view.phone.account
 
+import android.accounts.Account
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -64,7 +65,6 @@ class AccountScreen @Inject constructor(
         ) {
             controller.updateSearchClue(it.contents?:"")
         }
-
         LaunchedEffect(key1 = controller) {
             controller.request { updateAccountList() }
         }
@@ -136,7 +136,6 @@ class AccountScreen @Inject constructor(
 
             when(mode) {
                 UiAccountMode.Main -> {
-
                 }
                 UiAccountMode.Create -> {
                     AccountCreateDialog(
