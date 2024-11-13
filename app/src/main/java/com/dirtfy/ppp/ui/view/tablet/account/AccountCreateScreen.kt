@@ -56,22 +56,18 @@ class AccountCreateScreen @Inject constructor(
                 }
             }
         )
-        when(screen.newAccountState.state){
-            UiState.LOADING -> {
-                Component.Loading()}
-            UiState.COMPLETE -> {}
-            UiState.FAIL -> {
-                Component.Fail(
-                    {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
-                    screen.newAccountState.errorException,
-                    { controller.request {
-                        addAccount(screen.newAccount){ isSuccess ->
-                            if (isSuccess) { controller.setMode(UiAccountMode.Main) }
-                        } }
+
+        Component.HandleUiStateDialog(
+            screen.newAccountState,
+            {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
+            {controller.request {
+                addAccount(screen.newAccount) { isSuccess ->
+                    if (isSuccess) {
+                        controller.setMode(UiAccountMode.Main)
                     }
-                )
-            }
-        }
+                }
+            }}
+        )
     }
 
     @Composable

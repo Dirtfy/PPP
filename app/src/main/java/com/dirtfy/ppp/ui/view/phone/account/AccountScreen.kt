@@ -195,21 +195,14 @@ class AccountScreen @Inject constructor(
         onItemClick: (UiAccount) -> Unit,
         onRetryClick: () -> Unit
     ) {
-        when(accountListState.state) {
-            UiState.COMPLETE -> {//이거처럼 다이얼로그도 state확인해서 할 필요 있을듯!!!!!!!!!
-                AccountList(
-                    accountList = accountList,
-                    onItemClick = onItemClick
-                )
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.FAIL -> {//일단 이부분 절대 호출이 안됨..
-                Component.Fail({},accountListState.errorException,{})
-                // TODO Retry 어떻게 할지 생각 필요...
-            }
-        }
+        Component.HandleUiStateDialog(
+            accountListState,
+            {}, null, // TODO Retry 어떻게 할지 생각 필요...
+            {AccountList(
+                accountList = accountList,
+                onItemClick = onItemClick
+            )}
+        )
     }
 
     @Composable

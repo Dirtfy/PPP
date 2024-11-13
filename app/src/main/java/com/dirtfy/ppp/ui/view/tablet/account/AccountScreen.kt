@@ -196,21 +196,14 @@ class AccountScreen @Inject constructor(
         onItemClick: (UiAccount) -> Unit,
         onRetryClick: () -> Unit
     ) {
-        when(accountListState.state) {
-            UiState.COMPLETE -> {
-                AccountList(
-                    accountList = accountList,
-                    onItemClick = onItemClick
-                )
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.FAIL -> {
-                Component.Fail({},accountListState.errorException,{})
-                // TODO Retry 어떻게 할지 생각 필요...
-            }
-        }
+        Component.HandleUiStateDialog(
+            accountListState,
+            {}, null,  // TODO Retry 어떻게 할지 생각 필요...
+            {AccountList(
+                accountList = accountList,
+                onItemClick = onItemClick
+            )}
+        )
     }
 
     @Composable

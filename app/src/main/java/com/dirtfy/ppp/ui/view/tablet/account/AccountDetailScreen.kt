@@ -241,18 +241,11 @@ class AccountDetailScreen @Inject constructor(
         recordListState: UiScreenState,
         onRetryClick: () -> Unit
     ) {
-        when(recordListState.state) {
-            UiState.COMPLETE -> {
-                RecordList(recordList = recordList)
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.FAIL -> {
-                Component.Fail({},recordListState.errorException,{})
-                // TODO Retry 어떻게 할지 생각 필요...
-            }
-        }
+        Component.HandleUiStateDialog(
+            recordListState,
+            {},null,  // TODO Retry 어떻게 할지 생각 필요...
+            {RecordList(recordList = recordList)}
+        )
     }
 
     @Composable

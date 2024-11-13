@@ -27,6 +27,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
+import com.dirtfy.ppp.ui.state.common.UiScreenState
+import com.dirtfy.ppp.ui.state.common.UiState
 
 object Component {
 
@@ -110,6 +112,28 @@ object Component {
             },
             title = { Text(text = errorException?.message ?: "Unknown error") }
         )
+    }
+
+    @Composable
+    fun HandleUiStateDialog(
+        uiState: UiScreenState,
+        onDismissRequest: () -> Unit,
+        onRetryAction: (() -> Unit)? = null,
+        onComplete: @Composable () -> Unit = {}
+    ) {
+        when (uiState.state) {
+            UiState.LOADING -> {
+                Loading()
+            }
+            UiState.COMPLETE -> onComplete()
+            UiState.FAIL -> {
+                Fail(
+                    onDismissRequest ?: {},
+                    uiState.errorException,
+                    onRetryAction ?: {}
+                )
+            }
+        }
     }
 
 }

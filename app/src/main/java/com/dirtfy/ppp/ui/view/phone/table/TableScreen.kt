@@ -73,21 +73,18 @@ class TableScreen @Inject constructor(
             controller.updateTableList()
         }
 
-        when (screenData.mergeTableState.state) { // merge 사용시 loading
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.COMPLETE -> {}
-            UiState.FAIL -> {
-                Component.Fail(
-                    { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
-                    screenData.mergeTableState.errorException,
-                    {controller.request { mergeTable() }}
-                )
-            }
-        }
+        Component.HandleUiStateDialog(
+            screenData.mergeTableState,
+            { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
+            {controller.request { mergeTable() }}
+        )
+        Component.HandleUiStateDialog(
+            screenData.payTableState,
+            { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
+            {}   // TODO Retry 어떻게 할지 생각 필요... 잔액이나 이런걸 Error 던질때 기억해야 retry가 가능하다!!
+        )
 
-        //TODO screenData.payTableState screenData.cancelOrderStat screenData.addOrderState.state
+        //TODO  screenData.cancelOrderStat screenData.addOrderState.state
         /*when () {
             //  // e
             UiState.LOADING -> {
@@ -263,26 +260,19 @@ class TableScreen @Inject constructor(
         onMergeOkClick: () -> Unit,
         onMergeCancelClick: () -> Unit
     ) {
-        when(tableListState.state) {
-            UiState.COMPLETE -> {
-                TableLayout(
-                    tableList = tableList,
-                    mode = mode,
-                    mergeTableState = mergeTableState,
-                    onTableClick = onTableClick,
-                    onMergeClick = onMergeClick,
-                    onMergeOkClick = onMergeOkClick,
-                    onMergeCancelClick = onMergeCancelClick
-                )
-            }
-            UiState.FAIL -> {
-                //Component.Fail(failMessage = tableListState.failMessage,null)
-                // TODO RetryCLick add or not
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-        }
+        Component.HandleUiStateDialog(
+            tableListState,
+            {},null, // TODO Retry 어떻게 할지 생각 필요...
+            {TableLayout(
+                tableList = tableList,
+                mode = mode,
+                mergeTableState = mergeTableState,
+                onTableClick = onTableClick,
+                onMergeClick = onMergeClick,
+                onMergeOkClick = onMergeOkClick,
+                onMergeCancelClick = onMergeCancelClick
+            ) }
+        )
     }
 
     @Composable
@@ -403,29 +393,22 @@ class TableScreen @Inject constructor(
         onAddClick: (UiTableOrder) -> Unit,
         onCancelClick: (UiTableOrder) -> Unit
     ) {
-        when(tableOrderListState.state) {
-            UiState.COMPLETE -> {
-                OrderLayout(
-                    tableOrderList = tableOrderList,
-                    totalPrice = totalPrice,
-                    payTableState = payTableState,
-                    addOrderState = addOrderState,
-                    cancelOrderState = cancelOrderState,
-                    onCardClick = onCardClick,
-                    onCashClick = onCashClick,
-                    onPointClick = onPointClick,
-                    onAddClick = onAddClick,
-                    onCancelClick = onCancelClick
-                )
-            }
-            UiState.FAIL -> {
-                //Component.Fail(failMessage = tableOrderListState.failMessage,null)
-                // TODO RetryCLick add or not
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-        }
+        Component.HandleUiStateDialog(
+            tableOrderListState,
+            {},null, // TODO RetryCLick add or not
+            {OrderLayout(
+                tableOrderList = tableOrderList,
+                totalPrice = totalPrice,
+                payTableState = payTableState,
+                addOrderState = addOrderState,
+                cancelOrderState = cancelOrderState,
+                onCardClick = onCardClick,
+                onCashClick = onCashClick,
+                onPointClick = onPointClick,
+                onAddClick = onAddClick,
+                onCancelClick = onCancelClick
+            )}
+        )
     }
     @Composable
     fun OrderLayout(
@@ -616,24 +599,17 @@ class TableScreen @Inject constructor(
         onAddClick: (UiMenu) -> Unit,
         onCancelClick: (UiMenu) -> Unit
     ) {
-        when(menuListState.state) {
-            UiState.COMPLETE -> {
-                MenuList(
-                    menuList = menuList,
-                    addOrderState = addOrderState,
-                    cancelOrderState = cancelOrderState,
-                    onAddClick = onAddClick,
-                    onCancelClick = onCancelClick
-                )
-            }
-            UiState.FAIL -> {
-                //Component.Fail(failMessage = menuListState.failMessage,null)
-                // TODO RetryCLick add or not
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-        }
+        Component.HandleUiStateDialog(
+            menuListState,
+            {},null,// TODO RetryCLick add or not
+            {MenuList(
+                menuList = menuList,
+                addOrderState = addOrderState,
+                cancelOrderState = cancelOrderState,
+                onAddClick = onAddClick,
+                onCancelClick = onCancelClick
+            )}
+        )
     }
     @Composable
     fun MenuList(

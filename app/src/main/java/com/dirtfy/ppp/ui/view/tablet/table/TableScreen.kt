@@ -63,19 +63,16 @@ class TableScreen @Inject constructor(
             controller.updateTableList()
         }
 
-        when (screenData.mergeTableState.state) {
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.COMPLETE -> {}
-            UiState.FAIL -> {
-                Component.Fail(
-                    { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
-                    screenData.mergeTableState.errorException,
-                    {controller.request { mergeTable() }}
-                )
-            }
-        }
+        Component.HandleUiStateDialog(
+            screenData.mergeTableState,
+            { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
+            {controller.request { mergeTable() }}
+        )
+        Component.HandleUiStateDialog(
+            screenData.payTableState,
+            { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
+            // TODO Retry 어떻게 할지 생각 필요... 잔액이나 이런걸 Error 던질때 기억해야 retry가 가능하다!!
+        )
 
         ScreenContent(
             tableList = screenData.tableList,
