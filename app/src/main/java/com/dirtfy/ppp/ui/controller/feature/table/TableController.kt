@@ -25,6 +25,5 @@ interface TableController: Controller<UiTableScreenState, TableController> {
     suspend fun cancelOrder(name: String, price: String)
 
     fun setMode(mode: UiTableMode)
-    fun setMergeMode(mode: UiScreenState)
-
+    fun setMergeState(state: UiScreenState)
 }

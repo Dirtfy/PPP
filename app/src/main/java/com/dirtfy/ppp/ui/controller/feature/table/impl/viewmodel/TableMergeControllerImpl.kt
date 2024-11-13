@@ -294,7 +294,7 @@ class TableMergeControllerImpl @Inject constructor(
         syncTableList()
     }
 
-    override fun setMode(mode: UiScreenState) {
-        _screenData.update { it.copy(mergeTableState = mode) }
+    override fun setState(state: UiScreenState) {
+        _screenData.update { it.copy(mergeTableState = state) }
     }
 }

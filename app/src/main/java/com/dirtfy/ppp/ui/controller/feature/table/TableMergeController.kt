@@ -14,5 +14,5 @@ interface TableMergeController {
     suspend fun mergeTable()
     fun cancelMergeTable()
     fun disbandGroup(tableNumber: Int)
-    fun setMode(mode: UiScreenState)
+    fun setState(state: UiScreenState)
 }

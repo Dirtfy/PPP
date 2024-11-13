@@ -7,6 +7,7 @@ import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
 import com.dirtfy.ppp.ui.controller.feature.account.AccountDetailController
 import com.dirtfy.ppp.ui.controller.feature.account.AccountListController
 import com.dirtfy.ppp.ui.controller.feature.account.AccountUpdateController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.account.UiAccountScreenState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
@@ -76,8 +77,8 @@ class AccountViewModel @Inject constructor(
         accountCreateController.updateNewAccount(newAccountData)
     }
 
-    override suspend fun addAccount(newAccountData: UiNewAccount) {
-        accountCreateController.addAccount(newAccountData)
+    override suspend fun addAccount(newAccountData: UiNewAccount,onComplete: (Boolean) -> Unit) {
+        accountCreateController.addAccount(newAccountData,onComplete)
     }
 
     override suspend fun setRandomValidAccountNumberToNewAccount() {
@@ -110,6 +111,10 @@ class AccountViewModel @Inject constructor(
 
     override fun setMode(mode: UiAccountMode) {
         _screenData.update { it.copy(mode = mode) }
+    }
+
+    override fun setNewAccountState(state: UiScreenState){
+        accountCreateController.setState(state)
     }
 
     override fun request(job: suspend AccountController.() -> Unit) {

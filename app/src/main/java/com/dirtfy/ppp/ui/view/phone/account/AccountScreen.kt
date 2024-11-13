@@ -89,12 +89,6 @@ class AccountScreen @Inject constructor(
             onRetryClick = {
                 controller.request { updateAccountList() }
             },
-            onAccountCreate = {
-                controller.setMode(UiAccountMode.Main)
-                controller.request {
-                    updateAccountList()
-                }
-            },
             onDismissRequest = {
                 controller.setMode(UiAccountMode.Main)
             }
@@ -113,7 +107,6 @@ class AccountScreen @Inject constructor(
         onAddIconClick: () -> Unit,
         onItemClick: (UiAccount) -> Unit,
         onRetryClick: () -> Unit,
-        onAccountCreate: (UiNewAccount) -> Unit,
         onDismissRequest: () -> Unit
     ) {
         Column(
@@ -139,7 +132,6 @@ class AccountScreen @Inject constructor(
                 }
                 UiAccountMode.Create -> {
                     AccountCreateDialog(
-                        onAccountCreate = onAccountCreate,
                         onDismissRequest = onDismissRequest
                     )
                 }
@@ -305,13 +297,10 @@ class AccountScreen @Inject constructor(
     
     @Composable
     fun AccountCreateDialog(
-        onAccountCreate: (UiNewAccount) -> Unit,
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            accountCreateScreen.Main(
-                onAccountCreate = onAccountCreate
-            )
+            accountCreateScreen.Main()
         }
     }
 

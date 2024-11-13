@@ -23,7 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
+import com.dirtfy.ppp.ui.state.common.UiState
+import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class AccountCreateScreen @Inject constructor(
@@ -42,10 +46,32 @@ class AccountCreateScreen @Inject constructor(
             onValueChange = { controller.request { updateNewAccount(it) } },
             onAutoGenerateClick = { controller.request { setRandomValidAccountNumberToNewAccount() } },
             onCreateClick = {
-                controller.request { addAccount(screen.newAccount) }
-                onAccountCreate(screen.newAccount)
+                controller.request {
+                    addAccount(screen.newAccount){ isSuccess ->
+                        if (isSuccess) {
+                            controller.setMode(UiAccountMode.Main)
+                        }
+                        // 여기 fail안하는 이유 : View에서는 상태를 비동기로 늦게 읽어와서 여기서 상태 읽으면 Loading으로 나타남..
+                    }
+                }
             }
         )
+        when(screen.newAccountState.state){
+            UiState.LOADING -> {
+                Component.Loading()}
+            UiState.COMPLETE -> {}
+            UiState.FAIL -> {
+                Component.Fail(
+                    {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
+                    screen.newAccountState.errorException,
+                    { controller.request {
+                        addAccount(screen.newAccount){ isSuccess ->
+                            if (isSuccess) { controller.setMode(UiAccountMode.Main) }
+                        } }
+                    }
+                )
+            }
+        }
     }
 
     @Composable

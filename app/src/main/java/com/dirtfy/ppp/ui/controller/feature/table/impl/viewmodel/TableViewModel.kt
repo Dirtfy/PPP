@@ -102,8 +102,8 @@ class TableViewModel @Inject constructor(
     override fun setMode(mode: UiTableMode) {
         modeFlow.update { mode }
     }
-    override fun setMergeMode(mode: UiScreenState){
-        mergeController.setMode(mode)
+    override fun setMergeState(state: UiScreenState){
+        mergeController.setState(state)
     }
 
     override suspend fun mergeTable() {

@@ -80,7 +80,7 @@ class TableScreen @Inject constructor(
             UiState.COMPLETE -> {}
             UiState.FAIL -> {
                 Component.Fail(
-                    { controller.setMergeMode(UiScreenState(UiState.COMPLETE)) },
+                    { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
                     screenData.mergeTableState.errorException,
                     {controller.request { mergeTable() }}
                 )
