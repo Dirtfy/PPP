@@ -93,7 +93,6 @@ class RecordScreen @Inject constructor(
             when(mode) {
                 UiRecordMode.Detail -> {
                     RecordDetailDialog(
-                        nowAccount = nowRecord,
                         onDismissRequest = onDismissRequest
                     )
                 }
@@ -177,11 +176,10 @@ class RecordScreen @Inject constructor(
 
     @Composable
     fun RecordDetailDialog(
-        nowAccount: UiRecord,
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            recordDetailScreen.Main(firstRecord = nowAccount)
+            recordDetailScreen.Main()
         }
     }
 }

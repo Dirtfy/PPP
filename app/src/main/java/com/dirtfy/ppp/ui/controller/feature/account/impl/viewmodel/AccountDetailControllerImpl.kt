@@ -31,7 +31,7 @@ class AccountDetailControllerImpl @Inject constructor(
         )
     )
     override val screenData: Flow<UiAccountDetailScreenState>
-        get() = _screenData // 안될거같음
+        get() = _screenData
 
     private lateinit var accountRecordListStream: Flow<List<UiAccountRecord>>
 

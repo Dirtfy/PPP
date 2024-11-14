@@ -146,7 +146,6 @@ class AccountScreen @Inject constructor(
                 }
                 UiAccountMode.Detail -> {
                     AccountDetailDialog(
-                        account = nowAccount,
                         onDismissRequest = onDismissRequest
                     )
                 }
@@ -320,7 +319,6 @@ class AccountScreen @Inject constructor(
 
     @Composable
     fun AccountDetailDialog(
-        account: UiAccount,
         onDismissRequest: () -> Unit
     ) { //TODO maxHeight 설정?
         Dialog(onDismissRequest = onDismissRequest) {

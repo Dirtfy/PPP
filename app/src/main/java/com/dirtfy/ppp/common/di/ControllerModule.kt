@@ -8,6 +8,10 @@ import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountCreate
 import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountDetailControllerImpl
 import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountListControllerImpl
 import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountUpdateControllerImpl
+import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
+import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
+import com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel.RecordDetailControllerImpl
+import com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel.RecordListControllerImpl
 import com.dirtfy.ppp.ui.controller.feature.table.TableMenuController
 import com.dirtfy.ppp.ui.controller.feature.table.TableMergeController
 import com.dirtfy.ppp.ui.controller.feature.table.TableOrderController
@@ -56,4 +60,14 @@ abstract class ControllerModule {
     abstract fun bindsAccountUpdateController(
         controllerImpl: AccountUpdateControllerImpl
     ): AccountUpdateController
+
+    @Binds
+    abstract fun bindsRecordListController(
+        controllerImpl: RecordListControllerImpl
+    ): RecordListController
+
+    @Binds
+    abstract fun bindsRecordDetailController(
+        controllerImpl: RecordDetailControllerImpl
+    ): RecordDetailController
 }
