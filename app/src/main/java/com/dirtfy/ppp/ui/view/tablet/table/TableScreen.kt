@@ -209,8 +209,10 @@ class TableScreen @Inject constructor(
         onMergeClick: () -> Unit,
         onMergeCancelClick: () -> Unit
     ) {
-        when(tableListState.state) {
-            UiState.COMPLETE -> {
+        Component.HandleUiStateDialog(
+            uiState = tableListState,
+            onDismissRequest = {},onRetryAction = {},// TODO Retry 어떻게 할지 생각 필요...
+            onComplete = {
                 TableLayout(
                     tableList = tableList,
                     mode = mode,
@@ -221,14 +223,7 @@ class TableScreen @Inject constructor(
                     onMergeCancelClick = onMergeCancelClick
                 )
             }
-            UiState.FAIL -> {
-                Component.Fail({},tableListState.errorException,{})
-                // TODO Retry 어떻게 할지 생각 필요...
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-        }
+        )
     }
 
     @Composable
@@ -540,34 +535,4 @@ class TableScreen @Inject constructor(
         }
 
     }
-
-    /*@Composable
-    fun Loading() {
-        Dialog(onDismissRequest = { *//*TODO*//* }) {
-            CircularProgressIndicator(
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-
-    @Composable
-    fun Fail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            dismissButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
-    }*/
 }

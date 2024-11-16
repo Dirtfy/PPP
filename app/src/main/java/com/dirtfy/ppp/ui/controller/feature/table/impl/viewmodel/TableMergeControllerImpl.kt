@@ -52,6 +52,8 @@ class TableMergeControllerImpl @Inject constructor(
             tableList
         }
 
+
+
     private val _screenData: MutableStateFlow<UiTableMergeScreenState>
         = MutableStateFlow(UiTableMergeScreenState())
     override val screenData: Flow<UiTableMergeScreenState>
