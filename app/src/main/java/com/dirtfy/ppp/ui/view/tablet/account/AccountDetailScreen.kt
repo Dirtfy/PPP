@@ -242,9 +242,9 @@ class AccountDetailScreen @Inject constructor(
         onRetryClick: () -> Unit
     ) {
         Component.HandleUiStateDialog(
-            recordListState,
-            {},null,  // TODO Retry 어떻게 할지 생각 필요...
-            {RecordList(recordList = recordList)}
+            uiState = recordListState,
+            onDismissRequest = {}, onRetryAction = null,  // TODO Retry 어떻게 할지 생각 필요...
+            onComplete = {RecordList(recordList = recordList)}
         )
     }
 

@@ -74,14 +74,14 @@ class TableScreen @Inject constructor(
         }
 
         Component.HandleUiStateDialog(
-            screenData.mergeTableState,
-            { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
-            {controller.request { mergeTable() }}
+            uiState = screenData.mergeTableState,
+            onDismissRequest = { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = {controller.request { mergeTable() }}
         )
         Component.HandleUiStateDialog(
-            screenData.payTableState,
-            { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
-            {}   // TODO Retry 어떻게 할지 생각 필요... 잔액이나 이런걸 Error 던질때 기억해야 retry가 가능하다!!
+            uiState = screenData.payTableState,
+            onDismissRequest = { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = {}   // TODO Retry 어떻게 할지 생각 필요... 잔액이나 이런걸 Error 던질때 기억해야 retry가 가능하다!!
         )
 
         //TODO  screenData.cancelOrderStat screenData.addOrderState.state
@@ -261,9 +261,9 @@ class TableScreen @Inject constructor(
         onMergeCancelClick: () -> Unit
     ) {
         Component.HandleUiStateDialog(
-            tableListState,
-            {},null, // TODO Retry 어떻게 할지 생각 필요...
-            {TableLayout(
+            uiState = tableListState,
+            onDismissRequest = {},onRetryAction = null, // TODO Retry 어떻게 할지 생각 필요...
+            onComplete = {TableLayout(
                 tableList = tableList,
                 mode = mode,
                 mergeTableState = mergeTableState,
@@ -394,9 +394,9 @@ class TableScreen @Inject constructor(
         onCancelClick: (UiTableOrder) -> Unit
     ) {
         Component.HandleUiStateDialog(
-            tableOrderListState,
-            {},null, // TODO RetryCLick add or not
-            {OrderLayout(
+            uiState = tableOrderListState,
+            onDismissRequest = {}, onRetryAction = null, // TODO RetryCLick add or not
+            onComplete = {OrderLayout(
                 tableOrderList = tableOrderList,
                 totalPrice = totalPrice,
                 payTableState = payTableState,
@@ -600,9 +600,9 @@ class TableScreen @Inject constructor(
         onCancelClick: (UiMenu) -> Unit
     ) {
         Component.HandleUiStateDialog(
-            menuListState,
-            {},null,// TODO RetryCLick add or not
-            {MenuList(
+            uiState = menuListState,
+            onDismissRequest = {}, onRetryAction = null,// TODO RetryCLick add or not
+            onComplete = {MenuList(
                 menuList = menuList,
                 addOrderState = addOrderState,
                 cancelOrderState = cancelOrderState,
@@ -660,34 +660,4 @@ class TableScreen @Inject constructor(
             }
         }
     }
-
-    /*@Composable
-    fun Loading() {
-        Dialog(onDismissRequest = { *//*TODO*//* }) {
-            CircularProgressIndicator(
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-
-    @Composable
-    fun Fail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            dismissButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
-    }*/
 }

@@ -37,10 +37,12 @@ class RecordScreen @Inject constructor(
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
-        /*LaunchedEffect(key1 = controller) {
-            //controller.updateRecordList()
-        }
-        */
+        Component.HandleUiStateDialog(
+            uiState = screenData.nowRecordState,
+            onDismissRequest = {}, //TODO Controller로 분리후 가능
+            onRetryAction = {}//TODO Retry 에러날경우 클릭한 정보를 가지고 있어야 복구가 가능하다...
+        )
+
         ScreenContent(
             searchClue = screenData.searchClue,
             recordList = screenData.recordList,
@@ -110,21 +112,16 @@ class RecordScreen @Inject constructor(
         onItemClick: (UiRecord) -> Unit,
         onRetryClick: () -> Unit
     ) {
-        when(recordListState.state) {
-            UiState.COMPLETE -> {
+        Component.HandleUiStateDialog(
+            uiState = recordListState,
+            onDismissRequest = {}, onRetryAction = {  },// TODO Retry 어떻게 할지 생각 필요...
+            onComplete = {
                 RecordList(
                     recordList = recordList,
                     onItemClick = onItemClick
                 )
             }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.FAIL -> {
-                Component.Fail({},recordListState.errorException,{})
-                // TODO Retry 어떻게 할지 생각 필요...
-            }
-        }
+        )
     }
 
     @Composable
@@ -145,34 +142,6 @@ class RecordScreen @Inject constructor(
             }
         }
     }
-
-    /*@Composable
-    fun RecordListLoading() {
-        CircularProgressIndicator(
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-
-    @Composable
-    fun RecordListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            dismissButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
-    }*/
 
     @Composable
     fun RecordDetailDialog(

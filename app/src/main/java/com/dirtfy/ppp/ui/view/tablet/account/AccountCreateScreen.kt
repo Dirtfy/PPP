@@ -58,9 +58,9 @@ class AccountCreateScreen @Inject constructor(
         )
 
         Component.HandleUiStateDialog(
-            screen.newAccountState,
-            {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
-            {controller.request {
+            uiState = screen.newAccountState,
+            onDismissRequest = {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {controller.request {
                 addAccount(screen.newAccount) { isSuccess ->
                     if (isSuccess) {
                         controller.setMode(UiAccountMode.Main)

@@ -94,7 +94,7 @@ object Component {
         errorException: Throwable?,
         onRetryAction: (() -> Unit)? = null
     ) {
-        val shouldRetry = errorException?.let { ExceptionRetryHandling.isRetry(it) } ?: false
+        val shouldRetry = errorException?.let { ExceptionRetryHandling.isRetryable(it) } ?: false
 
         AlertDialog(
             onDismissRequest = { },

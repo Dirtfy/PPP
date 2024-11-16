@@ -64,14 +64,14 @@ class TableScreen @Inject constructor(
         }
 
         Component.HandleUiStateDialog(
-            screenData.mergeTableState,
-            { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
-            {controller.request { mergeTable() }}
+            uiState = screenData.mergeTableState,
+            onDismissRequest = { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = {controller.request { mergeTable() }}
         )
         Component.HandleUiStateDialog(
-            screenData.payTableState,
-            { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
-            // TODO Retry 어떻게 할지 생각 필요... 잔액이나 이런걸 Error 던질때 기억해야 retry가 가능하다!!
+            uiState = screenData.payTableState,
+            onDismissRequest = { controller.setMergeState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = {} // TODO Retry 어떻게 할지 생각 필요... 잔액이나 이런걸 Error 던질때 기억해야 retry가 가능하다!!
         )
 
         ScreenContent(
