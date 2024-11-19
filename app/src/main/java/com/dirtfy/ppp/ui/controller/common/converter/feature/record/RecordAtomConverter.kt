@@ -68,7 +68,7 @@ object RecordAtomConverter {
             id = id.toString(),
             timestamp = StringFormatConverter.formatTimestampFromMinute(timestamp),
             income = StringFormatConverter.formatCurrency(income),
-            type = if (type.split("-")[0].trim().matches(Regex("""^\d+$"""))) type
+            type = if (type.split("-")[0].trim().matches(Regex("""^\d+$"""))) "$type - $issuedBy"
                    else type.split("-")[0].trim()
         )
     }

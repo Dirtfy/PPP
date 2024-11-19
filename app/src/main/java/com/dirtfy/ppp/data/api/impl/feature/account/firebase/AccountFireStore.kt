@@ -81,9 +81,9 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
     @Deprecated("moved to record api")
     override suspend fun readAccountBalance(accountNumber: Int): Int {
         val query = recordRef.whereEqualTo("type", "$accountNumber")
-        val aggregation = query.aggregate(AggregateField.sum("amount"))
+        val aggregation = query.aggregate(AggregateField.sum("income"))
         val result = aggregation.get(AggregateSource.SERVER).await()
-        val value = result.get(AggregateField.sum("amount"))
+        val value = result.get(AggregateField.sum("income"))
 
         Log.d(TAG, "$result\n$value")
 

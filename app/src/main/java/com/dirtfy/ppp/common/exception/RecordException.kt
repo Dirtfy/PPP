@@ -5,6 +5,7 @@ sealed class RecordException(
 ): CustomException(massage) {
 
     class IdLoss: RecordException("id is not found")
+    class IllegalIdAssignment: RecordException("id is already assigned (illegal)")
     class IssuedNameLoss: RecordException("issued name is not found")
     class IncomeLoss: RecordException("income is not found")
     class TypeLoss: RecordException("type is not found")

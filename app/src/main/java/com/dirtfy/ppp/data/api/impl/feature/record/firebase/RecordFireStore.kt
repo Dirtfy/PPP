@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.data.api.impl.feature.record.firebase
 
 import android.util.Log
+import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecord.Companion.convertToFireStoreRecord
@@ -23,28 +24,36 @@ import javax.inject.Inject
 class RecordFireStore @Inject constructor(): RecordApi, Tagger {
 
     private val recordRef = Firebase.firestore.collection(FireStorePath.RECORD)
+    private val recordIdRef = Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
 
     override suspend fun create(
         record: DataRecord,
         detailList: List<DataRecordDetail>
     ): DataRecord {
-        Firebase.firestore.runTransaction {
-            val newRecord = recordRef.document(record.id.toString())
+        Log.d(TAG, "Record create start")
+        if (record.id != DataRecord.ID_NOT_ASSIGNED)
+            throw RecordException.IllegalIdAssignment()
+        Log.d(TAG, "ID NOT ASSIGNED")
+        Firebase.firestore.runTransaction { transaction ->
+            Log.d(TAG, "record create - transaction")
+            val snapshot = transaction.get(recordIdRef)
+            val newRecordId = snapshot.getLong("count")!!.toInt()
 
-            Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
-                .update("count", FieldValue.increment(1))
+            val newRecord = recordRef.document(newRecordId.toString())
 
-            newRecord.set(
-                record.convertToFireStoreRecord()
-            )
+            transaction.update(recordIdRef, "count", FieldValue.increment(1))
+
+            transaction.set(newRecord, record.copy(id = newRecordId).convertToFireStoreRecord())
 
             detailList.forEach {
-                recordRef.document(newRecord.id)
-                    .collection(FireStorePath.RECORD_DETAIL)
-                    .document().set(it.convertToFireStoreRecordDetail())
+                transaction.set(
+                    newRecord.collection(FireStorePath.RECORD_DETAIL).document(),
+                    it.convertToFireStoreRecordDetail()
+                )
             }
+            null
         }.await()
-
+        Log.d(TAG, "create runTransaction after await")
         val currentId = getNextId()-1
 
         return record.copy(id = currentId)
@@ -96,7 +105,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     }
 
     override suspend fun getNextId(): Int {
-        return Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT).get().await()
+        return recordIdRef.get().await()
             .getLong("count")!!.toInt() + 1
     }
 

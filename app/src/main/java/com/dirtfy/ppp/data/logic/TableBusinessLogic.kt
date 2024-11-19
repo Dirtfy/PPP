@@ -10,13 +10,14 @@ import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordType
 import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.ppp.data.logic.common.BusinessLogic
+import com.dirtfy.tagger.Tagger
 import javax.inject.Inject
 
 class TableBusinessLogic @Inject constructor(
     private val accountApi: AccountApi,
     private val tableApi: TableApi,
     private val recordApi: RecordApi
-): BusinessLogic {
+): BusinessLogic, Tagger {
 
     private fun isInValidTableNumber(tableNumber: Int): Boolean {
         return tableNumber !in 1..11
@@ -131,11 +132,8 @@ class TableBusinessLogic @Inject constructor(
 
         val orderList = tableApi.readAllOrder(group)
 
-        val nextRecordId = recordApi.getNextId()
-
         val payment = recordApi.create(
             record = DataRecord(
-                id = nextRecordId,
                 income = orderList.calcTotalPrice(),
                 type = DataRecordType.Cash.name
             ),
@@ -153,11 +151,8 @@ class TableBusinessLogic @Inject constructor(
 
         val orderList = tableApi.readAllOrder(group)
 
-        val nextRecordId = recordApi.getNextId()
-
         val payment = recordApi.create(
             record = DataRecord(
-                id = nextRecordId,
                 income = orderList.calcTotalPrice(),
                 type = DataRecordType.Card.name
             ),
@@ -173,21 +168,23 @@ class TableBusinessLogic @Inject constructor(
         accountNumber: Int,
         issuedName: String
     ) = operate {
+        Log.d(TAG, "Business - payTableWithPoint")
         val group = tableApi.readTable(tableNumber).group
 
         val orderList = tableApi.readAllOrder(group)
 
+        Log.d(TAG, "group, orderList gotten")
         val nowBalance = accountApi.readAccountBalance(accountNumber)
+        Log.d(TAG, "nowBalance $nowBalance")
         val totalPrice = orderList.calcTotalPrice()
+        Log.d(TAG, "totalPrice $totalPrice")
 
         if (nowBalance < totalPrice)
             throw TableException.InvalidPay()
 
-        val nextRecordId = recordApi.getNextId()
-
+        Log.d(TAG, "recordApi create call")
         val payment = recordApi.create(
             record = DataRecord(
-                id = nextRecordId,
                 income = -totalPrice,
                 type = accountNumber.toString(),
                 issuedBy = issuedName
@@ -195,7 +192,7 @@ class TableBusinessLogic @Inject constructor(
             detailList = orderList.map{ it.convertToRecordDetail() }
         )
         // TODO 다른 DB간 transaction 처리
-
+        Log.d(TAG, "recordApi create called")
         cleanGroup(group)
         payment
     }
