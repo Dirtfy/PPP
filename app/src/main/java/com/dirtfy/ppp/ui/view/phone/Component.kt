@@ -100,13 +100,13 @@ object Component {
             onDismissRequest = { },
             confirmButton = {
                 Button(onClick = onDismissRequest) {
-                    Text(text = "Cancel")
+                    Text(text = "취소")
                 }
             },
             dismissButton = {
                 if (shouldRetry) {
                     Button(onClick = { onRetryAction?.invoke() }) {
-                        Text(text = "Retry")
+                        Text(text = "재시도")
                     }
                 }
             },

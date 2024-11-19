@@ -12,5 +12,4 @@ interface RecordController: Controller<UiRecordScreenState, RecordController> {
     fun updateSearchClue(clue: String)
     fun updateNowRecord(record: UiRecord)
     fun setMode(mode: UiRecordMode)
-
 }

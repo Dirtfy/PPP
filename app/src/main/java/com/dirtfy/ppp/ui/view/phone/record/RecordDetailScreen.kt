@@ -121,19 +121,15 @@ class RecordDetailScreen @Inject constructor(
         recordDetailListState: UiScreenState,
         onRetryClick: () -> Unit
     ) {
-        when(recordDetailListState.state) {
-            UiState.COMPLETE -> {
+        Component.HandleUiStateDialog(
+            uiState = recordDetailListState,
+            onDismissRequest = {},
+            onRetryAction = null,
+            onComplete = {
                 if (recordDetailList.isNotEmpty())
                     RecordDetailList(recordDetailList = recordDetailList)
             }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.FAIL -> {
-                Component.Fail({},recordDetailListState.errorException,{})
-                // TODO Retry 어떻게 할지 생각 필요...
-            }
-        }
+        )
     }
 
     @Composable

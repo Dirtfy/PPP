@@ -59,29 +59,27 @@ class AccountCreateScreen @Inject constructor(
                     addAccount(screen.newAccount){ isSuccess ->
                         if (isSuccess) {
                             controller.setMode(UiAccountMode.Main)
-                        }
-                        // 여기 fail안하는 이유 : View에서는 상태를 비동기로 늦게 읽어와서 여기서 상태 읽으면 Loading으로 나타남..
+                        } // 여기 fail안하는 이유 : View에서는 상태를 비동기로 늦게 읽어와서 여기서 상태 읽으면 Loading으로 나타남..
                     }
                 }
             }
         )
-        when(screen.newAccountState.state){
-            UiState.LOADING -> {
-                Component.Loading()}
-            UiState.COMPLETE -> {}
-            UiState.FAIL -> {
-                Component.Fail(
-                    {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
-                    screen.newAccountState.errorException,
-                    { controller.request {
-                        addAccount(screen.newAccount){ isSuccess ->
-                            if (isSuccess) { controller.setMode(UiAccountMode.Main) }
-                        } }
-                    }
-                )
-            }
-        }
 
+        Component.HandleUiStateDialog(
+            uiState = screen.newAccountState,
+            onDismissRequest = {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = { controller.request {
+                addAccount(screen.newAccount){ isSuccess ->
+                    if (isSuccess) { controller.setMode(UiAccountMode.Main) }
+                } }
+            }
+        )
+
+        Component.HandleUiStateDialog(
+            uiState = screen.numberGeneratingState,
+            onDismissRequest = {controller.setNumberGeneratingState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {controller.request { setRandomValidAccountNumberToNewAccount() }}
+        )
     }
 
     @Composable
@@ -99,7 +97,7 @@ class AccountCreateScreen @Inject constructor(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "New Account",
+                            text = "새 계정",
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -157,7 +155,7 @@ class AccountCreateScreen @Inject constructor(
         onAutoGenerateClick: () -> Unit
     ) {
         TextField(
-            label = { Text(text = "account number") },
+            label = { Text(text = "계정 번호") },
             value = nowAccount.number,
             onValueChange = {
                 onValueChange(nowAccount.copy(number = it))
@@ -190,13 +188,14 @@ class AccountCreateScreen @Inject constructor(
         onValueChange: (UiNewAccount) -> Unit
     ) {
         TextField(
-            label = { Text(text = "account name") },
+            label = { Text(text = "계정 이름") },
             value = nowAccount.name,
             onValueChange = {
                 onValueChange(nowAccount.copy(name = it))
             }
         )
     }
+
 
     private fun getPhoneNumberTransfomred(input: String): TransformedText {
         val transformedText = formatPhoneNumber(input)
@@ -235,7 +234,7 @@ class AccountCreateScreen @Inject constructor(
         onValueChange: (UiNewAccount) -> Unit
     ) {
         TextField(
-            label = { Text(text = "phone number") },
+            label = { Text(text = "휴대폰 번호") },
             value = nowAccount.phoneNumber,
             onValueChange = {
                 onValueChange(nowAccount.copy(phoneNumber = it))
@@ -258,8 +257,7 @@ class AccountCreateScreen @Inject constructor(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(text = "add")
+            Text(text = "추가")
         }
     }
-
 }

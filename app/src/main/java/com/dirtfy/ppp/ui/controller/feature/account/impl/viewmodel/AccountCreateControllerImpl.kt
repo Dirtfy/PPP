@@ -83,9 +83,16 @@ class AccountCreateControllerImpl @Inject constructor(
                 }
             }
     }
-    override fun setState(state: UiScreenState){
+
+    override fun setNewAccountState(state: UiScreenState){
         _screenData.update {
             it.copy(newAccountState = state)
+        }
+    }
+
+    override fun setNumberGeneratingState(state: UiScreenState){
+        _screenData.update{
+            it.copy(numberGeneratingState = state)
         }
     }
 }

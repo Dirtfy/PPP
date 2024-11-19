@@ -114,7 +114,19 @@ class AccountViewModel @Inject constructor(
     }
 
     override fun setNewAccountState(state: UiScreenState){
-        accountCreateController.setState(state)
+        accountCreateController.setNewAccountState(state)
+    }
+
+    override fun setNumberGeneratingState(state: UiScreenState) {
+        accountCreateController.setNumberGeneratingState(state)
+    }
+
+    override fun setAccountRecordListState(state: UiScreenState){
+        accountDetailController.setAccountRecordListState(state)
+    }
+
+    override fun setNewAccountRecordState(state: UiScreenState){
+        accountDetailController.setNewAccountRecordState(state)
     }
 
     override fun request(job: suspend AccountController.() -> Unit) {

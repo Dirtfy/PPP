@@ -106,4 +106,15 @@ class AccountDetailControllerImpl @Inject constructor(
         }
     }
 
+    override fun setAccountRecordListState(state: UiScreenState){
+        _screenData.update{
+            it.copy(accountRecordListState = state)
+        }
+    }
+    override fun setNewAccountRecordState(state: UiScreenState){
+        _screenData.update{
+            it.copy(newAccountRecordState = state)
+        }
+    }
+
 }

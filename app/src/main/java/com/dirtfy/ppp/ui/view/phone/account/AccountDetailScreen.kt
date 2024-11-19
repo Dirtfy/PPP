@@ -75,10 +75,18 @@ class AccountDetailScreen @Inject constructor(
             onAddClick = {
                 controller.request { addRecord(it) }
             },
+            onDismissRequest = {
+                controller.setAccountRecordListState(UiScreenState(UiState.COMPLETE))
+            },
             onRetryClick = {
-                //controller.request { updateAccountRecordList() }
-                
+                controller.request { updateAccountRecordList() }
             }
+        )
+
+        Component.HandleUiStateDialog(
+            screen.newAccountRecordState,
+            onDismissRequest = {controller.setNewAccountRecordState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {controller.request{addRecord(screen.newAccountRecord)}}
         )
     }
 
@@ -90,6 +98,7 @@ class AccountDetailScreen @Inject constructor(
         recordListState: UiScreenState,
         onRecordChange: (UiNewAccountRecord) -> Unit,
         onAddClick: (UiNewAccountRecord) -> Unit,
+        onDismissRequest:() -> Unit,
         onRetryClick: () -> Unit
     ) {
         Surface(
@@ -113,10 +122,10 @@ class AccountDetailScreen @Inject constructor(
                         onAddClick = onAddClick
                     )
                     Spacer(modifier = Modifier.size(10.dp))
-                    RecordListState(
-                        recordList = recordList,
-                        recordListState = recordListState,
-                        onRetryClick = onRetryClick
+                    Component.HandleUiStateDialog(
+                        uiState = recordListState,
+                        onDismissRequest = onDismissRequest, onRetryAction = onRetryClick,
+                        onComplete = {RecordList(recordList = recordList)}
                     )
                 }
             }
@@ -223,7 +232,7 @@ class AccountDetailScreen @Inject constructor(
         onRecordChange: (UiNewAccountRecord) -> Unit
     ) {
         TextField(
-            label = { Text(text = "issued name") },
+            label = { Text(text = "발행자") },
             value = newRecord.issuedName,
             onValueChange = {
                 onRecordChange(newRecord.copy(issuedName = it))
@@ -236,7 +245,7 @@ class AccountDetailScreen @Inject constructor(
         onRecordChange: (UiNewAccountRecord) -> Unit
     ) {
         TextField(
-            label = { Text(text = "difference") },
+            label = { Text(text = "금액") },
             value = newRecord.difference,
             onValueChange = {
                 onRecordChange(newRecord.copy(difference = it))
@@ -247,25 +256,6 @@ class AccountDetailScreen @Inject constructor(
         )
     }
 
-    @Composable
-    fun RecordListState(
-        recordList: List<UiAccountRecord>,
-        recordListState: UiScreenState,
-        onRetryClick: () -> Unit
-    ) {
-        when(recordListState.state) {
-            UiState.COMPLETE -> {
-                RecordList(recordList = recordList)
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.FAIL -> {
-                Component.Fail({}, recordListState.errorException, {})
-                // TODO Retry 어떻게 할지 생각 필요...
-            }
-        }
-    }
 
     @Composable
     fun RecordList(
@@ -305,41 +295,4 @@ class AccountDetailScreen @Inject constructor(
             }
         }
     }
-
-    /*@Composable
-    fun RecordListLoading() {
-        Box(
-            modifier = Modifier
-                .padding(top = 50.dp)
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)), // 배경 색상을 좀 더 부드럽게
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(100.dp), // 크기를 조정
-                color = MaterialTheme.colorScheme.primary, // 색상 조정
-                strokeWidth = 8.dp // 두께 조정
-            )
-        }
-    }
-
-    @Composable
-    fun RecordListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
-    }*/
 }
