@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.data.api.impl.feature.record.firebase
 
 import android.util.Log
-import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.FireStoreRecord.Companion.convertToFireStoreRecord
@@ -10,7 +9,6 @@ import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.Firebase
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
@@ -20,7 +18,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import java.util.Date
 import javax.inject.Inject
 
 class RecordFireStore @Inject constructor(): RecordApi, Tagger {
@@ -32,7 +29,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
         detailList: List<DataRecordDetail>
     ): DataRecord {
         Firebase.firestore.runTransaction {
-            val newRecord = recordRef.document()
+            val newRecord = recordRef.document(record.id.toString())
 
             Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
                 .update("count", FieldValue.increment(1))
@@ -51,6 +48,12 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
         val currentId = getNextId()-1
 
         return record.copy(id = currentId)
+    }
+
+    override suspend fun read(id: Int): DataRecord {
+        val recordSnapshot = recordRef.document(id.toString()).get().await()
+        return recordSnapshot.toObject(FireStoreRecord::class.java)!!
+            .convertToDataRecord()
     }
 
     override suspend fun readAll(): List<DataRecord> {
@@ -83,19 +86,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     }
 
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
-        val query = recordRef
-            .whereEqualTo("timestamp", Timestamp(Date(record.timestamp)))
-        Log.d(TAG, "${Timestamp(Date(record.timestamp))}")
-        val document = query.get().await().documents
-        Log.d(TAG, "${record.timestamp}")
-
-        val documentID = when(document.size) {
-            1 -> document[0].id
-            0 -> throw RecordException.NonExistQuery()
-            else -> throw RecordException.NonUniqueQuery()
-        }
-
-        return recordRef.document(documentID)
+        return recordRef.document(record.id.toString())
             .collection(FireStorePath.RECORD_DETAIL).get().await()
             .documents.map { detailDocument ->
                 detailDocument.toObject(FireStoreRecordDetail::class.java)!!

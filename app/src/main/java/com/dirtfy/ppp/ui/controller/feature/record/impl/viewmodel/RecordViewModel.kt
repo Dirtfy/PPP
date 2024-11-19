@@ -2,7 +2,6 @@ package com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.ui.controller.feature.record.RecordController
 import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
 import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
@@ -29,25 +28,21 @@ class RecordViewModel @Inject constructor(
 ): ViewModel(), RecordController, Tagger {
 
     private val modeFlow = MutableStateFlow(UiRecordMode.Main)
-    private val nowRecordStateFlow = MutableStateFlow(UiScreenState(UiState.COMPLETE))
 
     override val screenData: StateFlow<UiRecordScreenState>
         = modeFlow
-            .combine(nowRecordStateFlow) { mode, nowRecordState ->
+            .combine(listController.screenData) { mode, listScreenData ->
                 UiRecordScreenState(
                     mode = mode,
-                    nowRecordState = nowRecordState
-                )
-            }.combine(listController.screenData) { state, listScreenData ->
-                state.copy(
                     recordList = listScreenData.recordList,
                     searchClue = listScreenData.searchClue,
                     recordListState = listScreenData.recordListState
                 )
             }.combine(detailController.screenData) { state, detailScreenData ->
                 state.copy(
-                    recordDetailList = detailScreenData.recordDetailList,
                     nowRecord = detailScreenData.nowRecord,
+                    recordDetailList = detailScreenData.recordDetailList,
+                    nowRecordState = detailScreenData.nowRecordState,
                     recordDetailListState = detailScreenData.recordDetailListState
                 )
             }.stateIn(
@@ -68,17 +63,8 @@ class RecordViewModel @Inject constructor(
         listController.updateSearchClue(clue)
     }
 
-    override fun updateNowRecord(record: UiRecord) {
-        val rawValue = listController.findRawRecord(record)
-        if(rawValue == null)
-            nowRecordStateFlow.update {
-                // TODO 이거 에러 처리 하는 부분 뷰 레이어에 필요함.
-                UiScreenState(UiState.FAIL, RecordException.NonExistQuery().message)
-            }
-        else {
-            detailController.updateNowRecord(rawValue)
-            nowRecordStateFlow.update { UiScreenState(UiState.COMPLETE) }
-        }
+    override suspend fun updateNowRecord(record: UiRecord) {
+        detailController.updateNowRecord(record)
     }
 
     override fun setMode(mode: UiRecordMode) {

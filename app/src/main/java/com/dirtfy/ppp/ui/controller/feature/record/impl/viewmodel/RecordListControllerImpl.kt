@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel
 
 import com.dirtfy.ppp.data.logic.RecordBusinessLogic
-import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToRawUiRecord
 import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToUiRecord
 import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
@@ -23,11 +22,8 @@ class RecordListControllerImpl @Inject constructor(
     private val _screenData: MutableStateFlow<UiRecordListScreenState>
             = MutableStateFlow(UiRecordListScreenState())
 
-    private lateinit var rawRecordList: List<UiRecord>
-
     private val recordListFlow = recordBusinessLogic.recordStream()
         .map {
-            rawRecordList = it.map { data -> data.convertToRawUiRecord() }
             it.map { data -> data.convertToUiRecord() }
         }
         .catch { cause ->
@@ -65,10 +61,4 @@ class RecordListControllerImpl @Inject constructor(
         _screenData.update { it.copy(searchClue = clue) }
     }
 
-    override fun findRawRecord(record: UiRecord): UiRecord? {
-        val rawValue = rawRecordList.find {
-            it.id == record.id
-        }
-        return rawValue
-    }
 }

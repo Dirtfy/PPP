@@ -50,9 +50,10 @@ class RecordScreen @Inject constructor(
             mode = screenData.mode,
             onClueChanged = { controller.updateSearchClue(it) },
             onItemClick = {
-                controller.run{
-                    updateNowRecord(it)
+                controller.request{
                     setMode(UiRecordMode.Detail)
+                    updateNowRecord(it)
+                    updateRecordDetailList()
                 }
             },
             onDismissRequest = {

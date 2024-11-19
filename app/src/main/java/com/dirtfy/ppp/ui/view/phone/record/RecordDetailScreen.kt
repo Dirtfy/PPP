@@ -18,7 +18,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,11 +41,11 @@ class RecordDetailScreen @Inject constructor(
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            controller.run {
-                updateRecordDetailList()
-            }
-        }
+//        LaunchedEffect(key1 = controller) {
+//            controller.run {
+//                updateRecordDetailList()
+//            }
+//        }
 
         ScreenContent(
             nowRecord = screenData.nowRecord,

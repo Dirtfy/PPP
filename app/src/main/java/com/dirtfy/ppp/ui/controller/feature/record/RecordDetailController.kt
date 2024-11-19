@@ -9,6 +9,6 @@ interface RecordDetailController {
     val screenData: Flow<UiRecordDetailScreenState>
 
     suspend fun updateRecordDetailList()
-    fun updateNowRecord(record: UiRecord)
+    suspend fun updateNowRecord(record: UiRecord)
 
 }
