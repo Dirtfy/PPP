@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
@@ -98,7 +100,7 @@ class AccountCreateScreen @Inject constructor(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "새 계정",
+                            text = stringResource(R.string.new_account),
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -156,7 +158,7 @@ class AccountCreateScreen @Inject constructor(
         onAutoGenerateClick: () -> Unit
     ) {
         TextField(
-            label = { Text(text = "계정 번호") },
+            label = { Text(text = stringResource(R.string.account_number)) },
             value = nowAccount.number,
             onValueChange = {
                 onValueChange(nowAccount.copy(number = it))
@@ -189,7 +191,7 @@ class AccountCreateScreen @Inject constructor(
         onValueChange: (UiNewAccount) -> Unit
     ) {
         TextField(
-            label = { Text(text = "계정 이름") },
+            label = { Text(text = stringResource(R.string.account_name)) },
             value = nowAccount.name,
             onValueChange = {
                 onValueChange(nowAccount.copy(name = it))
@@ -235,7 +237,7 @@ class AccountCreateScreen @Inject constructor(
         onValueChange: (UiNewAccount) -> Unit
     ) {
         TextField(
-            label = { Text(text = "휴대폰 번호") },
+            label = { Text(text = stringResource(R.string.phone_number)) },
             value = nowAccount.phoneNumber,
             onValueChange = {
                 onValueChange(nowAccount.copy(phoneNumber = it))
@@ -258,7 +260,7 @@ class AccountCreateScreen @Inject constructor(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text(text = "추가")
+            Text(text = stringResource(R.string.add))
         }
     }
 }

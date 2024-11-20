@@ -6,4 +6,19 @@
 
     <string name="deeplink_scheme">com.dirtfy.ppp</string>
     <string name="deeplink_host">account_record</string>
+
+
+    <!--AccountCreateScreen-->
+    <string name="new_account">새 계정</string>
+    <string name="account_number">계정 번호</string>
+    <string name="account_name">계정 이름</string>
+    <string name="phone_number">휴대폰 번호</string>
+    <string name="add">추가</string>
+
+    <!--AccountDetailScreen-->
+    <string name="issued_by">발행자</string>
+    <string name="difference">금액</string>
+    <string name="empty_list">목록이 비어있습니다</string>
+
+
 </resources>

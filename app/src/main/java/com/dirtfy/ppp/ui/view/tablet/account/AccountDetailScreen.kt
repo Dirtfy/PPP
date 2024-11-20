@@ -37,11 +37,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -235,7 +237,7 @@ class AccountDetailScreen @Inject constructor(
         onRecordChange: (UiNewAccountRecord) -> Unit
     ) {
         TextField(
-            label = { Text(text = "발행자") },
+            label = { Text(text = stringResource(R.string.issued_by)) },
             value = newRecord.issuedName,
             onValueChange = {
                 onRecordChange(newRecord.copy(issuedName = it))
@@ -248,7 +250,7 @@ class AccountDetailScreen @Inject constructor(
         onRecordChange: (UiNewAccountRecord) -> Unit
     ) {
         TextField(
-            label = { Text(text = "금액") },
+            label = { Text(text = stringResource(R.string.difference)) },
             value = newRecord.difference,
             onValueChange = {
                 onRecordChange(newRecord.copy(difference = it))
@@ -269,18 +271,18 @@ class AccountDetailScreen @Inject constructor(
         ) {
             if (recordList.isEmpty()) {
                 Text(
-                    text = "목록이 비어있습니다",
+                    text = stringResource(R.string.empty_list),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.Center) // 텍스트를 가운데 정렬
+                        .align(Alignment.Center)
                         .padding(16.dp),
                     textAlign = TextAlign.Center
                 )
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize() // LazyColumn이 Box 안에서 채워지도록 함
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     items(recordList) { record ->
                         ListItem(

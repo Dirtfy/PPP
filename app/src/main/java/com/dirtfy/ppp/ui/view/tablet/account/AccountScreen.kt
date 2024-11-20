@@ -1,23 +1,30 @@
 package com.dirtfy.ppp.ui.view.tablet.account
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +42,8 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.view.phone.account.AccountCreateScreen
+import com.dirtfy.ppp.ui.view.phone.account.AccountDetailScreen
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import javax.inject.Inject
@@ -43,7 +52,7 @@ class AccountScreen @Inject constructor(
     val accountController: AccountController,
     val accountCreateScreen: AccountCreateScreen,
     val accountDetailScreen: AccountDetailScreen
-) {
+){
 
     @Composable
     fun Main(
@@ -55,10 +64,6 @@ class AccountScreen @Inject constructor(
             contract = ScanContract()
         ) {
             controller.updateSearchClue(it.contents?:"")
-        }
-
-        LaunchedEffect(key1 = controller) {
-            controller.request { updateAccountList() }
         }
 
         ScreenContent(
@@ -81,14 +86,11 @@ class AccountScreen @Inject constructor(
             onRetryClick = {
                 controller.request { updateAccountList() }
             },
-            onAccountCreate = {
-                controller.setMode(UiAccountMode.Main)
-                controller.request {
-                    updateAccountList()
-                }
-            },
             onDismissRequest = {
                 controller.setMode(UiAccountMode.Main)
+            },
+            onDismissHandleDialogRequest = {
+                controller.setAccountListState(UiScreenState(UiState.COMPLETE))
             }
         )
     }
@@ -105,11 +107,11 @@ class AccountScreen @Inject constructor(
         onAddIconClick: () -> Unit,
         onItemClick: (UiAccount) -> Unit,
         onRetryClick: () -> Unit,
-        onAccountCreate: (UiNewAccount) -> Unit,
-        onDismissRequest: () -> Unit
+        onDismissRequest: () -> Unit,
+        onDismissHandleDialogRequest: () -> Unit
     ) {
         Column(
-            horizontalAlignment = Alignment.End
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SearchBar(
                 searchClue = searchClue,
@@ -119,34 +121,32 @@ class AccountScreen @Inject constructor(
             )
             Spacer(modifier = Modifier.size(10.dp))
 
-            AccountListState(
-                accountList = accountList,
-                accountListState = accountListState,
-                onItemClick = onItemClick,
-                onRetryClick = onRetryClick
+            Component.HandleUiStateDialog(
+                uiState = accountListState,
+                onDismissRequest = onDismissHandleDialogRequest, onRetryAction = null, //TODO Stream으로 바뀌면서 나는 Retry 안하겠음..
+                onComplete = {
+                    AccountList(
+                        accountList = accountList,
+                        onItemClick = onItemClick)
+                }
             )
 
             when(mode) {
                 UiAccountMode.Main -> {
-
                 }
                 UiAccountMode.Create -> {
                     AccountCreateDialog(
-                        onAccountCreate = onAccountCreate,
                         onDismissRequest = onDismissRequest
                     )
                 }
                 UiAccountMode.Detail -> {
                     AccountDetailDialog(
-                        account = nowAccount,
                         onDismissRequest = onDismissRequest
                     )
                 }
                 UiAccountMode.Update -> {
-
                 }
             }
-
         }
     }
 
@@ -160,7 +160,8 @@ class AccountScreen @Inject constructor(
         Component.SearchBar(
             searchClue = searchClue,
             onClueChanged = onClueChanged,
-            placeholder = "account number"
+            placeholder = "account number",
+            isNumber = true
         ) {
             BarcodeIcon(onClick = onBarcodeIconClick)
             Spacer(modifier = Modifier.size(10.dp))
@@ -190,93 +191,64 @@ class AccountScreen @Inject constructor(
     }
 
     @Composable
-    fun AccountListState(
-        accountList: List<UiAccount>,
-        accountListState: UiScreenState,
-        onItemClick: (UiAccount) -> Unit,
-        onRetryClick: () -> Unit
-    ) {
-        Component.HandleUiStateDialog(
-            uiState = accountListState,
-            onDismissRequest = {}, onRetryAction =  null,  // TODO Retry 어떻게 할지 생각 필요...
-            onComplete = {AccountList(
-                accountList = accountList,
-                onItemClick = onItemClick
-            )}
-        )
-    }
-
-    @Composable
     fun AccountList(
         accountList: List<UiAccount>,
         onItemClick: (UiAccount) -> Unit
     ) {
-        LazyVerticalGrid(columns = GridCells.Adaptive(150.dp)) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(150.dp),
+            modifier = Modifier.padding(8.dp)
+        ) {
             val moreIcon = Icons.Filled.MoreVert
-            items(accountList) {
-                ListItem(
-                    overlineContent = { Text(text = it.number) },
-                    headlineContent = { Text(text = it.name) },
-                    supportingContent = { Text(text = it.phoneNumber) },
-                    trailingContent = {
-                        Icon(
-                            imageVector = moreIcon,
-                            contentDescription = moreIcon.name
+            items(accountList) { account ->
+                Card(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable { onItemClick(account) },
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ){
+                    ListItem(
+                        modifier = Modifier
+                            .clickable { onItemClick(account) }
+                            .background(
+                                MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(8.dp)
+                            ),
+                        overlineContent = { Text(text = "ID : ${account.number}") },
+                        headlineContent = { Text(text = account.name) },
+                        supportingContent = { Text(text = account.phoneNumber) },
+                        trailingContent = {
+                            Icon(
+                                imageVector = moreIcon,
+                                contentDescription = moreIcon.name,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        colors = ListItemDefaults.colors(
+                            overlineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), // 부제목 색상
+                            headlineColor = MaterialTheme.colorScheme.onSurface, // 제목 색상
+                            supportingColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f) // 보조 텍스트 색상
                         )
-                    },
-                    modifier = Modifier.clickable {
-                        onItemClick(it)
-                    }
-                )
+                    )
+                }
             }
         }
     }
 
-    /*@Composable
-    fun AccountListLoading() {
-        CircularProgressIndicator(
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-
-    @Composable
-    fun AccountListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
-    }*/
-    
     @Composable
     fun AccountCreateDialog(
-        onAccountCreate: (UiNewAccount) -> Unit,
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            accountCreateScreen.Main(
-                onAccountCreate = onAccountCreate
-            )
+            accountCreateScreen.Main()
         }
     }
 
     @Composable
     fun AccountDetailDialog(
-        account: UiAccount,
         onDismissRequest: () -> Unit
-    ) { //TODO maxHeight 설정?
+    ) {
         Dialog(onDismissRequest = onDismissRequest) {
             accountDetailScreen.Main()
         }
