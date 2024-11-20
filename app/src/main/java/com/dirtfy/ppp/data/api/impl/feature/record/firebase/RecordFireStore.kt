@@ -10,7 +10,6 @@ import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.Firebase
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
@@ -20,37 +19,48 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import java.util.Date
 import javax.inject.Inject
 
 class RecordFireStore @Inject constructor(): RecordApi, Tagger {
 
     private val recordRef = Firebase.firestore.collection(FireStorePath.RECORD)
+    private val recordIdRef = Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
 
     override suspend fun create(
         record: DataRecord,
         detailList: List<DataRecordDetail>
     ): DataRecord {
-        Firebase.firestore.runTransaction {
-            val newRecord = recordRef.document()
+        if (record.id != DataRecord.ID_NOT_ASSIGNED)
+            throw RecordException.IllegalIdAssignment()
 
-            Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
-                .update("count", FieldValue.increment(1))
+        val createdRecord = Firebase.firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(recordIdRef)
+            val newRecordId = snapshot.getLong("count")!!.toInt()
 
-            newRecord.set(
-                record.convertToFireStoreRecord()
-            )
+            val newRecord = recordRef.document(newRecordId.toString())
+
+            transaction.update(recordIdRef, "count", FieldValue.increment(1))
+
+            val recordWithId = record.copy(id = newRecordId)
+            transaction.set(newRecord, recordWithId.convertToFireStoreRecord())
 
             detailList.forEach {
-                recordRef.document(newRecord.id)
-                    .collection(FireStorePath.RECORD_DETAIL)
-                    .document().set(it.convertToFireStoreRecordDetail())
+                transaction.set(
+                    newRecord.collection(FireStorePath.RECORD_DETAIL).document(),
+                    it.convertToFireStoreRecordDetail()
+                )
             }
+
+            recordWithId
         }.await()
 
-        val currentId = getNextId()-1
+        return createdRecord
+    }
 
-        return record.copy(id = currentId)
+    override suspend fun read(id: Int): DataRecord {
+        val recordSnapshot = recordRef.document(id.toString()).get().await()
+        return recordSnapshot.toObject(FireStoreRecord::class.java)!!
+            .convertToDataRecord()
     }
 
     override suspend fun readAll(): List<DataRecord> {
@@ -83,19 +93,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     }
 
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
-        val query = recordRef
-            .whereEqualTo("timestamp", Timestamp(Date(record.timestamp)))
-        Log.d(TAG, "${Timestamp(Date(record.timestamp))}")
-        val document = query.get().await().documents
-        Log.d(TAG, "${record.timestamp}")
-
-        val documentID = when(document.size) {
-            1 -> document[0].id
-            0 -> throw RecordException.NonExistQuery()
-            else -> throw RecordException.NonUniqueQuery()
-        }
-
-        return recordRef.document(documentID)
+        return recordRef.document(record.id.toString())
             .collection(FireStorePath.RECORD_DETAIL).get().await()
             .documents.map { detailDocument ->
                 detailDocument.toObject(FireStoreRecordDetail::class.java)!!
@@ -105,7 +103,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     }
 
     override suspend fun getNextId(): Int {
-        return Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT).get().await()
+        return recordIdRef.get().await()
             .getLong("count")!!.toInt() + 1
     }
 

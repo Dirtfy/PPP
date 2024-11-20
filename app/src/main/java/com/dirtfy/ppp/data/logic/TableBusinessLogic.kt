@@ -131,11 +131,8 @@ class TableBusinessLogic @Inject constructor(
 
         val orderList = tableApi.readAllOrder(group)
 
-        val nextRecordId = recordApi.getNextId()
-
         val payment = recordApi.create(
             record = DataRecord(
-                id = nextRecordId,
                 income = orderList.calcTotalPrice(),
                 type = DataRecordType.Cash.name
             ),
@@ -153,11 +150,8 @@ class TableBusinessLogic @Inject constructor(
 
         val orderList = tableApi.readAllOrder(group)
 
-        val nextRecordId = recordApi.getNextId()
-
         val payment = recordApi.create(
             record = DataRecord(
-                id = nextRecordId,
                 income = orderList.calcTotalPrice(),
                 type = DataRecordType.Card.name
             ),
@@ -183,11 +177,8 @@ class TableBusinessLogic @Inject constructor(
         if (nowBalance < totalPrice)
             throw TableException.InvalidPay()
 
-        val nextRecordId = recordApi.getNextId()
-
         val payment = recordApi.create(
             record = DataRecord(
-                id = nextRecordId,
                 income = -totalPrice,
                 type = accountNumber.toString(),
                 issuedBy = issuedName

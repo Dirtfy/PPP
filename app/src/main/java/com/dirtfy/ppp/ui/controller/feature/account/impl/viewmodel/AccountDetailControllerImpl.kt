@@ -31,7 +31,7 @@ class AccountDetailControllerImpl @Inject constructor(
         )
     )
     override val screenData: Flow<UiAccountDetailScreenState>
-        get() = _screenData // 안될거같음
+        get() = _screenData
 
     private lateinit var accountRecordListStream: Flow<List<UiAccountRecord>>
 
@@ -62,7 +62,11 @@ class AccountDetailControllerImpl @Inject constructor(
                 _screenData.update { before ->
                     before.copy(
                         nowAccount = account.copy(
-                            balance = listUiRecord.sumOf { uiRecord -> StringFormatConverter.parseCurrency(uiRecord.difference) }.toString()
+                            balance = StringFormatConverter.formatCurrency(
+                                listUiRecord.sumOf { uiRecord ->
+                                    StringFormatConverter.parseCurrency(uiRecord.difference)
+                                }
+                            )
                         ),
                         accountRecordList = listUiRecord,
                         accountRecordListState = UiScreenState(UiState.COMPLETE)

@@ -8,5 +8,6 @@ data class UiRecordDetailScreenState(
     val recordDetailList: List<UiRecordDetail> = emptyList(),
     val nowRecord: UiRecord = UiRecord(),
 
+    val nowRecordState: UiScreenState = UiScreenState(),
     val recordDetailListState: UiScreenState = UiScreenState()
 )

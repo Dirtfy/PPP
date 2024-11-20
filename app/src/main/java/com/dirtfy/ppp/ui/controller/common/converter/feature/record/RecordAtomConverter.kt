@@ -47,8 +47,8 @@ object RecordAtomConverter {
         return DataRecord(
             id = try { id.toInt() } catch (e: Exception) { throw RecordException.IdLoss() },
             income = StringFormatConverter.parseCurrency(income),
-            type = type.split("-")[0],
-            issuedBy = type.split("-")[1],
+            type = type.split("-")[0].trim(),
+            issuedBy = type.split("-")[1].trim(),
             timestamp = StringFormatConverter.parseTimestampFromMillis(timestamp)
         )
     }
@@ -57,9 +57,31 @@ object RecordAtomConverter {
         return DataRecord(
             id = try { id.toInt() } catch (e: Exception) { throw RecordException.IdLoss() },
             income = StringFormatConverter.parseCurrency(income),
-            type = type.split("-")[0],
-            issuedBy = type.split("-")[1],
+            type = type.split("-")[0].trim(),
+            issuedBy = type.split("-")[1].trim(),
             timestamp = StringFormatConverter.parseTimestampFromMillis(timestamp)
+        )
+    }
+
+    fun DataRecord.convertToNowRecord(): UiRecord {
+        return UiRecord(
+            id = id.toString(),
+            timestamp = StringFormatConverter.formatTimestampFromMinute(timestamp),
+            income = StringFormatConverter.formatCurrency(income),
+            type = if (type.split("-")[0].trim().matches(Regex("""^\d+$"""))) "$type - $issuedBy"
+                   else type.split("-")[0].trim()
+        )
+    }
+
+    fun UiRecord.convertToDataRecordFromNowRecord(): DataRecord {
+        return DataRecord(
+            id = id.toInt(),
+            timestamp = StringFormatConverter.parseTimestampFromMinute(timestamp),
+            income = StringFormatConverter.parseCurrency(income),
+            type = if (type.split("-").size > 1) type.split("-")[0].trim()
+                   else type,
+            issuedBy = if (type.split("-").size > 1) type.split("-")[1].trim()
+                       else "custom"
         )
     }
 

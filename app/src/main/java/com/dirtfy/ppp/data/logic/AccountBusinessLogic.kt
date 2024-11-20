@@ -107,10 +107,7 @@ class AccountBusinessLogic @Inject constructor(
         accountNumber: Int,
         accountRecord: DataAccountRecord
     ): DataAccountRecord {
-        val nextId = recordApi.getNextId()
-
         val record = DataRecord(
-            id = nextId,
             income = accountRecord.difference,
             type = accountNumber.toString(),
             issuedBy = accountRecord.issuedName
