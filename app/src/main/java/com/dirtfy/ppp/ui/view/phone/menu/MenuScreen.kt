@@ -53,10 +53,6 @@ class MenuScreen @Inject constructor(
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            controller.request { updateMenuList() }
-        }
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -82,8 +78,11 @@ class MenuScreen @Inject constructor(
 
             Spacer(modifier = Modifier.size(24.dp))
 
-            when(screen.menuListState.state) {
-                UiState.COMPLETE -> {
+            Component.HandleUiStateDialog(
+                uiState = screen.menuListState,
+                onDismissRequest = {},
+                onRetryAction = null, // TODO Retry
+                onComplete = {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(160.dp),
                         contentPadding = PaddingValues(10.dp)
@@ -99,29 +98,7 @@ class MenuScreen @Inject constructor(
                         }
                     }
                 }
-
-                UiState.LOADING -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                UiState.FAIL -> {
-
-                    AlertDialog(
-                        onDismissRequest = { },
-                        confirmButton = {
-                            Button(onClick = { controller.request { updateMenuList() } }) {
-                                Text(text = "Retry")
-                            }
-                        },
-                        title = { Text(text = screen.menuListState.errorException?.message ?: "unknown error") }
-                    )
-                }
-            }
+            )
         }
     }
 
