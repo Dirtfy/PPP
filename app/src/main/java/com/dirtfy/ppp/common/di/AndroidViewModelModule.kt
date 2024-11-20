@@ -8,8 +8,6 @@ import com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel.AccountViewMo
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.controller.feature.menu.impl.viewmodel.MenuViewModel
 import com.dirtfy.ppp.ui.controller.feature.record.RecordController
-import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
-import com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel.RecordDetailViewModel
 import com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel.RecordViewModel
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel.TableViewModel
@@ -44,14 +42,6 @@ class AndroidViewModelModule {
         @ActivityContext context: Context
     ): RecordController {
         val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[RecordViewModel::class.java]
-        return viewModel
-    }
-
-    @Provides
-    fun providesRecordDetailController(
-        @ActivityContext context: Context
-    ): RecordDetailController {
-        val viewModel = ViewModelProvider(context as ViewModelStoreOwner)[RecordDetailViewModel::class.java]
         return viewModel
     }
 

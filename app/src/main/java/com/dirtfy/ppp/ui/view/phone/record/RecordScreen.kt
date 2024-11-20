@@ -52,9 +52,10 @@ class RecordScreen @Inject constructor(
             mode = screenData.mode,
             onClueChanged = { controller.updateSearchClue(it) },
             onItemClick = {
-                controller.run{
-                    updateNowRecord(it)
+                controller.request{
                     setMode(UiRecordMode.Detail)
+                    updateNowRecord(it)
+                    updateRecordDetailList()
                 }
             },
             onDismissRequest = {
@@ -96,7 +97,6 @@ class RecordScreen @Inject constructor(
             when(mode) {
                 UiRecordMode.Detail -> {
                     RecordDetailDialog(
-                        nowAccount = nowRecord,
                         onDismissRequest = onDismissRequest
                     )
                 }
@@ -145,11 +145,10 @@ class RecordScreen @Inject constructor(
 
     @Composable
     fun RecordDetailDialog(
-        nowAccount: UiRecord,
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            recordDetailScreen.Main(firstRecord = nowAccount)
+            recordDetailScreen.Main()
         }
     }
 }

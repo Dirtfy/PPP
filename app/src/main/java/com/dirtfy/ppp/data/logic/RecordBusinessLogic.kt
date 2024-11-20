@@ -10,6 +10,10 @@ class RecordBusinessLogic @Inject constructor(
     private val repository: RecordApi
 ): BusinessLogic {
 
+    fun readRecord(id: Int) = operate {
+        repository.read(id)
+    }
+
     fun readRecords() = operate {
         val recordList = repository.readAll()
             .sortedBy { -it.timestamp }

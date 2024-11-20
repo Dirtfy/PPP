@@ -18,14 +18,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
+import com.dirtfy.ppp.ui.controller.feature.record.RecordController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
@@ -34,29 +33,27 @@ import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class RecordDetailScreen @Inject constructor(
-    val recordDetailController: RecordDetailController
+    val recordController: RecordController
 ){
 
     @Composable
     fun Main(
-        firstRecord: UiRecord,
-        controller: RecordDetailController = recordDetailController
+        controller: RecordController = recordController
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            controller.run {
-                updateRecordDetailList(firstRecord)
-                updateNowRecord(firstRecord)
-            }
-        }
+//        LaunchedEffect(key1 = controller) {
+//            controller.run {
+//                updateRecordDetailList()
+//            }
+//        }
 
         ScreenContent(
             nowRecord = screenData.nowRecord,
             recordDetailList = screenData.recordDetailList,
             recordDetailListState = screenData.recordDetailListState,
             onRetryClick = {
-                controller.request { updateRecordDetailList(screenData.nowRecord) }
+                controller.request { updateRecordDetailList() }
             }
         )
     }

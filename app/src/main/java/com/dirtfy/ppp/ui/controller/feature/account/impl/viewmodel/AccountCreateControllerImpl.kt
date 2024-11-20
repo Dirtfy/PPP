@@ -21,7 +21,7 @@ class AccountCreateControllerImpl @Inject constructor(
 
     private val _screenData = MutableStateFlow(UiAccountCreateScreenState())
     override val screenData: Flow<UiAccountCreateScreenState>
-        get() = _screenData // 안될거같음
+        get() = _screenData
 
     private fun _updateNewAccount(newAccountData: UiNewAccount) {
         _screenData.update {

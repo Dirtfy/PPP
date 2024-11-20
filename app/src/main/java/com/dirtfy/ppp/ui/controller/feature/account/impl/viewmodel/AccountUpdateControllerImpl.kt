@@ -20,7 +20,7 @@ class AccountUpdateControllerImpl @Inject constructor(
 
     private val _screenData = MutableStateFlow(UiAccountUpdateScreenState())
     override val screenData: Flow<UiAccountUpdateScreenState>
-        get() = _screenData // 안될거같음
+        get() = _screenData
 
     override suspend fun updateAccount(newAccountData: UiNewAccount) {
         val (number, name, phoneNumber) = newAccountData
