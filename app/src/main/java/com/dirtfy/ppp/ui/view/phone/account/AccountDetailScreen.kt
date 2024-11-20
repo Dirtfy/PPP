@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -261,37 +263,55 @@ class AccountDetailScreen @Inject constructor(
     fun RecordList(
         recordList: List<UiAccountRecord>
     ) {
-        val itemCount = recordList.size
-        val maxHeight = if (itemCount > 2) 300.dp else (itemCount * 100).dp // 2개 초과 시 고정 높이, 그렇지 않으면 아이템 개수에 따라 높이 설정
-        Log.d("minseok","$itemCount $maxHeight")
-        LazyColumn(
-            modifier = Modifier.height(maxHeight) // 계산된 최대 높이를 사용
+        Box(
+            modifier = Modifier.height(300.dp) // 고정된 높이를 적용
         ) {
-            items(recordList) { record ->
-                ListItem(
-                    overlineContent = {
-                        Text(
-                            text = record.timestamp,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        ) },
-                    headlineContent = {
-                        Text(
-                            text = record.difference,
-                            style = MaterialTheme.typography.titleMedium
-                        ) },
-                    supportingContent = {
-                        Text(
-                            text = record.result,
-                            style = MaterialTheme.typography.bodyMedium
-                        ) },
-                    trailingContent = {
-                        Text(
-                            text = record.issuedName,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
-                        ) }
+            if (recordList.isEmpty()) {
+                Text(
+                    text = "목록이 비어있습니다",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center) // 텍스트를 가운데 정렬
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
                 )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize() // LazyColumn이 Box 안에서 채워지도록 함
+                ) {
+                    items(recordList) { record ->
+                        ListItem(
+                            overlineContent = {
+                                Text(
+                                    text = record.timestamp,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            headlineContent = {
+                                Text(
+                                    text = record.difference,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = record.result,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            },
+                            trailingContent = {
+                                Text(
+                                    text = record.issuedName,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        )
+                    }
+                }
             }
         }
     }
