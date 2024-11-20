@@ -65,9 +65,6 @@ class AccountScreen @Inject constructor(
         ) {
             controller.updateSearchClue(it.contents?:"")
         }
-        LaunchedEffect(key1 = controller) {
-            controller.request { updateAccountList() }
-        }
 
         ScreenContent(
             searchClue = uiAccountScreen.searchClue,
@@ -91,6 +88,9 @@ class AccountScreen @Inject constructor(
             },
             onDismissRequest = {
                 controller.setMode(UiAccountMode.Main)
+            },
+            onDismissHandleDialogRequest = {
+                controller.setAccountListState(UiScreenState(UiState.COMPLETE))
             }
         )
     }
@@ -107,7 +107,8 @@ class AccountScreen @Inject constructor(
         onAddIconClick: () -> Unit,
         onItemClick: (UiAccount) -> Unit,
         onRetryClick: () -> Unit,
-        onDismissRequest: () -> Unit
+        onDismissRequest: () -> Unit,
+        onDismissHandleDialogRequest: () -> Unit
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -120,11 +121,14 @@ class AccountScreen @Inject constructor(
             )
             Spacer(modifier = Modifier.size(10.dp))
 
-            AccountListState(
-                accountList = accountList,
-                accountListState = accountListState,
-                onItemClick = onItemClick,
-                onRetryClick = onRetryClick
+            Component.HandleUiStateDialog(
+                uiState = accountListState,
+                onDismissRequest = onDismissHandleDialogRequest, onRetryAction = null, //TODO Stream으로 바뀌면서 나는 Retry 안하겠음..
+                onComplete = {
+                    AccountList(
+                        accountList = accountList,
+                        onItemClick = onItemClick)
+                }
             )
 
             when(mode) {
@@ -137,12 +141,10 @@ class AccountScreen @Inject constructor(
                 }
                 UiAccountMode.Detail -> {
                     AccountDetailDialog(
-                        account = nowAccount,
                         onDismissRequest = onDismissRequest
                     )
                 }
                 UiAccountMode.Update -> {
-
                 }
             }
         }
@@ -185,23 +187,6 @@ class AccountScreen @Inject constructor(
                 .clickable {
                     onClick()
                 }
-        )
-    }
-
-    @Composable
-    fun AccountListState(
-        accountList: List<UiAccount>,
-        accountListState: UiScreenState,
-        onItemClick: (UiAccount) -> Unit,
-        onRetryClick: () -> Unit
-    ) {
-        Component.HandleUiStateDialog(
-            uiState = accountListState,
-            onDismissRequest = {}, onRetryAction = null, // TODO Retry 어떻게 할지 생각 필요...
-            onComplete = {AccountList(
-                accountList = accountList,
-                onItemClick = onItemClick
-            )}
         )
     }
 
@@ -251,43 +236,6 @@ class AccountScreen @Inject constructor(
         }
     }
 
-    /*@Composable
-    fun AccountListLoading() {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)), // 배경 색상을 좀 더 부드럽게
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(100.dp), // 크기를 조정
-                color = MaterialTheme.colorScheme.primary, // 색상 조정
-                strokeWidth = 8.dp // 두께 조정
-            )
-        }
-    }
-
-    @Composable
-    fun AccountListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
-    }*/
-    
     @Composable
     fun AccountCreateDialog(
         onDismissRequest: () -> Unit
@@ -299,9 +247,8 @@ class AccountScreen @Inject constructor(
 
     @Composable
     fun AccountDetailDialog(
-        account: UiAccount,
         onDismissRequest: () -> Unit
-    ) { //TODO maxHeight 설정?
+    ) {
         Dialog(onDismissRequest = onDismissRequest) {
             accountDetailScreen.Main()
         }

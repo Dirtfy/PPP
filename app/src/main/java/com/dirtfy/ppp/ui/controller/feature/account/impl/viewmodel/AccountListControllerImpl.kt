@@ -56,4 +56,9 @@ class AccountListControllerImpl @Inject constructor(
         _screenData.update { it.copy(searchClue = clue) }
     }
 
+    override fun setAccountListState(state: UiScreenState){
+        _screenData.update{
+            it.copy(accountListState = state)
+        }
+    }
 }

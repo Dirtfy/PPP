@@ -129,6 +129,10 @@ class AccountViewModel @Inject constructor(
         accountDetailController.setNewAccountRecordState(state)
     }
 
+    override fun setAccountListState(state: UiScreenState) {
+        accountListController.setAccountListState(state)
+    }
+
     override fun request(job: suspend AccountController.() -> Unit) {
         viewModelScope.launch {
             job()

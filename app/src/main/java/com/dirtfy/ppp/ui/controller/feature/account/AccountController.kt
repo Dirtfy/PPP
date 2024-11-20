@@ -32,4 +32,5 @@ interface AccountController
     fun setNumberGeneratingState(state: UiScreenState)
     fun setAccountRecordListState(state: UiScreenState)
     fun setNewAccountRecordState(state: UiScreenState)
+    fun setAccountListState(state: UiScreenState)
 }
