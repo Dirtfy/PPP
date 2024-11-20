@@ -30,12 +30,10 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
         record: DataRecord,
         detailList: List<DataRecordDetail>
     ): DataRecord {
-        Log.d(TAG, "Record create start")
         if (record.id != DataRecord.ID_NOT_ASSIGNED)
             throw RecordException.IllegalIdAssignment()
-        Log.d(TAG, "ID NOT ASSIGNED")
-        Firebase.firestore.runTransaction { transaction ->
-            Log.d(TAG, "record create - transaction")
+
+        val createdRecord = Firebase.firestore.runTransaction { transaction ->
             val snapshot = transaction.get(recordIdRef)
             val newRecordId = snapshot.getLong("count")!!.toInt()
 
@@ -43,7 +41,8 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
 
             transaction.update(recordIdRef, "count", FieldValue.increment(1))
 
-            transaction.set(newRecord, record.copy(id = newRecordId).convertToFireStoreRecord())
+            val recordWithId = record.copy(id = newRecordId)
+            transaction.set(newRecord, recordWithId.convertToFireStoreRecord())
 
             detailList.forEach {
                 transaction.set(
@@ -51,12 +50,11 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
                     it.convertToFireStoreRecordDetail()
                 )
             }
-            null
-        }.await()
-        Log.d(TAG, "create runTransaction after await")
-        val currentId = getNextId()-1
 
-        return record.copy(id = currentId)
+            recordWithId
+        }.await()
+
+        return createdRecord
     }
 
     override suspend fun read(id: Int): DataRecord {
