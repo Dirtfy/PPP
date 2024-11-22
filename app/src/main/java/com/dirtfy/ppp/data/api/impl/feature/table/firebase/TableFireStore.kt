@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.data.api.impl.feature.table.firebase
 
 import android.util.Log
+import com.dirtfy.ppp.common.exception.ExternalException
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.api.TableApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
@@ -89,17 +90,21 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     }
 
     override fun tableStream(): Flow<List<DataTable>> = callbackFlow {
+        Log.d(TAG, "tableStream start")
         val tableSubscription = tableRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) return@addSnapshotListener
             try {
+                if (snapshot == null || snapshot.isEmpty) {
+                    Log.e(TAG, "tableStream snapshot empty")
+                    throw ExternalException.NetworkError()
+                }
                 val tableList = readAllTable(snapshot)
                 trySend(tableList)
             } catch (e: Throwable) {
                 Log.e(TAG, "table subscription fail\n${e.message}")
-                throw e
+                close(e)
             }
         }
-
+        Log.d(TAG, "tableStream end")
         awaitClose { tableSubscription.remove() }
     }
 

@@ -2,7 +2,6 @@ package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color
-import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToUiTable
@@ -18,7 +17,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import kotlin.random.Random
@@ -40,46 +41,62 @@ class TableMergeControllerImpl @Inject constructor(
     private val groupMap: MutableList<Int>
             = MutableList(12) { it }
 
-    private val tableListFlow = tableBusinessLogic.tableStream()
-        .catch { cause ->
-            Log.e(TAG, "tableList load failed")
-            _screenData.update { it.copy(tableListState = UiScreenState(UiState.FAIL, cause)) }
-        }
-        .map {
-            Log.d(TAG, _screenData.value.toString())
-            val tableList = _updateTableList(it)
-            _screenData.update { it.copy(sourceTableList = tableList) }
-            tableList
-        }
+    private val retryTrigger: MutableStateFlow<Int> = MutableStateFlow(0)
 
-
+    private val tableListFlow: Flow<UiTableMergeScreenState> = retryTrigger
+        .flatMapLatest {
+            Log.d(TAG, "tableListFlow - flatMapLatest")
+            tableBusinessLogic.tableStream()
+                .map { list ->
+                    Log.d(TAG, _screenData.value.toString())
+                    val tableList = _updateTableList(list)
+                    UiTableMergeScreenState(
+                        sourceTableList = tableList,
+                        tableListState = _screenData.value.tableListState
+                    )
+                }
+                .onStart {
+                    emit(
+                        UiTableMergeScreenState(
+                            tableListState = UiScreenState(UiState.LOADING)
+                        )
+                    )
+                }
+                .catch { cause ->
+                    Log.e(TAG, "tableList load failed")
+                    emit(
+                        UiTableMergeScreenState(
+                            tableListState = UiScreenState(UiState.FAIL, cause)
+                        )
+                    )
+                }
+        }
 
     private val _screenData: MutableStateFlow<UiTableMergeScreenState>
         = MutableStateFlow(UiTableMergeScreenState())
     override val screenData: Flow<UiTableMergeScreenState>
         = _screenData
-        .combine(tableListFlow) { state, tableList ->
+        .combine(tableListFlow) { state, tableListFlowState ->
             var newState = state.copy(
-                // TODO 논의필요: DB에서의 테이블 변경과 로컬에서의 변경을 따로 관리하도록 함.
-                sourceTableList = tableList
+                sourceTableList = tableListFlowState.sourceTableList,
+                tableListState = tableListFlowState.tableListState
             )
-            if (state.tableList != tableList // 내용이 달라졌을 때
-                || state.tableList !== tableList // 내용이 같지만 다른 인스턴스
-                || tableList == emptyList<UiTable>()) // emptyList()는 항상 같은 인스턴스
+
+            if (state.tableList == emptyList<UiTable>()
+                && tableListFlowState.sourceTableList != emptyList<UiTable>())
                 newState = newState.copy(
-                    tableListState = UiScreenState(state = UiState.COMPLETE)
+                    tableList = tableListFlowState.sourceTableList.map { table -> table },
                 )
 
-            if (state.tableList == emptyList<UiTable>())
-                _screenData.update {
-                    it.copy(
-                        tableList = tableList.map { table -> table },
-                        tableListState = UiScreenState(UiState.COMPLETE)
-                    )
-                }
-
+            Log.d(TAG, "screenData\n$newState")
+            _screenData.update { newState }
             newState
         }
+
+    override fun retryUpdateTableList() {
+        Log.d(TAG, "retryUpdateTableList")
+        retryTrigger.value += 1
+    }
 
     private fun _updateTableList(dbTableList: List<DataTable>): List<UiTable> {
         val newList = dbTableList.map { data -> data.convertToUiTable() }.toMutableList()
@@ -121,11 +138,12 @@ class TableMergeControllerImpl @Inject constructor(
                     table.number == tableNumber.toString()
                 }
                 if (uiTable == null) {
-                    _screenData.update {
-                        it.copy(
-                            tableListState = UiScreenState(UiState.FAIL, TableException.NumberLoss())
-                        )
-                    }
+                    // TODO Transaction 구현 후 주석 해제 해보자.
+//                    _screenData.update {
+//                        it.copy(
+//                            tableListState = UiScreenState(UiState.FAIL, TableException.NumberLoss())
+//                        )
+//                    }
                     // TODO 일단 더미 테이블로 바꾸기. 오류 처리 방법 논의 필요.
                     UiTable("?", defaultColor)
                 }

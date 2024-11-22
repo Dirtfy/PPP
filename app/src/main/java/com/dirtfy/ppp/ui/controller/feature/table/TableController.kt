@@ -11,6 +11,7 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 interface TableController: Controller<UiTableScreenState, TableController> {
 
     suspend fun updateTableList()
+    fun retryUpdateTableList()
     suspend fun updateOrderList(table: UiTable)
     suspend fun updateMenuList()
     fun updatePointUse(pointUse: UiPointUse)

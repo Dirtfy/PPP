@@ -74,6 +74,10 @@ class TableViewModel @Inject constructor(
         mergeController.updateTableList()
     }
 
+    override fun retryUpdateTableList() {
+        mergeController.retryUpdateTableList()
+    }
+
     override suspend fun updateOrderList(table: UiTable) {
         selectedTableNumber = table.number.toInt()
         println(selectedTableNumber.toString())
