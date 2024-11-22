@@ -56,7 +56,7 @@ class RecordDetailControllerImpl @Inject constructor(
         recordBusinessLogic.readRecord(record.id.toInt())
             .catch { cause ->
                 _screenData.update { it.copy(
-                    nowRecordState = UiScreenState(UiState.FAIL, cause.message)
+                    nowRecordState = UiScreenState(UiState.FAIL, cause)
                 ) }
             }
             .collect { data ->
@@ -65,6 +65,14 @@ class RecordDetailControllerImpl @Inject constructor(
                     nowRecordState = UiScreenState(UiState.COMPLETE)
                 ) }
             }
+    }
+
+    override fun setRecordDetailListState(state: UiScreenState) {
+        _screenData.update { it.copy(recordDetailListState = state) }
+    }
+
+    override fun setNowRecordState(state: UiScreenState) {
+        _screenData.update { it.copy(nowRecordState = state) }
     }
 
 }

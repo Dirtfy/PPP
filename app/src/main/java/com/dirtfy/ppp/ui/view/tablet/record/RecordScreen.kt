@@ -38,10 +38,6 @@ class RecordScreen @Inject constructor(
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            //controller.updateRecordList()
-        }
-
         ScreenContent(
             searchClue = screenData.searchClue,
             recordList = screenData.recordList,
@@ -61,10 +57,15 @@ class RecordScreen @Inject constructor(
                 controller.setMode(UiRecordMode.Main)
             },
             onRetryClick = {
-                //controller.request { updateRecordList() }
+                //TODO RetryStream 해결 후 실행 recordListState
             }
         )
 
+        Component.HandleUiStateDialog(
+            uiState = screenData.nowRecordState,
+            onDismissRequest = {controller.setNowRecordState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {}//TODO RetryStream 해결 후 실행 nowRecordState
+        )
     }
 
     @Composable
@@ -86,11 +87,16 @@ class RecordScreen @Inject constructor(
 //                onClueChanged = onClueChanged,
 //                placeholder = "record date"
 //            )
-            RecordListState(
-                recordList = recordList,
-                recordListState = recordListState,
-                onItemClick = onItemClick,
-                onRetryClick = onRetryClick
+            Component.HandleUiStateDialog(
+                uiState = recordListState,
+                onDismissRequest = {},
+                onRetryAction = onRetryClick,
+                onComplete = {
+                    RecordList(
+                        recordList = recordList,
+                        onItemClick = onItemClick
+                    )
+                }
             )
 
             when(mode) {
@@ -100,29 +106,6 @@ class RecordScreen @Inject constructor(
                     )
                 }
                 UiRecordMode.Main -> {}
-            }
-        }
-    }
-
-    @Composable
-    fun RecordListState(
-        recordList: List<UiRecord>,
-        recordListState: UiScreenState,
-        onItemClick: (UiRecord) -> Unit,
-        onRetryClick: () -> Unit
-    ) {
-        when(recordListState.state) {
-            UiState.COMPLETE -> {
-                RecordList(
-                    recordList = recordList,
-                    onItemClick = onItemClick
-                )
-            }
-            UiState.LOADING -> {
-                Component.Loading()
-            }
-            UiState.FAIL -> {
-                Component.Fail({},recordListState.errorException,{})
             }
         }
     }
@@ -145,34 +128,6 @@ class RecordScreen @Inject constructor(
             }
         }
     }
-
-    /*@Composable
-    fun RecordListLoading() {
-        CircularProgressIndicator(
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-
-    @Composable
-    fun RecordListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            dismissButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
-    }*/
 
     @Composable
     fun RecordDetailDialog(

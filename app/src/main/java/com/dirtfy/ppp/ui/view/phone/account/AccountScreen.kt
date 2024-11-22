@@ -68,7 +68,6 @@ class AccountScreen @Inject constructor(
 
         ScreenContent(
             searchClue = uiAccountScreen.searchClue,
-            nowAccount = uiAccountScreen.nowAccount,
             accountList = uiAccountScreen.accountList,
             accountListState = uiAccountScreen.accountListState,
             mode = uiAccountScreen.mode,
@@ -84,7 +83,7 @@ class AccountScreen @Inject constructor(
                 controller.setMode(UiAccountMode.Detail)
             },
             onRetryClick = {
-                controller.request { updateAccountList() }
+                //TODO RetryStream 해결후 넣을 예정
             },
             onDismissRequest = {
                 controller.setMode(UiAccountMode.Main)
@@ -98,7 +97,6 @@ class AccountScreen @Inject constructor(
     @Composable
     fun ScreenContent(
         searchClue: String,
-        nowAccount: UiAccount,
         accountList: List<UiAccount>,
         accountListState: UiScreenState,
         mode: UiAccountMode,
@@ -123,7 +121,7 @@ class AccountScreen @Inject constructor(
 
             Component.HandleUiStateDialog(
                 uiState = accountListState,
-                onDismissRequest = onDismissHandleDialogRequest, onRetryAction = null, //TODO Stream으로 바뀌면서 나는 Retry 안하겠음..
+                onDismissRequest = onDismissHandleDialogRequest, onRetryAction = onRetryClick,
                 onComplete = {
                     AccountList(
                         accountList = accountList,

@@ -27,7 +27,7 @@ class RecordListControllerImpl @Inject constructor(
             it.map { data -> data.convertToUiRecord() }
         }
         .catch { cause ->
-            _screenData.update { it.copy(recordListState = UiScreenState(UiState.FAIL, cause.message)) }
+            _screenData.update { it.copy(recordListState = UiScreenState(UiState.FAIL, cause)) }
         }
 
     override val screenData: Flow<UiRecordListScreenState>

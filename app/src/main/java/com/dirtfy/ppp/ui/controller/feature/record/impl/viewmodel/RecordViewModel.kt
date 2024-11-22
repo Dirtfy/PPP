@@ -71,6 +71,14 @@ class RecordViewModel @Inject constructor(
         modeFlow.update { mode }
     }
 
+    override fun setRecordDetailListState(state: UiScreenState) {
+        detailController.setRecordDetailListState(state)
+    }
+
+    override fun setNowRecordState(state: UiScreenState) {
+        detailController.setNowRecordState(state)
+    }
+
     override fun request(job: suspend RecordController.() -> Unit) {
         viewModelScope.launch {
             job()

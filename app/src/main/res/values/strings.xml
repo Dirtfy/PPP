@@ -20,5 +20,15 @@
     <string name="difference">금액</string>
     <string name="empty_list">목록이 비어있습니다</string>
 
+    <!--MenuScreen-->
+    <!--여기 필요--> //TODO RetryStream 해결 후 실행
+
+    <!--RecordDetailScreen-->
+    <string name = "record_name">이름</string>
+    <string name = "record_price">가격</string>
+    <string name = "record_count">수량</string>
+
+
+
 
 </resources>

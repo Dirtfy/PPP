@@ -23,6 +23,7 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
 import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.view.tablet.record.RecordDetailScreen
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(
@@ -36,12 +37,6 @@ class RecordScreen @Inject constructor(
         controller: RecordController = recordController
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
-
-        Component.HandleUiStateDialog(
-            uiState = screenData.nowRecordState,
-            onDismissRequest = {}, //TODO Controller로 분리후 가능
-            onRetryAction = {}//TODO Retry 에러날경우 클릭한 정보를 가지고 있어야 복구가 가능하다...
-        )
 
         ScreenContent(
             searchClue = screenData.searchClue,
@@ -62,10 +57,15 @@ class RecordScreen @Inject constructor(
                 controller.setMode(UiRecordMode.Main)
             },
             onRetryClick = {
-                //controller.request { updateRecordList() }
+                //TODO RetryStream 해결 후 실행 recordListState
             }
         )
 
+        Component.HandleUiStateDialog(
+            uiState = screenData.nowRecordState,
+            onDismissRequest = {controller.setNowRecordState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {}//TODO RetryStream 해결 후 실행 nowRecordState
+        )
     }
 
     @Composable
@@ -87,11 +87,16 @@ class RecordScreen @Inject constructor(
 //                onClueChanged = onClueChanged,
 //                placeholder = "record date"
 //            )
-            RecordListState(
-                recordList = recordList,
-                recordListState = recordListState,
-                onItemClick = onItemClick,
-                onRetryClick = onRetryClick
+            Component.HandleUiStateDialog(
+                uiState = recordListState,
+                onDismissRequest = {},
+                onRetryAction = onRetryClick,
+                onComplete = {
+                    RecordList(
+                        recordList = recordList,
+                        onItemClick = onItemClick
+                    )
+                }
             )
 
             when(mode) {
@@ -103,25 +108,6 @@ class RecordScreen @Inject constructor(
                 UiRecordMode.Main -> {}
             }
         }
-    }
-
-    @Composable
-    fun RecordListState(
-        recordList: List<UiRecord>,
-        recordListState: UiScreenState,
-        onItemClick: (UiRecord) -> Unit,
-        onRetryClick: () -> Unit
-    ) {
-        Component.HandleUiStateDialog(
-            uiState = recordListState,
-            onDismissRequest = {}, onRetryAction = {  },// TODO Retry 어떻게 할지 생각 필요...
-            onComplete = {
-                RecordList(
-                    recordList = recordList,
-                    onItemClick = onItemClick
-                )
-            }
-        )
     }
 
     @Composable
