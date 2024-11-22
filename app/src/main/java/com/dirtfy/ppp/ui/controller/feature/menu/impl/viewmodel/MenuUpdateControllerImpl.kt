@@ -30,8 +30,10 @@ class MenuUpdateControllerImpl @Inject constructor(
         _screenData.update { it.copy(newMenu = menu) }
     }
 
-    override suspend fun createMenu(menu: UiMenu) {
+    override suspend fun createMenu() {
         _screenData.update { it.copy(addMenuState = UiScreenState(UiState.LOADING)) }
+
+        val menu = _screenData.value.newMenu
 
         if (menu.name == "") {
             _screenData.update { it.copy(

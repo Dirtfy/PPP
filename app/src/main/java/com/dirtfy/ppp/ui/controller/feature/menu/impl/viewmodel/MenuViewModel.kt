@@ -53,7 +53,7 @@ class MenuViewModel @Inject constructor(
     }
 
     override suspend fun createMenu() {
-        updateController.createMenu(screenData.value.newMenu)
+        updateController.createMenu()
     }
 
     override suspend fun deleteMenu(menu: UiMenu) {

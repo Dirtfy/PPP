@@ -10,6 +10,6 @@ interface MenuUpdateController {
 
     fun updateNewMenu(menu: UiMenu)
 
-    suspend fun createMenu(menu: UiMenu)
+    suspend fun createMenu()
     suspend fun deleteMenu(menu: UiMenu)
 }
