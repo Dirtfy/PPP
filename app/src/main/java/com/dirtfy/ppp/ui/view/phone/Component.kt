@@ -128,12 +128,11 @@ object Component {
             UiState.COMPLETE -> onComplete()
             UiState.FAIL -> {
                 Fail(
-                    onDismissRequest ?: {},
-                    uiState.errorException,
-                    onRetryAction ?: {}
+                    onDismissRequest = onDismissRequest ?: {},
+                    errorException = uiState.errorException,
+                    onRetryAction = onRetryAction ?: {}
                 )
             }
         }
     }
-
 }
