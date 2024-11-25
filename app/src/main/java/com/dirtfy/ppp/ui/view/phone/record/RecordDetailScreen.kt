@@ -11,10 +11,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -126,9 +123,9 @@ class RecordDetailScreen @Inject constructor(
             ) {
                 item {
                     Row {
-                        Text(text = stringResource(R.string.record_name), modifier = Modifier.weight(1f))
-                        Text(text = stringResource(R.string.record_price), modifier = Modifier.weight(1f))
-                        Text(text = stringResource(R.string.record_count), modifier = Modifier.weight(1f))
+                        Text(text = stringResource(R.string.name), modifier = Modifier.weight(1f))
+                        Text(text = stringResource(R.string.price), modifier = Modifier.weight(1f))
+                        Text(text = stringResource(R.string.count), modifier = Modifier.weight(1f))
                     }
                 }
                 items(recordDetailList) {

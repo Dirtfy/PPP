@@ -99,13 +99,6 @@ class TableViewModel @Inject constructor(
         }
     }
 
-    override fun setMode(mode: UiTableMode) {
-        modeFlow.update { mode }
-    }
-    override fun setMergeState(state: UiScreenState){
-        mergeController.setState(state)
-    }
-
     override suspend fun mergeTable() {
         mergeController.mergeTable()
     }
@@ -142,6 +135,39 @@ class TableViewModel @Inject constructor(
     override suspend fun cancelOrder(name: String, price: String) {
         orderController.cancelOrder(selectedTableNumber, name, price)
     }
+
+    override fun setMode(mode: UiTableMode) {
+        modeFlow.update { mode }
+    }
+
+    override fun setMenuListState(state: UiScreenState){
+        menuController.setMenuListState(state)
+    }
+
+    override fun setTableListState(state: UiScreenState) {
+        mergeController.setTableListState(state)
+    }
+
+    override fun setMergeTableState(state: UiScreenState) {
+        mergeController.setMergeTableState(state)
+    }
+
+    override fun setPayTableState(state: UiScreenState) {
+        orderController.setPayTableState(state)
+    }
+
+    override fun setOrderListState(state: UiScreenState) {
+        orderController.setOrderListState(state)
+    }
+
+    override fun setAddOrderState(state: UiScreenState) {
+        orderController.setAddOrderState(state)
+    }
+
+    override fun setCancelOrderState(state: UiScreenState) {
+        orderController.setCancelOrderState(state)
+    }
+
 
     override fun request(job: suspend TableController.() -> Unit) {
         viewModelScope.launch {

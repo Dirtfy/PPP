@@ -53,4 +53,8 @@ class TableMenuControllerImpl @Inject constructor(
     override suspend fun updateMenuList() {
     }
 
+    override fun setMenuListState(state: UiScreenState) {
+        _screenData.update { it.copy(menuListState = state) }
+    }
+
 }

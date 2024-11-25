@@ -168,4 +168,20 @@ class TableOrderControllerImpl @Inject constructor(
         _cancelOrder(tableNumber, name, menuPrice)
     }
 
+    override fun setPayTableState(state: UiScreenState) {
+        _screenData.update { it.copy(payTableState = state) }
+    }
+
+    override fun setOrderListState(state: UiScreenState) {
+        _screenData.update { it.copy(orderListState = state) }
+    }
+
+    override fun setAddOrderState(state: UiScreenState) {
+        _screenData.update { it.copy(addOrderState = state) }
+    }
+
+    override fun setCancelOrderState(state: UiScreenState) {
+        _screenData.update { it.copy(cancelOrderState = state) }
+    }
+
 }

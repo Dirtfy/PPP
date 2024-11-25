@@ -32,9 +32,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
@@ -120,7 +122,7 @@ class MenuScreen @Inject constructor(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Add New Menu",
+                    text = stringResource(R.string.new_menu),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -128,7 +130,7 @@ class MenuScreen @Inject constructor(
                 Spacer(modifier = Modifier.size(16.dp))
 
                 TextField(
-                    label = { Text(text = "Menu Name") },
+                    label = { Text(text = stringResource(R.string.menu_name)) },
                     value = newMenu.name,
                     onValueChange = { onMenuChanged(newMenu.copy(name = it)) },
                     modifier = Modifier.fillMaxWidth()
@@ -137,7 +139,7 @@ class MenuScreen @Inject constructor(
                 Spacer(modifier = Modifier.size(8.dp))
 
                 TextField(
-                    label = { Text(text = "Menu Price") },
+                    label = { Text(text = stringResource(R.string.menu_price)) },
                     value = newMenu.price,
                     onValueChange = { onMenuChanged(newMenu.copy(price = it)) },
                     modifier = Modifier.fillMaxWidth(),
@@ -151,7 +153,7 @@ class MenuScreen @Inject constructor(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(text = "Add Menu")
+                    Text(text = stringResource(R.string.add_menu))
                 }
             }
         }
