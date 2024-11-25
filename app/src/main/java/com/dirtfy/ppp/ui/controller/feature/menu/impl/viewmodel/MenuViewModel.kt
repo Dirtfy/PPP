@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuListController
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuUpdateController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
 import com.dirtfy.tagger.Tagger
@@ -58,6 +59,18 @@ class MenuViewModel @Inject constructor(
 
     override suspend fun deleteMenu(menu: UiMenu) {
         updateController.deleteMenu(menu)
+    }
+
+    override fun setMenuListState(state: UiScreenState) {
+        listController.setMenuListState(state)
+    }
+
+    override fun setAddMenuState(state: UiScreenState) {
+        updateController.setAddMenuState(state)
+    }
+
+    override fun setDeleteMenuState(state: UiScreenState) {
+        updateController.setDeleteMenuState(state)
     }
 
     override fun request(job: suspend MenuController.() -> Unit) {

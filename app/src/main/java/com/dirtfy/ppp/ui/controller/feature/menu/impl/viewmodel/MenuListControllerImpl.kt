@@ -25,7 +25,7 @@ class MenuListControllerImpl @Inject constructor(
     private val menuListFlow: Flow<List<UiMenu>> = menuBusinessLogic.menuStream()
         .map { it.map { menu -> menu.convertToUiMenu() } }
         .catch { cause ->
-            _screenData.update { it.copy(menuListState = UiScreenState(UiState.FAIL, cause.message)) }
+            _screenData.update { it.copy(menuListState = UiScreenState(UiState.FAIL, cause)) }
         }
 
     override val screenData: Flow<UiMenuListScreenState>
@@ -55,5 +55,9 @@ class MenuListControllerImpl @Inject constructor(
 
     override fun updateSearchClue(clue: String) {
         _screenData.update { it.copy(searchClue = clue) }
+    }
+
+    override fun setMenuListState(state: UiScreenState) {
+        _screenData.update { it.copy(menuListState = state) }
     }
 }

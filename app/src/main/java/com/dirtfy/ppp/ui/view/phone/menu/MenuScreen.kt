@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
 import com.dirtfy.ppp.ui.view.phone.Component
@@ -55,6 +56,17 @@ class MenuScreen @Inject constructor(
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
+        Component.HandleUiStateDialog(
+            uiState = screen.addMenuState,
+            onDismissRequest = {controller.setAddMenuState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {}//TODO RetryStream 이후 구현
+
+        )
+        Component.HandleUiStateDialog(
+            uiState = screen.deleteMenuState,
+            onDismissRequest = {controller.setDeleteMenuState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {}//TODO RetryStream 이후 구현
+        )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -82,8 +94,8 @@ class MenuScreen @Inject constructor(
 
             Component.HandleUiStateDialog(
                 uiState = screen.menuListState,
-                onDismissRequest = {},
-                onRetryAction = null, // TODO Retry
+                onDismissRequest = { controller.setMenuListState(UiScreenState(UiState.COMPLETE)) },
+                onRetryAction = {}, //TODO RetryStream 이후 구현
                 onComplete = {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(160.dp),
