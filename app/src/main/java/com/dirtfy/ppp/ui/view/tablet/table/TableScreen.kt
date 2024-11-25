@@ -85,12 +85,6 @@ class TableScreen @Inject constructor(
         )
 
         Component.HandleUiStateDialog(
-            uiState = screenData.orderListState,
-            onDismissRequest = { controller.setOrderListState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = {} // TODO RetryStream 구현후 수정 예정
-        )
-
-        Component.HandleUiStateDialog(
             uiState = screenData.addOrderState,
             onDismissRequest = { controller.setAddOrderState(UiScreenState(UiState.COMPLETE)) },
             onRetryAction = {} // TODO RetryStream 구현후 수정 예정

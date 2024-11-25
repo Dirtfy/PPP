@@ -74,22 +74,16 @@ class TableScreen @Inject constructor(
         LaunchedEffect(key1 = controller) {
             controller.updateTableList()
         }
-
         Component.HandleUiStateDialog(
             uiState = screenData.mergeTableState,
             onDismissRequest = { controller.setMergeTableState(UiScreenState(UiState.COMPLETE)) },
             onRetryAction = {controller.request { mergeTable() }}
         )
+
         Component.HandleUiStateDialog(
             uiState = screenData.payTableState,
             onDismissRequest = { controller.setPayTableState(UiScreenState(UiState.COMPLETE)) },
             onRetryAction = {}   // TODO RetryStream 구현후 수정 예정 //특히 애매... point cash등 뭘로 했는지도 알고 있어야 함...
-        )
-
-        Component.HandleUiStateDialog(
-            uiState = screenData.orderListState,
-            onDismissRequest = { controller.setOrderListState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = {} // TODO RetryStream 구현후 수정 예정
         )
 
         Component.HandleUiStateDialog(
@@ -103,6 +97,7 @@ class TableScreen @Inject constructor(
             onDismissRequest = { controller.setCancelOrderState(UiScreenState(UiState.COMPLETE)) },
             onRetryAction = {} // TODO RetryStream 구현후 수정 예정
         )
+
 
         ScreenContent(
             tableList = screenData.tableList,
