@@ -64,7 +64,7 @@ class MenuScreen @Inject constructor(
             NewMenu(
                 newMenu = screen.newMenu,
                 onMenuChanged = { controller.updateNewMenu(it) },
-                onMenuAdd = { controller.request { createMenu(it) } }
+                onMenuAdd = { controller.request { createMenu() } }
             )
 
             Spacer(modifier = Modifier.size(10.dp))
