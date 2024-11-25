@@ -12,7 +12,7 @@ interface MenuController: Controller<UiMenuScreenState, MenuController> {
     fun updateSearchClue(clue: String)
     fun updateNewMenu(menu: UiMenu)
 
-    suspend fun createMenu(menu: UiMenu)
+    suspend fun createMenu()
     suspend fun deleteMenu(menu: UiMenu)
 
 }
