@@ -77,6 +77,7 @@ class TableScreen @Inject constructor(
             onDismissRequest = { controller.setMergeTableState(UiScreenState(UiState.COMPLETE)) },
             onRetryAction = {controller.request { mergeTable() }}
         )
+
         Component.HandleUiStateDialog(
             uiState = screenData.payTableState,
             onDismissRequest = { controller.setPayTableState(UiScreenState(UiState.COMPLETE)) },
@@ -151,6 +152,12 @@ class TableScreen @Inject constructor(
             },
             onTableListFailRetryClick = {
                 //TODO RetryStream 구현 이후
+            },
+            onOrderListFailDismissRequest = {
+                controller.setOrderListState(UiScreenState(UiState.COMPLETE))
+            },
+            onOrderListFailRetryClick = {
+                //TODO RetryStream 구현 이후
             }
         )
     }
@@ -189,6 +196,8 @@ class TableScreen @Inject constructor(
         onMenuListFailRetryClick: () -> Unit,
         onTableListFailDismissRequest: () -> Unit,
         onTableListFailRetryClick: () -> Unit,
+        onOrderListFailDismissRequest: () -> Unit,
+        onOrderListFailRetryClick: () -> Unit
     ) {
         ConstraintLayout {
             val (table, order, menu) = createRefs()
@@ -225,14 +234,12 @@ class TableScreen @Inject constructor(
                 ) {
                     Component.HandleUiStateDialog(
                         uiState = tableOrderListState,
-                        onDismissRequest = {}, onRetryAction = null, // TODO RetryCLick add or not
+                        onDismissRequest = onOrderListFailDismissRequest, onRetryAction = onOrderListFailRetryClick,
                         onComplete = {
                             OrderLayout(
                                 tableOrderList = tableOrderList,
                                 totalPrice = totalPrice,
                                 payTableState = payTableState,
-                                addOrderState = addOrderState,
-                                cancelOrderState = cancelOrderState,
                                 onCardClick = onCardClick,
                                 onCashClick = onCashClick,
                                 onPointClick = onPointClick,
@@ -386,8 +393,6 @@ class TableScreen @Inject constructor(
         tableOrderList: List<UiTableOrder>,
         totalPrice: String,
         payTableState: UiScreenState,
-        addOrderState: UiScreenState,
-        cancelOrderState: UiScreenState,
         onCardClick: () -> Unit,
         onCashClick: () -> Unit,
         onPointClick: () -> Unit,
