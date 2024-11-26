@@ -78,7 +78,7 @@ class AccountDetailScreen @Inject constructor(
                 controller.updateNewAccountRecord(it)
             },
             onAddClick = {
-                controller.request { addRecord(it) }
+                controller.request { addRecord() }
             },
             onDismissRequest = {
                 controller.setAccountRecordListState(UiScreenState(UiState.COMPLETE))
@@ -91,7 +91,7 @@ class AccountDetailScreen @Inject constructor(
         Component.HandleUiStateDialog(
             screen.newAccountRecordState,
             onDismissRequest = {controller.setNewAccountRecordState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {controller.request{addRecord(screen.newAccountRecord)}}
+            onRetryAction = {controller.request{addRecord()}}
         )
     }
 

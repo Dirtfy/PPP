@@ -16,12 +16,12 @@ interface AccountController
     suspend fun updateAccountList()
 
     suspend fun updateNewAccount(newAccountData: UiNewAccount)
-    suspend fun addAccount(newAccountData: UiNewAccount, onComplete: (Boolean) -> Unit)
+    suspend fun addAccount()
     suspend fun setRandomValidAccountNumberToNewAccount()
 
     suspend fun updateAccountRecordList()
     fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord)
-    suspend fun addRecord(newAccountRecord: UiNewAccountRecord)
+    suspend fun addRecord()
 
     suspend fun updateAccount(newAccountData: UiNewAccount)
 

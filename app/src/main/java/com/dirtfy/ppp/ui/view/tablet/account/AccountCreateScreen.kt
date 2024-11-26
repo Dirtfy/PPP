@@ -53,17 +53,14 @@ class AccountCreateScreen @Inject constructor(
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
+
         ScreenContent(
             newAccount = screen.newAccount,
             onValueChange = { controller.request { updateNewAccount(it) } },
             onAutoGenerateClick = { controller.request { setRandomValidAccountNumberToNewAccount() } },
             onCreateClick = {
                 controller.request {
-                    addAccount(screen.newAccount){ isSuccess ->
-                        if (isSuccess) {
-                            controller.setMode(UiAccountMode.Main)
-                        } // 여기 fail안하는 이유 : View에서는 상태를 비동기로 늦게 읽어와서 여기서 상태 읽으면 Loading으로 나타남..
-                    }
+                    addAccount()
                 }
             }
         )
@@ -71,11 +68,7 @@ class AccountCreateScreen @Inject constructor(
         Component.HandleUiStateDialog(
             uiState = screen.newAccountState,
             onDismissRequest = {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = { controller.request {
-                addAccount(screen.newAccount){ isSuccess ->
-                    if (isSuccess) { controller.setMode(UiAccountMode.Main) }
-                } }
-            }
+            onRetryAction = { controller.request { addAccount() } }
         )
 
         Component.HandleUiStateDialog(

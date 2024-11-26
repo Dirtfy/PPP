@@ -23,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -100,17 +102,17 @@ object Component {
             onDismissRequest = { },
             confirmButton = {
                 Button(onClick = onDismissRequest) {
-                    Text(text = "취소")
+                    Text(text = stringResource(R.string.cancel))
                 }
             },
             dismissButton = {
                 if (shouldRetry) {
                     Button(onClick = { onRetryAction?.invoke() }) {
-                        Text(text = "재시도")
+                        Text(text = stringResource(R.string.retry))
                     }
                 }
             },
-            title = { Text(text = errorException?.message ?: "Unknown error") }
+            title = { Text(text = errorException?.message ?: stringResource(R.string.unknown_error)) }
         )
     }
 

@@ -34,9 +34,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -158,7 +160,7 @@ class AccountScreen @Inject constructor(
         Component.SearchBar(
             searchClue = searchClue,
             onClueChanged = onClueChanged,
-            placeholder = "account number",
+            placeholder = stringResource(R.string.account_name),
             isNumber = true
         ) {
             BarcodeIcon(onClick = onBarcodeIconClick)

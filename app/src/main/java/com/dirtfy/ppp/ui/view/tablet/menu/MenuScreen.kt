@@ -27,8 +27,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
@@ -58,7 +60,7 @@ class MenuScreen @Inject constructor(
                 searchClue = screen.searchClue, onClueChanged = {
                     controller.request { updateSearchClue(it) }
                 },
-                placeholder = "menu name"
+                placeholder = stringResource(R.string.menu_name)
             )
             
             NewMenu(

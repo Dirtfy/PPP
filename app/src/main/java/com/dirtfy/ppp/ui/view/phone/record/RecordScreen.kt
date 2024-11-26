@@ -82,11 +82,6 @@ class RecordScreen @Inject constructor(
         onRetryClick: () -> Unit
     ) {
         Column {
-//            Component.SearchBar(
-//                searchClue = searchClue,
-//                onClueChanged = onClueChanged,
-//                placeholder = "record date"
-//            )
             Component.HandleUiStateDialog(
                 uiState = recordListState,
                 onDismissRequest = {},

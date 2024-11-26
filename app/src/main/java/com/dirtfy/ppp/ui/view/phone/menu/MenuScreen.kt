@@ -79,7 +79,7 @@ class MenuScreen @Inject constructor(
                 onClueChanged = {
                     controller.updateSearchClue(it)
                 },
-                placeholder = "menu name"
+                placeholder = stringResource(R.string.menu_name)
             )
 
             Spacer(modifier = Modifier.size(16.dp))

@@ -10,7 +10,7 @@ interface AccountCreateController {
     val screenData: Flow<UiAccountCreateScreenState>
 
     suspend fun updateNewAccount(newAccountData: UiNewAccount)
-    suspend fun addAccount(newAccountData: UiNewAccount, onComplete: (Boolean) -> Unit)
+    suspend fun addAccount(onComplete: () -> Unit)
     suspend fun setRandomValidAccountNumberToNewAccount()
     fun setNewAccountState(state: UiScreenState)
     fun setNumberGeneratingState(state: UiScreenState)

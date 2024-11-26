@@ -33,8 +33,8 @@ class AccountCreateControllerImpl @Inject constructor(
         _updateNewAccount(newAccountData)
     }
 
-    override suspend fun addAccount(newAccountData: UiNewAccount, onComplete: (Boolean) -> Unit) {
-        val (number, name, phoneNumber) = newAccountData
+    override suspend fun addAccount(onComplete: () -> Unit) {
+        val (number, name, phoneNumber) = _screenData.value.newAccount
         _screenData.update { it.copy(newAccountState = UiScreenState(UiState.LOADING)) }
         accountBusinessLogic.createAccount(
             number = number.toInt(),
@@ -47,7 +47,6 @@ class AccountCreateControllerImpl @Inject constructor(
                     newAccountState = UiScreenState(UiState.FAIL, cause)
                 )
             }
-            onComplete(false)
         }.collect {
             _screenData.update { before ->
                 before.copy(
@@ -55,7 +54,7 @@ class AccountCreateControllerImpl @Inject constructor(
                     newAccountState = UiScreenState(UiState.COMPLETE)
                 )
             }
-            onComplete(true)
+            onComplete()
         }
     }
 

@@ -12,7 +12,7 @@ interface AccountDetailController {
 
     suspend fun updateAccountRecordList(account: UiAccount)
     fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord)
-    suspend fun addRecord(newAccountRecord: UiNewAccountRecord)
+    suspend fun addRecord()
 
     fun setAccountRecordListState(state: UiScreenState)
     fun setNewAccountRecordState(state: UiScreenState)

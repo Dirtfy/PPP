@@ -85,9 +85,9 @@ class AccountDetailControllerImpl @Inject constructor(
         }
     }
 
-    override suspend fun addRecord(newAccountRecord: UiNewAccountRecord) {
+    override suspend fun addRecord() {
         val accountNumber = _screenData.value.nowAccount.number.toInt()
-        val (issuedName, difference) = newAccountRecord
+        val (issuedName, difference) = _screenData.value.newAccountRecord
         _screenData.update { it.copy(newAccountRecordState = UiScreenState(UiState.LOADING)) }
         accountBusinessLogic.addAccountRecord(
             accountNumber = accountNumber,

@@ -77,8 +77,8 @@ class AccountViewModel @Inject constructor(
         accountCreateController.updateNewAccount(newAccountData)
     }
 
-    override suspend fun addAccount(newAccountData: UiNewAccount,onComplete: (Boolean) -> Unit) {
-        accountCreateController.addAccount(newAccountData,onComplete)
+    override suspend fun addAccount() {
+        accountCreateController.addAccount { setMode(UiAccountMode.Main) }
     }
 
     override suspend fun setRandomValidAccountNumberToNewAccount() {
@@ -97,8 +97,8 @@ class AccountViewModel @Inject constructor(
         accountDetailController.updateNewAccountRecord(newAccountRecord)
     }
 
-    override suspend fun addRecord(newAccountRecord: UiNewAccountRecord) {
-        accountDetailController.addRecord(newAccountRecord)
+    override suspend fun addRecord() {
+        accountDetailController.addRecord()
     }
 
     override suspend fun updateAccount(newAccountData: UiNewAccount) {
