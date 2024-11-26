@@ -66,6 +66,7 @@ class RecordScreen @Inject constructor(
             onDismissRequest = {controller.setNowRecordState(UiScreenState(UiState.COMPLETE))},
             onRetryAction = {}//TODO RetryStream 해결 후 실행 nowRecordState
         )
+
     }
 
     @Composable
