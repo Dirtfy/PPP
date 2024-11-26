@@ -21,7 +21,7 @@ class AccountListControllerImpl @Inject constructor(
 
     private val accountListFlow = accountBusinessLogic.accountStream()
         .catch { cause ->
-            _screenData.update { it.copy(accountListState = UiScreenState(UiState.FAIL, cause.message)) }
+            _screenData.update { it.copy(accountListState = UiScreenState(UiState.FAIL, cause)) }
         }
         .map { it.map { account -> account.convertToUiAccount(0) } }
 
@@ -56,4 +56,9 @@ class AccountListControllerImpl @Inject constructor(
         _screenData.update { it.copy(searchClue = clue) }
     }
 
+    override fun setAccountListState(state: UiScreenState){
+        _screenData.update{
+            it.copy(accountListState = state)
+        }
+    }
 }

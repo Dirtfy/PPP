@@ -1,7 +1,5 @@
 package com.dirtfy.ppp.ui.view.phone.account
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,10 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -36,17 +31,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountRecord
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class AccountDetailScreen @Inject constructor(
@@ -74,12 +72,20 @@ class AccountDetailScreen @Inject constructor(
                 controller.updateNewAccountRecord(it)
             },
             onAddClick = {
-                controller.request { addRecord(it) }
+                controller.request { addRecord() }
+            },
+            onDismissRequest = {
+                controller.setAccountRecordListState(UiScreenState(UiState.COMPLETE))
             },
             onRetryClick = {
-                //controller.request { updateAccountRecordList() }
-                
+                controller.request { updateAccountRecordList() }
             }
+        )
+
+        Component.HandleUiStateDialog(
+            screen.newAccountRecordState,
+            onDismissRequest = {controller.setNewAccountRecordState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {controller.request{addRecord()}}
         )
     }
 
@@ -91,6 +97,7 @@ class AccountDetailScreen @Inject constructor(
         recordListState: UiScreenState,
         onRecordChange: (UiNewAccountRecord) -> Unit,
         onAddClick: (UiNewAccountRecord) -> Unit,
+        onDismissRequest:() -> Unit,
         onRetryClick: () -> Unit
     ) {
         Surface(
@@ -114,10 +121,10 @@ class AccountDetailScreen @Inject constructor(
                         onAddClick = onAddClick
                     )
                     Spacer(modifier = Modifier.size(10.dp))
-                    RecordListState(
-                        recordList = recordList,
-                        recordListState = recordListState,
-                        onRetryClick = onRetryClick
+                    Component.HandleUiStateDialog(
+                        uiState = recordListState,
+                        onDismissRequest = onDismissRequest, onRetryAction = onRetryClick,
+                        onComplete = {RecordList(recordList = recordList)}
                     )
                 }
             }
@@ -224,7 +231,7 @@ class AccountDetailScreen @Inject constructor(
         onRecordChange: (UiNewAccountRecord) -> Unit
     ) {
         TextField(
-            label = { Text(text = "issued name") },
+            label = { Text(text = stringResource(R.string.issued_by)) },
             value = newRecord.issuedName,
             onValueChange = {
                 onRecordChange(newRecord.copy(issuedName = it))
@@ -237,7 +244,7 @@ class AccountDetailScreen @Inject constructor(
         onRecordChange: (UiNewAccountRecord) -> Unit
     ) {
         TextField(
-            label = { Text(text = "difference") },
+            label = { Text(text = stringResource(R.string.difference)) },
             value = newRecord.difference,
             onValueChange = {
                 onRecordChange(newRecord.copy(difference = it))
@@ -248,27 +255,6 @@ class AccountDetailScreen @Inject constructor(
         )
     }
 
-    @Composable
-    fun RecordListState(
-        recordList: List<UiAccountRecord>,
-        recordListState: UiScreenState,
-        onRetryClick: () -> Unit
-    ) {
-        when(recordListState.state) {
-            UiState.COMPLETE -> {
-                RecordList(recordList = recordList)
-            }
-            UiState.LOADING -> {
-                RecordListLoading()
-            }
-            UiState.FAIL -> {
-                RecordListLoadFail(
-                    failMessage = recordListState.failMessage,
-                    onRetryClick = onRetryClick
-                )
-            }
-        }
-    }
 
     @Composable
     fun RecordList(
@@ -279,18 +265,18 @@ class AccountDetailScreen @Inject constructor(
         ) {
             if (recordList.isEmpty()) {
                 Text(
-                    text = "목록이 비어있습니다",
+                    text = stringResource(R.string.empty_list),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.Center) // 텍스트를 가운데 정렬
+                        .align(Alignment.Center)
                         .padding(16.dp),
                     textAlign = TextAlign.Center
                 )
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize() // LazyColumn이 Box 안에서 채워지도록 함
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     items(recordList) { record ->
                         ListItem(
@@ -325,43 +311,5 @@ class AccountDetailScreen @Inject constructor(
                 }
             }
         }
-    }
-
-
-    @Composable
-    fun RecordListLoading() {
-        Box(
-            modifier = Modifier
-                .padding(top = 50.dp)
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)), // 배경 색상을 좀 더 부드럽게
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(100.dp), // 크기를 조정
-                color = MaterialTheme.colorScheme.primary, // 색상 조정
-                strokeWidth = 8.dp // 두께 조정
-            )
-        }
-    }
-
-    @Composable
-    fun RecordListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
     }
 }

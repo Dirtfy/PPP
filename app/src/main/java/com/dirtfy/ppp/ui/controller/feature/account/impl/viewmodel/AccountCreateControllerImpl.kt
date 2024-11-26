@@ -33,8 +33,8 @@ class AccountCreateControllerImpl @Inject constructor(
         _updateNewAccount(newAccountData)
     }
 
-    override suspend fun addAccount(newAccountData: UiNewAccount) {
-        val (number, name, phoneNumber) = newAccountData
+    override suspend fun addAccount(onComplete: () -> Unit) {
+        val (number, name, phoneNumber) = _screenData.value.newAccount
         _screenData.update { it.copy(newAccountState = UiScreenState(UiState.LOADING)) }
         accountBusinessLogic.createAccount(
             number = number.toInt(),
@@ -44,7 +44,7 @@ class AccountCreateControllerImpl @Inject constructor(
             Log.e(TAG, "addAccount() - createAccount failed \n ${cause.message}")
             _screenData.update {
                 it.copy(
-                    newAccountState = UiScreenState(UiState.FAIL, cause.message)
+                    newAccountState = UiScreenState(UiState.FAIL, cause)
                 )
             }
         }.collect {
@@ -54,6 +54,7 @@ class AccountCreateControllerImpl @Inject constructor(
                     newAccountState = UiScreenState(UiState.COMPLETE)
                 )
             }
+            onComplete()
         }
     }
 
@@ -68,7 +69,7 @@ class AccountCreateControllerImpl @Inject constructor(
                 Log.e(TAG, "setRandomValidAccountNumberToNewAccount() - createAccountNumber failed \n ${cause.message}")
                 _screenData.update {
                     it.copy(
-                        numberGeneratingState = UiScreenState(UiState.FAIL, cause.message)
+                        numberGeneratingState = UiScreenState(UiState.FAIL, cause)
                     )
                 }
             }
@@ -82,4 +83,15 @@ class AccountCreateControllerImpl @Inject constructor(
             }
     }
 
+    override fun setNewAccountState(state: UiScreenState){
+        _screenData.update {
+            it.copy(newAccountState = state)
+        }
+    }
+
+    override fun setNumberGeneratingState(state: UiScreenState){
+        _screenData.update{
+            it.copy(numberGeneratingState = state)
+        }
+    }
 }

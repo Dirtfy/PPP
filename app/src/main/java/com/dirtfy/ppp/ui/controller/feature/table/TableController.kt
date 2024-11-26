@@ -1,6 +1,8 @@
 package com.dirtfy.ppp.ui.controller.feature.table
 
 import com.dirtfy.ppp.ui.controller.common.Controller
+import com.dirtfy.ppp.ui.state.common.UiScreenState
+import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
@@ -23,5 +25,11 @@ interface TableController: Controller<UiTableScreenState, TableController> {
     suspend fun cancelOrder(name: String, price: String)
 
     fun setMode(mode: UiTableMode)
-
+    fun setMenuListState(state: UiScreenState)
+    fun setTableListState(state: UiScreenState)
+    fun setMergeTableState(state: UiScreenState)
+    fun setPayTableState(state: UiScreenState)
+    fun setOrderListState(state: UiScreenState)
+    fun setAddOrderState(state: UiScreenState)
+    fun setCancelOrderState(state: UiScreenState)
 }

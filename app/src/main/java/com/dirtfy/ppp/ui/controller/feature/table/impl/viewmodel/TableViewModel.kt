@@ -6,20 +6,28 @@ import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.controller.feature.table.TableMenuController
 import com.dirtfy.ppp.ui.controller.feature.table.TableMergeController
 import com.dirtfy.ppp.ui.controller.feature.table.TableOrderController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
+import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import com.dirtfy.tagger.Tagger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class TableViewModel @Inject constructor(
@@ -91,10 +99,6 @@ class TableViewModel @Inject constructor(
         }
     }
 
-    override fun setMode(mode: UiTableMode) {
-        modeFlow.update { mode }
-    }
-
     override suspend fun mergeTable() {
         mergeController.mergeTable()
     }
@@ -131,6 +135,39 @@ class TableViewModel @Inject constructor(
     override suspend fun cancelOrder(name: String, price: String) {
         orderController.cancelOrder(selectedTableNumber, name, price)
     }
+
+    override fun setMode(mode: UiTableMode) {
+        modeFlow.update { mode }
+    }
+
+    override fun setMenuListState(state: UiScreenState){
+        menuController.setMenuListState(state)
+    }
+
+    override fun setTableListState(state: UiScreenState) {
+        mergeController.setTableListState(state)
+    }
+
+    override fun setMergeTableState(state: UiScreenState) {
+        mergeController.setMergeTableState(state)
+    }
+
+    override fun setPayTableState(state: UiScreenState) {
+        orderController.setPayTableState(state)
+    }
+
+    override fun setOrderListState(state: UiScreenState) {
+        orderController.setOrderListState(state)
+    }
+
+    override fun setAddOrderState(state: UiScreenState) {
+        orderController.setAddOrderState(state)
+    }
+
+    override fun setCancelOrderState(state: UiScreenState) {
+        orderController.setCancelOrderState(state)
+    }
+
 
     override fun request(job: suspend TableController.() -> Unit) {
         viewModelScope.launch {

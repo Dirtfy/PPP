@@ -7,6 +7,7 @@ import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
 import com.dirtfy.ppp.ui.controller.feature.account.AccountDetailController
 import com.dirtfy.ppp.ui.controller.feature.account.AccountListController
 import com.dirtfy.ppp.ui.controller.feature.account.AccountUpdateController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.account.UiAccountScreenState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
@@ -76,8 +77,8 @@ class AccountViewModel @Inject constructor(
         accountCreateController.updateNewAccount(newAccountData)
     }
 
-    override suspend fun addAccount(newAccountData: UiNewAccount) {
-        accountCreateController.addAccount(newAccountData)
+    override suspend fun addAccount() {
+        accountCreateController.addAccount { setMode(UiAccountMode.Main) }
     }
 
     override suspend fun setRandomValidAccountNumberToNewAccount() {
@@ -96,8 +97,8 @@ class AccountViewModel @Inject constructor(
         accountDetailController.updateNewAccountRecord(newAccountRecord)
     }
 
-    override suspend fun addRecord(newAccountRecord: UiNewAccountRecord) {
-        accountDetailController.addRecord(newAccountRecord)
+    override suspend fun addRecord() {
+        accountDetailController.addRecord()
     }
 
     override suspend fun updateAccount(newAccountData: UiNewAccount) {
@@ -110,6 +111,26 @@ class AccountViewModel @Inject constructor(
 
     override fun setMode(mode: UiAccountMode) {
         _screenData.update { it.copy(mode = mode) }
+    }
+
+    override fun setNewAccountState(state: UiScreenState){
+        accountCreateController.setNewAccountState(state)
+    }
+
+    override fun setNumberGeneratingState(state: UiScreenState) {
+        accountCreateController.setNumberGeneratingState(state)
+    }
+
+    override fun setAccountRecordListState(state: UiScreenState){
+        accountDetailController.setAccountRecordListState(state)
+    }
+
+    override fun setNewAccountRecordState(state: UiScreenState){
+        accountDetailController.setNewAccountRecordState(state)
+    }
+
+    override fun setAccountListState(state: UiScreenState) {
+        accountListController.setAccountListState(state)
     }
 
     override fun request(job: suspend AccountController.() -> Unit) {

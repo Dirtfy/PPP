@@ -11,6 +11,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +43,7 @@ class TableMergeControllerImpl @Inject constructor(
     private val tableListFlow = tableBusinessLogic.tableStream()
         .catch { cause ->
             Log.e(TAG, "tableList load failed")
-            _screenData.update { it.copy(tableListState = UiScreenState(UiState.FAIL, cause.message)) }
+            _screenData.update { it.copy(tableListState = UiScreenState(UiState.FAIL, cause)) }
         }
         .map {
             Log.d(TAG, _screenData.value.toString())
@@ -50,6 +51,8 @@ class TableMergeControllerImpl @Inject constructor(
             _screenData.update { it.copy(sourceTableList = tableList) }
             tableList
         }
+
+
 
     private val _screenData: MutableStateFlow<UiTableMergeScreenState>
         = MutableStateFlow(UiTableMergeScreenState())
@@ -120,7 +123,7 @@ class TableMergeControllerImpl @Inject constructor(
                 if (uiTable == null) {
                     _screenData.update {
                         it.copy(
-                            tableListState = UiScreenState(UiState.FAIL, TableException.NumberLoss().message)
+                            tableListState = UiScreenState(UiState.FAIL, TableException.NumberLoss())
                         )
                     }
                     // TODO 일단 더미 테이블로 바꾸기. 오류 처리 방법 논의 필요.
@@ -232,7 +235,7 @@ class TableMergeControllerImpl @Inject constructor(
         tableBusinessLogic.mergeTables(tableList)
             .catch { cause ->
                 Log.e(TAG, "table merge failed - ${cause.message}")
-                _screenData.update { it.copy(mergeTableState = UiScreenState(UiState.FAIL, cause.message)) }
+                _screenData.update { it.copy(mergeTableState = UiScreenState(UiState.FAIL, cause)) }
             }
             .conflate().collect { groupNumber ->
                 // TODO 아래 코드 state 변경만 빼고 다 지우고 syncTableList() 호출하면 바로 아래 색깔 문제도 해결.
@@ -293,4 +296,11 @@ class TableMergeControllerImpl @Inject constructor(
         syncTableList()
     }
 
+    override fun setTableListState(state: UiScreenState) {
+        _screenData.update { it.copy(tableListState = state) }
+    }
+
+    override fun setMergeTableState(state: UiScreenState) {
+        _screenData.update { it.copy(mergeTableState = state) }
+    }
 }

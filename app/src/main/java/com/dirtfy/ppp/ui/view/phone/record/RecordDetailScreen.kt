@@ -11,24 +11,24 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.record.RecordController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordDetail
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class RecordDetailScreen @Inject constructor(
@@ -41,16 +41,13 @@ class RecordDetailScreen @Inject constructor(
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
-//        LaunchedEffect(key1 = controller) {
-//            controller.run {
-//                updateRecordDetailList()
-//            }
-//        }
-
         ScreenContent(
             nowRecord = screenData.nowRecord,
             recordDetailList = screenData.recordDetailList,
             recordDetailListState = screenData.recordDetailListState,
+            onDismissRequest = {
+                controller.setRecordDetailListState(UiScreenState(UiState.COMPLETE))
+            },
             onRetryClick = {
                 controller.request { updateRecordDetailList() }
             }
@@ -62,6 +59,7 @@ class RecordDetailScreen @Inject constructor(
         nowRecord: UiRecord,
         recordDetailList: List<UiRecordDetail>,
         recordDetailListState: UiScreenState,
+        onDismissRequest: () -> Unit,
         onRetryClick: () -> Unit
     ) {
         Surface(
@@ -75,10 +73,14 @@ class RecordDetailScreen @Inject constructor(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     RecordDetailHead(nowRecord = nowRecord)
-                    RecordDetailListState(
-                        recordDetailList = recordDetailList,
-                        recordDetailListState = recordDetailListState,
-                        onRetryClick = onRetryClick
+                    Component.HandleUiStateDialog(
+                        uiState = recordDetailListState,
+                        onDismissRequest = onDismissRequest,
+                        onRetryAction = onRetryClick,
+                        onComplete = {
+                            if (recordDetailList.isNotEmpty())
+                                RecordDetailList(recordDetailList = recordDetailList)
+                        }
                     )
                 }
             }
@@ -112,29 +114,6 @@ class RecordDetailScreen @Inject constructor(
     }
 
     @Composable
-    fun RecordDetailListState(
-        recordDetailList: List<UiRecordDetail>,
-        recordDetailListState: UiScreenState,
-        onRetryClick: () -> Unit
-    ) {
-        when(recordDetailListState.state) {
-            UiState.COMPLETE -> {
-                if (recordDetailList.isNotEmpty())
-                    RecordDetailList(recordDetailList = recordDetailList)
-            }
-            UiState.LOADING -> {
-                RecordDetailListLoading()
-            }
-            UiState.FAIL -> {
-                RecordDetailListLoadFail(
-                    failMessage = recordDetailListState.failMessage,
-                    onRetryClick = onRetryClick
-                )
-            }
-        }
-    }
-
-    @Composable
     fun RecordDetailList(
         recordDetailList: List<UiRecordDetail>
     ) {
@@ -144,9 +123,9 @@ class RecordDetailScreen @Inject constructor(
             ) {
                 item {
                     Row {
-                        Text(text = "name", modifier = Modifier.weight(1f))
-                        Text(text = "price", modifier = Modifier.weight(1f))
-                        Text(text = "count", modifier = Modifier.weight(1f))
+                        Text(text = stringResource(R.string.name), modifier = Modifier.weight(1f))
+                        Text(text = stringResource(R.string.price), modifier = Modifier.weight(1f))
+                        Text(text = stringResource(R.string.count), modifier = Modifier.weight(1f))
                     }
                 }
                 items(recordDetailList) {
@@ -159,33 +138,5 @@ class RecordDetailScreen @Inject constructor(
             }
         }
 
-    }
-
-    @Composable
-    fun RecordDetailListLoading() {
-        CircularProgressIndicator(
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-
-    @Composable
-    fun RecordDetailListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            dismissButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
     }
 }

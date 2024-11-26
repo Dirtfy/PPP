@@ -53,7 +53,7 @@ class AccountDetailControllerImpl @Inject constructor(
                 Log.e(TAG, "updateAccountRecordList() - stream failed \n ${cause.message}")
                 _screenData.update {
                     it.copy(
-                        accountRecordListState = UiScreenState(UiState.FAIL, cause.message)
+                        accountRecordListState = UiScreenState(UiState.FAIL, cause)
                     )
                 }
             }
@@ -85,9 +85,9 @@ class AccountDetailControllerImpl @Inject constructor(
         }
     }
 
-    override suspend fun addRecord(newAccountRecord: UiNewAccountRecord) {
+    override suspend fun addRecord() {
         val accountNumber = _screenData.value.nowAccount.number.toInt()
-        val (issuedName, difference) = newAccountRecord
+        val (issuedName, difference) = _screenData.value.newAccountRecord
         _screenData.update { it.copy(newAccountRecordState = UiScreenState(UiState.LOADING)) }
         accountBusinessLogic.addAccountRecord(
             accountNumber = accountNumber,
@@ -97,7 +97,7 @@ class AccountDetailControllerImpl @Inject constructor(
             Log.e(TAG, "addRecord() - addAccountRecord failed \n ${cause.message}")
             _screenData.update {
                 it.copy(
-                    newAccountRecordState = UiScreenState(UiState.FAIL, cause.message)
+                    newAccountRecordState = UiScreenState(UiState.FAIL, cause)
                 )
             }
         }.collect {
@@ -107,6 +107,17 @@ class AccountDetailControllerImpl @Inject constructor(
                     newAccountRecordState = UiScreenState(UiState.COMPLETE)
                 )
             }
+        }
+    }
+
+    override fun setAccountRecordListState(state: UiScreenState){
+        _screenData.update{
+            it.copy(accountRecordListState = state)
+        }
+    }
+    override fun setNewAccountRecordState(state: UiScreenState){
+        _screenData.update{
+            it.copy(newAccountRecordState = state)
         }
     }
 

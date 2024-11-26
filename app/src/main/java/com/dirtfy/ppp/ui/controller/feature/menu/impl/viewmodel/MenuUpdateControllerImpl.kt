@@ -37,13 +37,13 @@ class MenuUpdateControllerImpl @Inject constructor(
 
         if (menu.name == "") {
             _screenData.update { it.copy(
-                addMenuState = UiScreenState(UiState.FAIL, MenuException.BlankName().message)
+                addMenuState = UiScreenState(UiState.FAIL, MenuException.BlankName())
             ) }
             return
         }
         if (menu.price == "") {
             _screenData.update { it.copy(
-                addMenuState = UiScreenState(UiState.FAIL, MenuException.BlankPrice().message)
+                addMenuState = UiScreenState(UiState.FAIL, MenuException.BlankPrice())
             ) }
             return
         }
@@ -53,7 +53,7 @@ class MenuUpdateControllerImpl @Inject constructor(
         ).catch { cause ->
             Log.e(TAG, "createMenu() - createMenu failed")
             _screenData.update { it.copy(
-                addMenuState = UiScreenState(UiState.FAIL, cause.message)
+                addMenuState = UiScreenState(UiState.FAIL, cause)
             ) }
         }.collect {
             _screenData.update { it.copy(
@@ -73,12 +73,20 @@ class MenuUpdateControllerImpl @Inject constructor(
         ).catch { cause ->
             Log.e(TAG, "deleteMenu() - deleteMenu failed")
             _screenData.update { it.copy(
-                deleteMenuState = UiScreenState(UiState.FAIL, cause.message)
+                deleteMenuState = UiScreenState(UiState.FAIL, cause)
             ) }
         }.collect {
             _screenData.update { it.copy(
                 deleteMenuState = UiScreenState(UiState.COMPLETE)
             ) }
         }
+    }
+
+    override fun setAddMenuState(state: UiScreenState) {
+        _screenData.update { it.copy(addMenuState = state) }
+    }
+
+    override fun setDeleteMenuState(state: UiScreenState) {
+        _screenData.update { it.copy(deleteMenuState = state) }
     }
 }

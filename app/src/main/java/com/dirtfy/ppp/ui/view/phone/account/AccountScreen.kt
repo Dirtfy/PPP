@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view.phone.account
 
+import android.accounts.Account
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,9 +34,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -65,13 +68,8 @@ class AccountScreen @Inject constructor(
             controller.updateSearchClue(it.contents?:"")
         }
 
-        LaunchedEffect(key1 = controller) {
-            controller.request { updateAccountList() }
-        }
-
         ScreenContent(
             searchClue = uiAccountScreen.searchClue,
-            nowAccount = uiAccountScreen.nowAccount,
             accountList = uiAccountScreen.accountList,
             accountListState = uiAccountScreen.accountListState,
             mode = uiAccountScreen.mode,
@@ -87,16 +85,13 @@ class AccountScreen @Inject constructor(
                 controller.setMode(UiAccountMode.Detail)
             },
             onRetryClick = {
-                controller.request { updateAccountList() }
-            },
-            onAccountCreate = {
-                controller.setMode(UiAccountMode.Main)
-                controller.request {
-                    updateAccountList()
-                }
+                //TODO RetryStream 해결후 넣을 예정
             },
             onDismissRequest = {
                 controller.setMode(UiAccountMode.Main)
+            },
+            onDismissHandleDialogRequest = {
+                controller.setAccountListState(UiScreenState(UiState.COMPLETE))
             }
         )
     }
@@ -104,7 +99,6 @@ class AccountScreen @Inject constructor(
     @Composable
     fun ScreenContent(
         searchClue: String,
-        nowAccount: UiAccount,
         accountList: List<UiAccount>,
         accountListState: UiScreenState,
         mode: UiAccountMode,
@@ -113,8 +107,8 @@ class AccountScreen @Inject constructor(
         onAddIconClick: () -> Unit,
         onItemClick: (UiAccount) -> Unit,
         onRetryClick: () -> Unit,
-        onAccountCreate: (UiNewAccount) -> Unit,
-        onDismissRequest: () -> Unit
+        onDismissRequest: () -> Unit,
+        onDismissHandleDialogRequest: () -> Unit
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -127,20 +121,21 @@ class AccountScreen @Inject constructor(
             )
             Spacer(modifier = Modifier.size(10.dp))
 
-            AccountListState(
-                accountList = accountList,
-                accountListState = accountListState,
-                onItemClick = onItemClick,
-                onRetryClick = onRetryClick
+            Component.HandleUiStateDialog(
+                uiState = accountListState,
+                onDismissRequest = onDismissHandleDialogRequest, onRetryAction = onRetryClick,
+                onComplete = {
+                    AccountList(
+                        accountList = accountList,
+                        onItemClick = onItemClick)
+                }
             )
 
             when(mode) {
                 UiAccountMode.Main -> {
-
                 }
                 UiAccountMode.Create -> {
                     AccountCreateDialog(
-                        onAccountCreate = onAccountCreate,
                         onDismissRequest = onDismissRequest
                     )
                 }
@@ -150,7 +145,6 @@ class AccountScreen @Inject constructor(
                     )
                 }
                 UiAccountMode.Update -> {
-
                 }
             }
         }
@@ -166,7 +160,7 @@ class AccountScreen @Inject constructor(
         Component.SearchBar(
             searchClue = searchClue,
             onClueChanged = onClueChanged,
-            placeholder = "account number",
+            placeholder = stringResource(R.string.account_name),
             isNumber = true
         ) {
             BarcodeIcon(onClick = onBarcodeIconClick)
@@ -194,32 +188,6 @@ class AccountScreen @Inject constructor(
                     onClick()
                 }
         )
-    }
-
-    @Composable
-    fun AccountListState(
-        accountList: List<UiAccount>,
-        accountListState: UiScreenState,
-        onItemClick: (UiAccount) -> Unit,
-        onRetryClick: () -> Unit
-    ) {
-        when(accountListState.state) {
-            UiState.COMPLETE -> {//이거처럼 다이얼로그도 state확인해서 할 필요 있을듯!!!!!!!!!
-                AccountList(
-                    accountList = accountList,
-                    onItemClick = onItemClick
-                )
-            }
-            UiState.LOADING -> {
-                AccountListLoading()
-            }
-            UiState.FAIL -> {//일단 이부분 절대 호출이 안됨..
-                AccountListLoadFail(
-                    failMessage = accountListState.failMessage,
-                    onRetryClick = onRetryClick
-                )
-            }
-        }
     }
 
     @Composable
@@ -269,58 +237,18 @@ class AccountScreen @Inject constructor(
     }
 
     @Composable
-    fun AccountListLoading() {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)), // 배경 색상을 좀 더 부드럽게
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(100.dp), // 크기를 조정
-                color = MaterialTheme.colorScheme.primary, // 색상 조정
-                strokeWidth = 8.dp // 두께 조정
-            )
-        }
-    }
-
-    @Composable
-    fun AccountListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
-    }
-    
-    @Composable
     fun AccountCreateDialog(
-        onAccountCreate: (UiNewAccount) -> Unit,
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            accountCreateScreen.Main(
-                onAccountCreate = onAccountCreate
-            )
+            accountCreateScreen.Main()
         }
     }
 
     @Composable
     fun AccountDetailDialog(
         onDismissRequest: () -> Unit
-    ) { //TODO maxHeight 설정?
+    ) {
         Dialog(onDismissRequest = onDismissRequest) {
             accountDetailScreen.Main()
         }

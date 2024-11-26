@@ -22,6 +22,8 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
+import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.view.tablet.record.RecordDetailScreen
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(
@@ -36,10 +38,6 @@ class RecordScreen @Inject constructor(
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
-        /*LaunchedEffect(key1 = controller) {
-            //controller.updateRecordList()
-        }
-        */
         ScreenContent(
             searchClue = screenData.searchClue,
             recordList = screenData.recordList,
@@ -59,8 +57,14 @@ class RecordScreen @Inject constructor(
                 controller.setMode(UiRecordMode.Main)
             },
             onRetryClick = {
-                //controller.request { updateRecordList() }
+                //TODO RetryStream 해결 후 실행 recordListState
             }
+        )
+
+        Component.HandleUiStateDialog(
+            uiState = screenData.nowRecordState,
+            onDismissRequest = {controller.setNowRecordState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {}//TODO RetryStream 해결 후 실행 nowRecordState
         )
 
     }
@@ -79,16 +83,16 @@ class RecordScreen @Inject constructor(
         onRetryClick: () -> Unit
     ) {
         Column {
-//            Component.SearchBar(
-//                searchClue = searchClue,
-//                onClueChanged = onClueChanged,
-//                placeholder = "record date"
-//            )
-            RecordListState(
-                recordList = recordList,
-                recordListState = recordListState,
-                onItemClick = onItemClick,
-                onRetryClick = onRetryClick
+            Component.HandleUiStateDialog(
+                uiState = recordListState,
+                onDismissRequest = {},
+                onRetryAction = onRetryClick,
+                onComplete = {
+                    RecordList(
+                        recordList = recordList,
+                        onItemClick = onItemClick
+                    )
+                }
             )
 
             when(mode) {
@@ -98,32 +102,6 @@ class RecordScreen @Inject constructor(
                     )
                 }
                 UiRecordMode.Main -> {}
-            }
-        }
-    }
-
-    @Composable
-    fun RecordListState(
-        recordList: List<UiRecord>,
-        recordListState: UiScreenState,
-        onItemClick: (UiRecord) -> Unit,
-        onRetryClick: () -> Unit
-    ) {
-        when(recordListState.state) {
-            UiState.COMPLETE -> {
-                RecordList(
-                    recordList = recordList,
-                    onItemClick = onItemClick
-                )
-            }
-            UiState.LOADING -> {
-                RecordListLoading()
-            }
-            UiState.FAIL -> {
-                RecordListLoadFail(
-                    failMessage = recordListState.failMessage,
-                    onRetryClick = onRetryClick
-                )
             }
         }
     }
@@ -145,34 +123,6 @@ class RecordScreen @Inject constructor(
                 )
             }
         }
-    }
-
-    @Composable
-    fun RecordListLoading() {
-        CircularProgressIndicator(
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-
-    @Composable
-    fun RecordListLoadFail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            dismissButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
     }
 
     @Composable

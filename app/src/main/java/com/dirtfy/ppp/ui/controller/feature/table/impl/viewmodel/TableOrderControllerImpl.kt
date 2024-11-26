@@ -46,7 +46,7 @@ class TableOrderControllerImpl @Inject constructor(
                 Log.e(TAG, "orderList load failed")
                 _screenData.update {
                     it.copy(
-                        orderListState = UiScreenState(UiState.FAIL, cause.message)
+                        orderListState = UiScreenState(UiState.FAIL, cause)
                     )
                 }
             }
@@ -77,7 +77,7 @@ class TableOrderControllerImpl @Inject constructor(
         _screenData.update { it.copy(payTableState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.payTableWithCash(tableNumber)
             .catch { cause ->
-                _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause.message)) }
+                _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause)) }
             }
             .conflate().collect {
                 _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
@@ -93,7 +93,7 @@ class TableOrderControllerImpl @Inject constructor(
         _screenData.update { it.copy(payTableState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.payTableWithCard(tableNumber)
             .catch { cause ->
-                _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause.message)) }
+                _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause)) }
             }
             .conflate().collect {
                 _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
@@ -114,7 +114,7 @@ class TableOrderControllerImpl @Inject constructor(
             accountNumber = accountNumber,
             issuedName = issuedName
         ).catch { cause ->
-            _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause.message)) }
+            _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause)) }
         }.conflate().collect {
             _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
         }
@@ -139,7 +139,7 @@ class TableOrderControllerImpl @Inject constructor(
         tableBusinessLogic.addOrder(
             tableNumber, menuName, menuPrice
         ).catch { cause ->
-            _screenData.update { it.copy(addOrderState = UiScreenState(UiState.FAIL, cause.message)) }
+            _screenData.update { it.copy(addOrderState = UiScreenState(UiState.FAIL, cause)) }
         }.conflate().collect { data ->
             _screenData.update { it.copy(addOrderState = UiScreenState(UiState.COMPLETE)) }
         }
@@ -158,7 +158,7 @@ class TableOrderControllerImpl @Inject constructor(
         tableBusinessLogic.cancelOrder(
             tableNumber, menuName, menuPrice
         ).catch { cause ->
-            _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.FAIL, cause.message)) }
+            _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.FAIL, cause)) }
         }.conflate().collect {
             _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.COMPLETE)) }
         }
@@ -166,6 +166,22 @@ class TableOrderControllerImpl @Inject constructor(
     override suspend fun cancelOrder(tableNumber: Int, name: String, price: String) {
         val menuPrice = StringFormatConverter.parseCurrency(price)
         _cancelOrder(tableNumber, name, menuPrice)
+    }
+
+    override fun setPayTableState(state: UiScreenState) {
+        _screenData.update { it.copy(payTableState = state) }
+    }
+
+    override fun setOrderListState(state: UiScreenState) {
+        _screenData.update { it.copy(orderListState = state) }
+    }
+
+    override fun setAddOrderState(state: UiScreenState) {
+        _screenData.update { it.copy(addOrderState = state) }
+    }
+
+    override fun setCancelOrderState(state: UiScreenState) {
+        _screenData.update { it.copy(cancelOrderState = state) }
     }
 
 }

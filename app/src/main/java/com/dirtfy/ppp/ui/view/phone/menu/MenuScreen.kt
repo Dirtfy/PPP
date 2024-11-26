@@ -32,10 +32,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
 import com.dirtfy.ppp.ui.view.phone.Component
@@ -53,10 +56,17 @@ class MenuScreen @Inject constructor(
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            controller.request { updateMenuList() }
-        }
+        Component.HandleUiStateDialog(
+            uiState = screen.addMenuState,
+            onDismissRequest = {controller.setAddMenuState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {}//TODO RetryStream 이후 구현
 
+        )
+        Component.HandleUiStateDialog(
+            uiState = screen.deleteMenuState,
+            onDismissRequest = {controller.setDeleteMenuState(UiScreenState(UiState.COMPLETE))},
+            onRetryAction = {}//TODO RetryStream 이후 구현
+        )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -69,7 +79,7 @@ class MenuScreen @Inject constructor(
                 onClueChanged = {
                     controller.updateSearchClue(it)
                 },
-                placeholder = "menu name"
+                placeholder = stringResource(R.string.menu_name)
             )
 
             Spacer(modifier = Modifier.size(16.dp))
@@ -82,8 +92,11 @@ class MenuScreen @Inject constructor(
 
             Spacer(modifier = Modifier.size(24.dp))
 
-            when(screen.menuListState.state) {
-                UiState.COMPLETE -> {
+            Component.HandleUiStateDialog(
+                uiState = screen.menuListState,
+                onDismissRequest = { controller.setMenuListState(UiScreenState(UiState.COMPLETE)) },
+                onRetryAction = {}, //TODO RetryStream 이후 구현
+                onComplete = {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(160.dp),
                         contentPadding = PaddingValues(10.dp)
@@ -99,29 +112,7 @@ class MenuScreen @Inject constructor(
                         }
                     }
                 }
-
-                UiState.LOADING -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                UiState.FAIL -> {
-
-                    AlertDialog(
-                        onDismissRequest = { },
-                        confirmButton = {
-                            Button(onClick = { controller.request { updateMenuList() } }) {
-                                Text(text = "Retry")
-                            }
-                        },
-                        title = { Text(text = screen.menuListState.failMessage ?: "unknown error") }
-                    )
-                }
-            }
+            )
         }
     }
 
@@ -143,7 +134,7 @@ class MenuScreen @Inject constructor(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Add New Menu",
+                    text = stringResource(R.string.new_menu),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -151,7 +142,7 @@ class MenuScreen @Inject constructor(
                 Spacer(modifier = Modifier.size(16.dp))
 
                 TextField(
-                    label = { Text(text = "Menu Name") },
+                    label = { Text(text = stringResource(R.string.menu_name)) },
                     value = newMenu.name,
                     onValueChange = { onMenuChanged(newMenu.copy(name = it)) },
                     modifier = Modifier.fillMaxWidth()
@@ -160,7 +151,7 @@ class MenuScreen @Inject constructor(
                 Spacer(modifier = Modifier.size(8.dp))
 
                 TextField(
-                    label = { Text(text = "Menu Price") },
+                    label = { Text(text = stringResource(R.string.menu_price)) },
                     value = newMenu.price,
                     onValueChange = { onMenuChanged(newMenu.copy(price = it)) },
                     modifier = Modifier.fillMaxWidth(),
@@ -174,7 +165,7 @@ class MenuScreen @Inject constructor(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(text = "Add Menu")
+                    Text(text = stringResource(R.string.add_menu))
                 }
             }
         }

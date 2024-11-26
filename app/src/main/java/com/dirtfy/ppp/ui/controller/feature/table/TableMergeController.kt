@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.table
 
+import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import kotlinx.coroutines.flow.Flow
@@ -13,4 +14,6 @@ interface TableMergeController {
     suspend fun mergeTable()
     fun cancelMergeTable()
     fun disbandGroup(tableNumber: Int)
+    fun setTableListState(state: UiScreenState)
+    fun setMergeTableState(state: UiScreenState)
 }

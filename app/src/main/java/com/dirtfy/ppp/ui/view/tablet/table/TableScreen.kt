@@ -6,9 +6,11 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,9 +24,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -34,9 +38,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.R
+import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -45,11 +55,12 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
+import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class TableScreen @Inject constructor(
     val tableController: TableController
-) {
+){
 
     @Composable
     fun Main(
@@ -61,6 +72,30 @@ class TableScreen @Inject constructor(
             controller.updateTableList()
         }
 
+        Component.HandleUiStateDialog(
+            uiState = screenData.mergeTableState,
+            onDismissRequest = { controller.setMergeTableState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = {controller.request { mergeTable() }}
+        )
+
+        Component.HandleUiStateDialog(
+            uiState = screenData.payTableState,
+            onDismissRequest = { controller.setPayTableState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = {}   // TODO RetryStream 구현후 수정 예정 //특히 애매... point cash등 뭘로 했는지도 알고 있어야 함...
+        )
+
+        Component.HandleUiStateDialog(
+            uiState = screenData.addOrderState,
+            onDismissRequest = { controller.setAddOrderState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = {} // TODO RetryStream 구현후 수정 예정
+        )
+
+        Component.HandleUiStateDialog(
+            uiState = screenData.cancelOrderState,
+            onDismissRequest = { controller.setCancelOrderState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = {} // TODO RetryStream 구현후 수정 예정
+        )
+
         ScreenContent(
             tableList = screenData.tableList,
             tableListState = screenData.tableListState,
@@ -71,7 +106,6 @@ class TableScreen @Inject constructor(
             totalPrice = screenData.orderTotalPrice,
             pointUse = screenData.pointUse,
             mode = screenData.mode,
-            mergeTableState = screenData.mergeTableState,
             payTableState = screenData.payTableState,
             addOrderState = screenData.addOrderState,
             cancelOrderState = screenData.cancelOrderState,
@@ -82,8 +116,8 @@ class TableScreen @Inject constructor(
                     updateMenuList()
                 }
             },
-            onTableLongClick = { controller.setMode(UiTableMode.Merge) },
-            onMergeClick = { controller.request { mergeTable() } },
+            onMergeClick = {controller.setMode(UiTableMode.Merge)},
+            onMergeOkClick = { controller.request { mergeTable() } },
             onMergeCancelClick = { controller.cancelMergeTable() },
             onCashClick = { controller.request { payTableWithCash() } },
             onCardClick = { controller.request { payTableWithCard() } },
@@ -100,9 +134,28 @@ class TableScreen @Inject constructor(
                     payTableWithPoint()
                     setMode(UiTableMode.Main)
                 }
+            },
+            onMenuListFailDismissRequest = {
+                controller.setMenuListState(UiScreenState(UiState.COMPLETE))
+            },
+            onMenuListFailRetryClick = {
+                //TODO RetryStream 구현 이후
+            },
+            onTableListFailDismissRequest = {
+                controller.setTableListState(UiScreenState(UiState.COMPLETE))
+            },
+            onTableListFailRetryClick = {
+                //TODO RetryStream 구현 이후
+            },
+            onOrderListFailDismissRequest = {
+                controller.setOrderListState(UiScreenState(UiState.COMPLETE))
+            },
+            onOrderListFailRetryClick = {
+                //TODO RetryStream 구현 이후
             }
         )
     }
+
 
     @Composable
     fun ScreenContent(
@@ -115,13 +168,12 @@ class TableScreen @Inject constructor(
         totalPrice: String,
         pointUse: UiPointUse,
         mode: UiTableMode,
-        mergeTableState: UiScreenState,
         payTableState: UiScreenState,
         addOrderState: UiScreenState,
         cancelOrderState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
-        onTableLongClick: () -> Unit,
-        onMergeClick: () -> Unit,
+        onMergeClick : () -> Unit,
+        onMergeOkClick: () -> Unit,
         onMergeCancelClick: () -> Unit,
         onCashClick: () -> Unit,
         onCardClick: () -> Unit,
@@ -133,89 +185,97 @@ class TableScreen @Inject constructor(
         onPointUseDialogDismissRequest: () -> Unit,
         onPointUseUserNameChange: (String) -> Unit,
         onPointUseAccountNumberChange: (String) -> Unit,
-        onPointUseConfirm: () -> Unit
+        onPointUseConfirm: () -> Unit,
+        onMenuListFailDismissRequest: () -> Unit,
+        onMenuListFailRetryClick: () -> Unit,
+        onTableListFailDismissRequest: () -> Unit,
+        onTableListFailRetryClick: () -> Unit,
+        onOrderListFailDismissRequest: () -> Unit,
+        onOrderListFailRetryClick: () -> Unit
     ) {
-        Column {
-            TableLayoutState(
-                tableList = tableList,
-                tableListState = tableListState,
-                mode = mode,
-                mergeTableState = mergeTableState,
-                onTableClick = onTableClick,
-                onTableLongClick = onTableLongClick,
-                onMergeClick = onMergeClick,
-                onMergeCancelClick = onMergeCancelClick
-            )
+        ConstraintLayout {
+            val (table, order, menu) = createRefs()
+
+            Box(
+                modifier = Modifier
+                    .constrainAs(table) {
+                        top.linkTo(parent.top)
+                    }
+            ) {
+                Component.HandleUiStateDialog(
+                    uiState = tableListState,
+                    onDismissRequest = onTableListFailDismissRequest, onRetryAction = onTableListFailRetryClick,
+                    onComplete = {
+                        TableLayout(
+                            tableList = tableList,
+                            mode = mode,
+                            onTableClick = onTableClick,
+                            onMergeClick = onMergeClick,
+                            onMergeOkClick = onMergeOkClick,
+                            onMergeCancelClick = onMergeCancelClick
+                        )
+                    }
+                )
+            }
 
             if (mode == UiTableMode.Order || mode == UiTableMode.PointUse) {
-                OrderLayoutState(
-                    tableOrderList = tableOrderList,
-                    tableOrderListState = tableOrderListState,
-                    totalPrice = totalPrice,
-                    payTableState = payTableState,
-                    addOrderState = addOrderState,
-                    cancelOrderState = cancelOrderState,
-                    onCardClick = onCardClick,
-                    onCashClick = onCashClick,
-                    onPointClick = onPointClick,
-                    onAddClick = onAddClick,
-                    onCancelClick = onCancelClick
-                )
+                Box(
+                    modifier = Modifier.constrainAs(order){
+                        top.linkTo(table.bottom)
+                        bottom.linkTo(menu.top)
+                        height = Dimension.fillToConstraints
+                    }
+                ) {
+                    Component.HandleUiStateDialog(
+                        uiState = tableOrderListState,
+                        onDismissRequest = onOrderListFailDismissRequest, onRetryAction = onOrderListFailRetryClick,
+                        onComplete = {
+                            OrderLayout(
+                                tableOrderList = tableOrderList,
+                                totalPrice = totalPrice,
+                                payTableState = payTableState,
+                                onCardClick = onCardClick,
+                                onCashClick = onCashClick,
+                                onPointClick = onPointClick,
+                                onAddClick = onAddClick,
+                                onCancelClick = onCancelClick
+                            )
+                        }
+                    )
+                }
 
-                MenuListState(
-                    menuList = menuList,
-                    menuListState = menuListState,
-                    addOrderState = addOrderState,
-                    cancelOrderState = cancelOrderState,
-                    onAddClick = onMenuAddClick,
-                    onCancelClick = onMenuCancelClick
-                )
-            }
-
-            if (mode == UiTableMode.PointUse) {
-                PointUseDataInputDialog(
-                    pointUse = pointUse,
-                    payTableState = payTableState,
-                    onDismissRequest = onPointUseDialogDismissRequest,
-                    onUserNameChange = onPointUseUserNameChange,
-                    onAccountNumberChange = onPointUseAccountNumberChange,
-                    onConfirmClick = onPointUseConfirm,
-                )
-            }
-        }
-    }
-
-    @Composable
-    fun TableLayoutState(
-        tableList: List<UiTable>,
-        tableListState: UiScreenState,
-        mode: UiTableMode,
-        mergeTableState: UiScreenState,
-        onTableClick: (UiTable) -> Unit,
-        onTableLongClick: () -> Unit,
-        onMergeClick: () -> Unit,
-        onMergeCancelClick: () -> Unit
-    ) {
-        when(tableListState.state) {
-            UiState.COMPLETE -> {
-                TableLayout(
-                    tableList = tableList,
-                    mode = mode,
-                    mergeTableState = mergeTableState,
-                    onTableClick = onTableClick,
-                    onTableLongClick = onTableLongClick,
-                    onMergeClick = onMergeClick,
-                    onMergeCancelClick = onMergeCancelClick
-                )
-            }
-            UiState.FAIL -> {
-                Fail(failMessage = tableListState.failMessage) {
-
+                Box(
+                    modifier = Modifier
+                        .constrainAs(menu) {
+                            bottom.linkTo(parent.bottom)
+                        }
+                ) {
+                    Component.HandleUiStateDialog(
+                        uiState = menuListState,
+                        onDismissRequest = onMenuListFailDismissRequest, onRetryAction = onMenuListFailRetryClick,
+                        onComplete = {
+                            MenuList(
+                                menuList = menuList,
+                                addOrderState = addOrderState,
+                                cancelOrderState = cancelOrderState,
+                                onAddClick = onMenuAddClick,
+                                onCancelClick = onMenuCancelClick
+                            )
+                        }
+                    )
                 }
             }
-            UiState.LOADING -> {
-                Loading()
-            }
+        }
+
+        if (mode == UiTableMode.PointUse) {
+            PointUseDataInputDialog(
+                pointUse = pointUse,
+                payTableState = payTableState,
+                onDismissRequest = onPointUseDialogDismissRequest,
+                onUserNameChange = onPointUseUserNameChange,
+                onAccountNumberChange = onPointUseAccountNumberChange,
+                onConfirmClick = onPointUseConfirm,
+            )
         }
     }
 
@@ -223,31 +283,76 @@ class TableScreen @Inject constructor(
     fun TableLayout(
         tableList: List<UiTable>,
         mode: UiTableMode,
-        mergeTableState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
-        onTableLongClick: () -> Unit,
         onMergeClick: () -> Unit,
+        onMergeOkClick: () -> Unit,
         onMergeCancelClick: () -> Unit
     ) {
-        Column {
-            LazyVerticalGrid(columns = GridCells.Fixed(10)) {
-                items(tableList) {
-                    Table(
-                        table = it,
-                        onClick = { onTableClick(it) },
-                        onLongClick = onTableLongClick
+        Box{
+            ConstraintLayout(modifier = Modifier.padding(10.dp)) {
+                val (tables,mergeButtonRow) = createRefs()
+                Box(
+                    modifier = Modifier
+                        .constrainAs(tables){
+                            top.linkTo(parent.top)
+                        }
+                ){
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(10)
+                    ) {
+                        items(tableList) {
+                            Box(
+                                modifier = Modifier.padding(2.dp)
+                            ) {
+                                Table(
+                                    table = it,
+                                    onClick = { onTableClick(it) }
+                                )
+                            }
+                        }
+                    }
+                }
+                Box(modifier = Modifier
+                    .constrainAs(mergeButtonRow){
+                        bottom.linkTo(tables.bottom)
+                    }
+                ) {
+                    MergeButtonLayout(
+                        mode = mode,
+                        onMergeClick = onMergeClick,
+                        onMergeOkClick = onMergeOkClick,
+                        onMergeCancelClick = onMergeCancelClick
                     )
                 }
             }
+        }
+    }
 
-            if (mode == UiTableMode.Merge) {
+    @Composable
+    fun MergeButtonLayout(
+        mode: UiTableMode,
+        onMergeClick: () -> Unit,
+        onMergeOkClick: () -> Unit,
+        onMergeCancelClick: () -> Unit
+    ){
+        if (mode == UiTableMode.Merge) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = stringResource(R.string.select_table), style = MaterialTheme.typography.bodyMedium)
                 Row {
-                    Button(onClick = onMergeClick) {
-                        Text(text = "Merge")
+                    Button(onClick = onMergeOkClick ) {
+                        Text(text = stringResource(R.string.ok))
                     }
-                    Button(onClick = onMergeCancelClick) {
-                        Text(text = "Cancel")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = onMergeCancelClick ) {
+                        Text(text = stringResource(R.string.cancel))
                     }
+                }
+            }
+        }
+        else{
+            Row {
+                Button(onClick = onMergeClick) {
+                    Text(text = stringResource(R.string.merge))
                 }
             }
         }
@@ -257,18 +362,20 @@ class TableScreen @Inject constructor(
     @Composable
     fun Table(
         table: UiTable,
-        onClick: () -> Unit,
-        onLongClick: () -> Unit
+        onClick: () -> Unit
     ){
         if (table.number != "0") {
             Box(
                 modifier = Modifier
                     .size(35.dp)
-                    .background(Color(table.color))
-                    .combinedClickable(
-                        onClick = onClick,
-                        onLongClick = onLongClick
+                    .background(
+                        color = Color(table.color),
+                        shape = RoundedCornerShape(12.dp)
                     )
+                    .combinedClickable(
+                        onClick = onClick
+                    ),
+                contentAlignment = Alignment.Center
             ) {
                 Text(text = table.number)
             }
@@ -276,72 +383,39 @@ class TableScreen @Inject constructor(
     }
 
     @Composable
-    fun OrderLayoutState(
-        tableOrderList: List<UiTableOrder>,
-        tableOrderListState: UiScreenState,
-        totalPrice: String,
-        payTableState: UiScreenState,
-        addOrderState: UiScreenState,
-        cancelOrderState: UiScreenState,
-        onCardClick: () -> Unit,
-        onCashClick: () -> Unit,
-        onPointClick: () -> Unit,
-        onAddClick: (UiTableOrder) -> Unit,
-        onCancelClick: (UiTableOrder) -> Unit
-    ) {
-        when(tableOrderListState.state) {
-            UiState.COMPLETE -> {
-                OrderLayout(
-                    tableOrderList = tableOrderList,
-                    totalPrice = totalPrice,
-                    payTableState = payTableState,
-                    addOrderState = addOrderState,
-                    cancelOrderState = cancelOrderState,
-                    onCardClick = onCardClick,
-                    onCashClick = onCashClick,
-                    onPointClick = onPointClick,
-                    onAddClick = onAddClick,
-                    onCancelClick = onCancelClick
-                )
-            }
-            UiState.FAIL -> {
-                Fail(failMessage = tableOrderListState.failMessage) {
-
-                }
-            }
-            UiState.LOADING -> {
-                Loading()
-            }
-        }
-    }
-    @Composable
     fun OrderLayout(
         tableOrderList: List<UiTableOrder>,
         totalPrice: String,
         payTableState: UiScreenState,
-        addOrderState: UiScreenState,
-        cancelOrderState: UiScreenState,
         onCardClick: () -> Unit,
         onCashClick: () -> Unit,
         onPointClick: () -> Unit,
         onAddClick: (UiTableOrder) -> Unit,
         onCancelClick: (UiTableOrder) -> Unit
     ) {
-        Row {
-            PaySelect(
-                payTableState = payTableState,
-                onCardClick = onCardClick,
-                onCashClick = onCashClick,
-                onPointClick = onPointClick
-            )
+        Box{
+            Row(
+                modifier = Modifier.padding(10.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                PaySelect(
+                    payTableState = payTableState,
+                    onCardClick = onCardClick,
+                    onCashClick = onCashClick,
+                    onPointClick = onPointClick
+                )
 
-            OrderList(
-                tableOrderList = tableOrderList,
-                totalPrice = totalPrice,
-                onAddClick = onAddClick,
-                onCancelClick = onCancelClick
-            )
+                Spacer(modifier = Modifier.size(10.dp))
+
+                OrderList(
+                    tableOrderList = tableOrderList,
+                    totalPrice = totalPrice,
+                    onAddClick = onAddClick,
+                    onCancelClick = onCancelClick
+                )
+            }
         }
+
     }
 
     @Composable
@@ -353,13 +427,13 @@ class TableScreen @Inject constructor(
     ) {
         Column {
             Button(onClick = onCashClick) {
-                Text(text = "Cash")
+                Text(text = stringResource(R.string.cash))
             }
             Button(onClick = onCardClick) {
-                Text(text = "Card")
+                Text(text = stringResource(R.string.card))
             }
             Button(onClick = onPointClick) {
-                Text(text = "Point")
+                Text(text = stringResource(R.string.point))
             }
         }
     }
@@ -383,7 +457,7 @@ class TableScreen @Inject constructor(
                     contentAlignment = Alignment.Center
                 ) {
                     PointUseDataInput(
-                        pointUse =pointUse,
+                        pointUse = pointUse,
                         onAccountNumberChange = onAccountNumberChange,
                         onUserNameChange = onUserNameChange,
                         onConfirmClick = onConfirmClick
@@ -403,14 +477,16 @@ class TableScreen @Inject constructor(
         Column {
             TextField(
                 value = pointUse.accountNumber,
-                onValueChange = onAccountNumberChange
+                onValueChange = onAccountNumberChange,
+                label = { Text(text = stringResource(R.string.account_number)) }
             )
             TextField(
                 value = pointUse.userName,
-                onValueChange = onUserNameChange
+                onValueChange = onUserNameChange,
+                label = { Text(text = stringResource(R.string.issued_by)) }
             )
             Button(onClick = onConfirmClick) {
-                Text(text = "Confirm")
+                Text(text = stringResource(R.string.ok))
             }
         }
     }
@@ -424,18 +500,36 @@ class TableScreen @Inject constructor(
     ) {
         Column {
             Row {
-                Text(text = "total")
-                Text(text = totalPrice)
+                Text(text = stringResource(R.string.total), fontSize = 20.sp)
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(text = totalPrice, fontSize = 20.sp)
             }
 
-            LazyColumn {
-                items(tableOrderList) {
-                    Order(
-                        tableOrder = it,
-                        onAddClick = { onAddClick(it) },
-                        onCancelClick = { onCancelClick(it) }
-                    )
+            Spacer(modifier = Modifier.size(15.dp))
+
+            if (tableOrderList.isNotEmpty()) {
+                Column {
+                    Row {
+                        Text(text = stringResource(R.string.name))
+                        Spacer(modifier = Modifier.size(20.dp))
+                        Text(text = stringResource(R.string.price))
+                        Spacer(modifier = Modifier.size(20.dp))
+                        Text(text = stringResource(R.string.count))
+                        Spacer(modifier = Modifier.size(20.dp))
+                    }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(tableOrderList) {
+                            Order(
+                                tableOrder = it,
+                                onAddClick = { onAddClick(it) },
+                                onCancelClick = { onCancelClick(it) }
+                            )
+                        }
+                    }
                 }
+
             }
         }
     }
@@ -446,10 +540,15 @@ class TableScreen @Inject constructor(
         onAddClick: () -> Unit,
         onCancelClick: () -> Unit
     ) {
-        Row {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = tableOrder.name)
+            Spacer(modifier = Modifier.size(20.dp))
             Text(text = tableOrder.price)
+            Spacer(modifier = Modifier.size(20.dp))
             Text(text = tableOrder.count)
+            Spacer(modifier = Modifier.size(20.dp))
             IconButton(onClick = onAddClick) {
                 val addIcon = Icons.Filled.Add
                 Icon(imageVector = addIcon, contentDescription = addIcon.name)
@@ -462,35 +561,6 @@ class TableScreen @Inject constructor(
     }
 
     @Composable
-    fun MenuListState(
-        menuList: List<UiMenu>,
-        menuListState: UiScreenState,
-        addOrderState: UiScreenState,
-        cancelOrderState: UiScreenState,
-        onAddClick: (UiMenu) -> Unit,
-        onCancelClick: (UiMenu) -> Unit
-    ) {
-        when(menuListState.state) {
-            UiState.COMPLETE -> {
-                MenuList(
-                    menuList = menuList,
-                    addOrderState = addOrderState,
-                    cancelOrderState = cancelOrderState,
-                    onAddClick = onAddClick,
-                    onCancelClick = onCancelClick
-                )
-            }
-            UiState.FAIL -> {
-                Fail(failMessage = menuListState.failMessage) {
-
-                }
-            }
-            UiState.LOADING -> {
-                Loading()
-            }
-        }
-    }
-    @Composable
     fun MenuList(
         menuList: List<UiMenu>,
         addOrderState: UiScreenState,
@@ -500,11 +570,15 @@ class TableScreen @Inject constructor(
     ) {
         LazyRow {
             items(menuList) {
-                Menu(
-                    menu = it,
-                    onAddClick = { onAddClick(it) },
-                    onCancelClick = { onCancelClick(it) }
-                )
+                Box(
+                    modifier = Modifier.padding(5.dp)
+                ) {
+                    Menu(
+                        menu = it,
+                        onAddClick = { onAddClick(it) },
+                        onCancelClick = { onCancelClick(it) }
+                    )
+                }
             }
         }
     }
@@ -515,49 +589,24 @@ class TableScreen @Inject constructor(
         onAddClick: () -> Unit,
         onCancelClick: () -> Unit
     ) {
-        Column {
-            Text(text = menu.name)
-            Row {
-                IconButton(onClick = onAddClick) {
-                    val addIcon = Icons.Filled.Add
-                    Icon(imageVector = addIcon, contentDescription = addIcon.name)
-                }
-                IconButton(onClick = onCancelClick) {
-                    val cancelIcon = Icons.Filled.Close
-                    Icon(imageVector = cancelIcon, contentDescription = cancelIcon.name)
+        Card{
+            Column(
+                modifier = Modifier.padding(5.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = menu.name, fontSize = 20.sp)
+                Spacer(modifier = Modifier.size(10.dp))
+                Row {
+                    IconButton(onClick = onAddClick) {
+                        val addIcon = Icons.Filled.Add
+                        Icon(imageVector = addIcon, contentDescription = addIcon.name)
+                    }
+                    IconButton(onClick = onCancelClick) {
+                        val cancelIcon = Icons.Filled.Close
+                        Icon(imageVector = cancelIcon, contentDescription = cancelIcon.name)
+                    }
                 }
             }
         }
-
-    }
-
-    @Composable
-    fun Loading() {
-        Dialog(onDismissRequest = { /*TODO*/ }) {
-            CircularProgressIndicator(
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-
-    @Composable
-    fun Fail(
-        failMessage: String?,
-        onRetryClick: () -> Unit
-    ) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = { }) {
-                    Text(text = "Cancel")
-                }
-            },
-            dismissButton = {
-                Button(onClick = onRetryClick) {
-                    Text(text = "Retry")
-                }
-            },
-            title = { Text(text = failMessage ?: "unknown error") }
-        )
     }
 }
