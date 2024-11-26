@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.Flow
 interface TableOrderController {
     val screenData: Flow<UiTableOrderScreenState>
 
-    suspend fun updateOrderList(table: UiTable)
+    fun updateOrderList(table: UiTable)
+    fun retryUpdateOrderList()
     fun updatePointUse(pointUse: UiPointUse)
     suspend fun payTableWithCash(tableNumber: Int)
     suspend fun payTableWithCard(tableNumber: Int)

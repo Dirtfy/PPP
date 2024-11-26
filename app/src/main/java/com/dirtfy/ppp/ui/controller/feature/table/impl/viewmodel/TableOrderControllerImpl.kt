@@ -10,13 +10,16 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableOrderScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
-import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
@@ -24,47 +27,72 @@ class TableOrderControllerImpl @Inject constructor(
     private val tableBusinessLogic: TableBusinessLogic
 ): TableOrderController, Tagger {
 
-    private lateinit var orderListFlow: Flow<List<UiTableOrder>>
-
-    private val _screenData: MutableStateFlow<UiTableOrderScreenState>
-        = MutableStateFlow(UiTableOrderScreenState())
-    override val screenData: Flow<UiTableOrderScreenState>
-        get() = _screenData
-
-    private suspend fun _updateOrderList(tableNumber: Int) {
-        _screenData.update {
-            it.copy(
-                orderListState = UiScreenState(UiState.LOADING),
-                orderTotalPrice = StringFormatConverter.formatCurrency(0)
-            )
-        }
-
-        orderListFlow = tableBusinessLogic.orderStream(tableNumber).map { it.map { data -> data.convertToUiTableOrder() } }
-
-        orderListFlow
-            .catch { cause ->
-                Log.e(TAG, "orderList load failed")
-                _screenData.update {
-                    it.copy(
-                        orderListState = UiScreenState(UiState.FAIL, cause)
+    private val retryTrigger = MutableStateFlow(0)
+    private val nowTableNumberFlow = MutableStateFlow(0)
+    private val orderListFlow: Flow<UiTableOrderScreenState>
+        = retryTrigger
+        .combine(nowTableNumberFlow) { retryCnt, nowTableNumber ->
+            Pair(retryCnt, nowTableNumber)
+        }.flatMapLatest { pair ->
+            val tableNumber = pair.second
+            if (tableNumber <= 0) {
+                flow {
+                    _screenData.update { it.copy(orderListState = UiScreenState(UiState.COMPLETE)) }
+                    emit(
+                        UiTableOrderScreenState(
+                            orderList = emptyList(),
+                            orderTotalPrice = StringFormatConverter.formatCurrency(0)
+                        )
                     )
                 }
-            }
-            .conflate().collect {
-                _screenData.update { before ->
-                    before.copy(
-                        orderList = it,
-                        orderListState = UiScreenState(UiState.COMPLETE),
+            } else {
+                tableBusinessLogic.orderStream(tableNumber).map {
+                    _screenData.update { before -> before.copy(orderListState = UiScreenState(UiState.COMPLETE)) }
+                    val orderList = it.map { data -> data.convertToUiTableOrder() }
+                    UiTableOrderScreenState(
+                        orderList = orderList,
                         orderTotalPrice = StringFormatConverter.formatCurrency(
-                            it.sumOf { order -> StringFormatConverter.parseCurrency(order.price) * order.count.toInt() }
+                            it.sumOf { order -> order.price * order.count }
+                        )
+                    )
+                }.onStart {
+                    _screenData.update { it.copy(orderListState = UiScreenState(UiState.LOADING)) }
+                    emit(
+                        UiTableOrderScreenState(
+                            orderList = emptyList(),
+                            orderTotalPrice = StringFormatConverter.formatCurrency(0)
+                        )
+                    )
+                }.catch { cause ->
+                    _screenData.update { it.copy(orderListState = UiScreenState(UiState.FAIL, cause)) }
+                    emit(
+                        UiTableOrderScreenState(
+                            orderList = emptyList(),
+                            orderTotalPrice = StringFormatConverter.formatCurrency(0)
                         )
                     )
                 }
             }
-    }
-    override suspend fun updateOrderList(table: UiTable) {
+        }
+
+    private val _screenData: MutableStateFlow<UiTableOrderScreenState>
+        = MutableStateFlow(UiTableOrderScreenState())
+    override val screenData: Flow<UiTableOrderScreenState>
+        = _screenData
+        .combine(orderListFlow) { state, orderListFlowState ->
+            state.copy(
+                orderList = orderListFlowState.orderList,
+                orderTotalPrice = orderListFlowState.orderTotalPrice,
+            )
+        }
+
+    override fun updateOrderList(table: UiTable) {
         val tableNumber = table.number.toInt()
-        _updateOrderList(tableNumber)
+        nowTableNumberFlow.update { tableNumber }
+    }
+
+    override fun retryUpdateOrderList() {
+        retryTrigger.value += 1
     }
 
     override fun updatePointUse(pointUse: UiPointUse) {

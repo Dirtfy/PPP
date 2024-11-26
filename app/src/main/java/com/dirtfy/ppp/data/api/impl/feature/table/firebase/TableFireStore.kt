@@ -93,10 +93,19 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         Log.d(TAG, "tableStream start")
         val tableSubscription = tableRef.addSnapshotListener { snapshot, error ->
             try {
-                if (snapshot == null || snapshot.isEmpty) {
-                    Log.e(TAG, "tableStream snapshot empty")
+                if (snapshot == null) {
+                    Log.e(TAG, "tableStream snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "tableStream snapshot is from cache")
                     throw ExternalException.NetworkError()
                 }
+                if (snapshot.isEmpty) {
+                    Log.e(TAG, "tableStream snapshot is empty")
+                    throw ExternalException.ServerError()
+                }
+
                 val tableList = readAllTable(snapshot)
                 trySend(tableList)
             } catch (e: Throwable) {
@@ -223,13 +232,20 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     override fun orderStream(tableNumber: Int): Flow<List<DataTableOrder>> = callbackFlow {
         val targetRef = getOrderRef(readGroup(tableNumber))
         val orderSubscription = targetRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) return@addSnapshotListener
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "orderStream snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "orderStream snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val orderList = readAllOrder(snapshot)
                 trySend(orderList)
             } catch (e: Throwable) {
                 Log.e(TAG, "order subscription fail\n${e.message}")
-                throw e
+                close(e)
             }
         }
 

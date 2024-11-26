@@ -28,6 +28,8 @@ class TableMergeControllerImpl @Inject constructor(
     private val tableBusinessLogic: TableBusinessLogic
 ): TableMergeController, Tagger {
 
+    private var mode: UiTableMode = UiTableMode.Main
+
     private val groupColorSet = mutableSetOf<ULong>()
     private val defaultColor = Color.LightGray.value
 
@@ -43,32 +45,24 @@ class TableMergeControllerImpl @Inject constructor(
 
     private val retryTrigger: MutableStateFlow<Int> = MutableStateFlow(0)
 
-    private val tableListFlow: Flow<UiTableMergeScreenState> = retryTrigger
+    private val tableListFlow: Flow<List<UiTable>> = retryTrigger
         .flatMapLatest {
             Log.d(TAG, "tableListFlow - flatMapLatest")
             tableBusinessLogic.tableStream()
                 .map { list ->
                     Log.d(TAG, _screenData.value.toString())
+                    _screenData.update { it.copy(tableListState = UiScreenState(UiState.COMPLETE)) }
                     val tableList = _updateTableList(list)
-                    UiTableMergeScreenState(
-                        sourceTableList = tableList,
-                        tableListState = _screenData.value.tableListState
-                    )
+                    tableList
                 }
                 .onStart {
-                    emit(
-                        UiTableMergeScreenState(
-                            tableListState = UiScreenState(UiState.LOADING)
-                        )
-                    )
+                    _screenData.update { it.copy(tableListState = UiScreenState(UiState.LOADING)) }
+                    emit(emptyList())
                 }
                 .catch { cause ->
                     Log.e(TAG, "tableList load failed")
-                    emit(
-                        UiTableMergeScreenState(
-                            tableListState = UiScreenState(UiState.FAIL, cause)
-                        )
-                    )
+                    _screenData.update { it.copy(tableListState = UiScreenState(UiState.FAIL, cause)) }
+                    emit(emptyList())
                 }
         }
 
@@ -76,16 +70,16 @@ class TableMergeControllerImpl @Inject constructor(
         = MutableStateFlow(UiTableMergeScreenState())
     override val screenData: Flow<UiTableMergeScreenState>
         = _screenData
-        .combine(tableListFlow) { state, tableListFlowState ->
+        .combine(tableListFlow) { state, tableList ->
             var newState = state.copy(
-                sourceTableList = tableListFlowState.sourceTableList,
-                tableListState = tableListFlowState.tableListState
+                sourceTableList = tableList,
+                tableListState = state.tableListState
             )
 
-            if (state.tableList == emptyList<UiTable>()
-                && tableListFlowState.sourceTableList != emptyList<UiTable>())
+            if (state.tableList == emptyList<UiTable>() && tableList != emptyList<UiTable>()
+                || state.tableList !== tableList && mode == UiTableMode.Main)
                 newState = newState.copy(
-                    tableList = tableListFlowState.sourceTableList.map { table -> table },
+                    tableList = tableList.map { table -> table },
                 )
 
             Log.d(TAG, "screenData\n$newState")
@@ -152,12 +146,13 @@ class TableMergeControllerImpl @Inject constructor(
         }
     }
 
-    // TODO deprecate
+    @Deprecated("screen state synchronized with repository")
     override suspend fun updateTableList() {
 //        _updateTableList()
     }
 
-    private fun syncTableList() {
+    override fun syncTableList() { // 절대 setMode(Main) 외에 호출해선 안된다.. selectedTableSet.clear() 때문
+        selectedTableSet.clear()
         _screenData.update { before ->
             before.copy(tableList = before.sourceTableList.map { it })
         }
@@ -210,10 +205,12 @@ class TableMergeControllerImpl @Inject constructor(
 
         val newColor = if (selectedTableSet.contains(tableNumber)) {
             Log.d(TAG, "table $tableNumber is already selected")
+            mode = UiTableMode.Main
             selectedTableSet.removeAll(member.toSet()) // 왜 clear가 아니라 removeAll?
             Color(table.color).copy(alpha = 1f)
         } else {
             Log.d(TAG, "table $tableNumber is not selected yet")
+            mode = UiTableMode.Order
             selectedTableSet.clear()
             selectedTableSet.addAll(member.toSet())
             Color(table.color).copy(alpha = 0.5f)
@@ -234,8 +231,8 @@ class TableMergeControllerImpl @Inject constructor(
 
         _screenData.update { it.copy(tableList = tableList) }
 
-        return if (newColor.alpha < 0.7f) group
-               else { syncTableList(); 0 }
+        return if (newColor.alpha > 0.7f) 0
+               else group
 
     }
 
@@ -292,7 +289,6 @@ class TableMergeControllerImpl @Inject constructor(
 
     override fun cancelMergeTable() {
         selectedTableSet.clear()
-        syncTableList()
     }
 
     override fun disbandGroup(tableNumber: Int) {
@@ -310,8 +306,10 @@ class TableMergeControllerImpl @Inject constructor(
 
         val groupColor = _screenData.value.tableList.find { it.number.toInt() == tableNumber }!!.color
         groupColorSet.remove(groupColor)
+    }
 
-        syncTableList()
+    override fun updateMode(mode: UiTableMode) {
+        this.mode = mode
     }
 
     override fun setTableListState(state: UiScreenState) {

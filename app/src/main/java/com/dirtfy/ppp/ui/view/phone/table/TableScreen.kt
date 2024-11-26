@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,10 +22,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,13 +44,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
-import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
-import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
-import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
@@ -142,13 +136,13 @@ class TableScreen @Inject constructor(
                 controller.setMenuListState(UiScreenState(UiState.COMPLETE))
             },
             onMenuListFailRetryClick = {
-                //TODO RetryStream 구현 이후
+                controller.retryUpdateTableList()
             },
             onTableListFailDismissRequest = {
                 controller.setTableListState(UiScreenState(UiState.COMPLETE))
             },
             onTableListFailRetryClick = {
-                //TODO RetryStream 구현 이후
+                controller.retryUpdateTableList()
             }
         )
     }
@@ -223,7 +217,11 @@ class TableScreen @Inject constructor(
                 ) {
                     Component.HandleUiStateDialog(
                         uiState = tableOrderListState,
-                        onDismissRequest = {}, onRetryAction = null, // TODO RetryCLick add or not
+                        onDismissRequest = {
+                            tableController.updateOrderList(UiTable(number = "0", color = Color.Transparent.value)) // TODO 이렇게 호출하는 함수가 TableController 내부에 있으면 더 좋을 듯 initOrderListFlow 같은 느낌
+                            tableController.setMode(UiTableMode.Main)
+                        },
+                        onRetryAction = { tableController.retryUpdateOrderList() }, // TODO onDismissRequest, onRetryAction 둘 다 함수 매개변수로 받기
                         onComplete = {
                             OrderLayout(
                                 tableOrderList = tableOrderList,
