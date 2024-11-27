@@ -12,13 +12,13 @@ interface TableMergeController {
     @Deprecated("screen state synchronized with repository")
     suspend fun updateTableList()
     fun clickTableOnMergeMode(table: UiTable)
-    fun clickTableOnMainOrOrderMode(table: UiTable): Int
+    fun clickTableOnMainOrOrderMode(table: UiTable)
     suspend fun mergeTable()
     fun cancelMergeTable()
     fun disbandGroup(tableNumber: Int)
     fun syncTableList()
     fun retryUpdateTableList()
-    fun updateMode(mode: UiTableMode)
+    fun setMode(mode: UiTableMode)
     fun setTableListState(state: UiScreenState)
     fun setMergeTableState(state: UiScreenState)
 }

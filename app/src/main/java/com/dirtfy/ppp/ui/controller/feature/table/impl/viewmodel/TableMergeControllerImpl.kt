@@ -28,20 +28,16 @@ class TableMergeControllerImpl @Inject constructor(
     private val tableBusinessLogic: TableBusinessLogic
 ): TableMergeController, Tagger {
 
-    private var mode: UiTableMode = UiTableMode.Main
-
     private val groupColorSet = mutableSetOf<ULong>()
     private val defaultColor = Color.LightGray.value
 
     private val tableFormation: List<Int> = listOf(
         11, 10, 9, 8, 7, 6, 5, 4, 3, 0,
-        0,  0, 0, 0, 0, 0, 0, 0, 0, 2,
-        0,  0, 0, 0, 0, 0, 0, 0, 0, 1
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1
     )
-    private val selectedTableSet: MutableSet<Int>
-            = mutableSetOf()
-    private val groupMap: MutableList<Int>
-            = MutableList(12) { it }
+    private val selectedTableSet: MutableSet<Int> = mutableSetOf()
+    private val groupMap: MutableList<Int> = MutableList(12) { it }
 
     private val retryTrigger: MutableStateFlow<Int> = MutableStateFlow(0)
 
@@ -61,15 +57,21 @@ class TableMergeControllerImpl @Inject constructor(
                 }
                 .catch { cause ->
                     Log.e(TAG, "tableList load failed")
-                    _screenData.update { it.copy(tableListState = UiScreenState(UiState.FAIL, cause)) }
+                    _screenData.update {
+                        it.copy(
+                            tableListState = UiScreenState(
+                                UiState.FAIL,
+                                cause
+                            )
+                        )
+                    }
                     emit(emptyList())
                 }
         }
 
-    private val _screenData: MutableStateFlow<UiTableMergeScreenState>
-        = MutableStateFlow(UiTableMergeScreenState())
-    override val screenData: Flow<UiTableMergeScreenState>
-        = _screenData
+    private val _screenData: MutableStateFlow<UiTableMergeScreenState> =
+        MutableStateFlow(UiTableMergeScreenState())
+    override val screenData: Flow<UiTableMergeScreenState> = _screenData
         .combine(tableListFlow) { state, tableList ->
             var newState = state.copy(
                 sourceTableList = tableList,
@@ -77,7 +79,7 @@ class TableMergeControllerImpl @Inject constructor(
             )
 
             if (state.tableList == emptyList<UiTable>() && tableList != emptyList<UiTable>()
-                || state.tableList !== tableList && mode == UiTableMode.Main)
+                || state.tableList !== tableList && state.mode == UiTableMode.Main)
                 newState = newState.copy(
                     tableList = tableList.map { table -> table },
                 )
@@ -140,8 +142,7 @@ class TableMergeControllerImpl @Inject constructor(
 //                    }
                     // TODO 일단 더미 테이블로 바꾸기. 오류 처리 방법 논의 필요.
                     UiTable("?", defaultColor)
-                }
-                else uiTable
+                } else uiTable
             }
         }
     }
@@ -193,7 +194,7 @@ class TableMergeControllerImpl @Inject constructor(
         }
     }
 
-    override fun clickTableOnMainOrOrderMode(table: UiTable): Int {
+    override fun clickTableOnMainOrOrderMode(table: UiTable) {
         val tableNumber = table.number.toInt()
         val group = groupMap[tableNumber]
         val member = getMembersOf(group)
@@ -203,37 +204,35 @@ class TableMergeControllerImpl @Inject constructor(
             it.copy(color = nowColor.copy(alpha = 1f).value)
         }
 
-        val newColor = if (selectedTableSet.contains(tableNumber)) {
+        if (selectedTableSet.contains(tableNumber)) {
             Log.d(TAG, "table $tableNumber is already selected")
-            mode = UiTableMode.Main
-            selectedTableSet.removeAll(member.toSet()) // 왜 clear가 아니라 removeAll?
+            setMode(UiTableMode.Main)
+//            selectedTableSet.removeAll(member.toSet()) // 왜 clear가 아니라 removeAll?
             Color(table.color).copy(alpha = 1f)
         } else {
             Log.d(TAG, "table $tableNumber is not selected yet")
-            mode = UiTableMode.Order
+            setMode(UiTableMode.Order)
             selectedTableSet.clear()
             selectedTableSet.addAll(member.toSet())
-            Color(table.color).copy(alpha = 0.5f)
-        }
-        Log.d(TAG, "newColor.alpha: ${newColor.alpha}")
+            val newColor = Color(table.color).copy(alpha = 0.5f)
 
-        Log.d(TAG, "tableList size: ${tableList.size}")
-        tableList = tableList.map { nowTable ->
-            Log.d(TAG, "$nowTable")
-            if (member.contains(nowTable.number.toInt())) {
-                Log.d(TAG, "this is a member of the group")
-                nowTable.copy(color = newColor.value)
-            } else {
-                Log.d(TAG, "this is NOT a member of the group")
-                nowTable
+            Log.d(TAG, "tableList size: ${tableList.size}")
+            tableList = tableList.map { nowTable ->
+                Log.d(TAG, "$nowTable")
+                if (member.contains(nowTable.number.toInt())) {
+                    Log.d(TAG, "this is a member of the group")
+                    nowTable.copy(color = newColor.value)
+                } else {
+                    Log.d(TAG, "this is NOT a member of the group")
+                    nowTable
+                }
             }
+
+            _screenData.update { it.copy(tableList = tableList) }
+
+//                return if (newColor.alpha > 0.7f) 0
+//                else group
         }
-
-        _screenData.update { it.copy(tableList = tableList) }
-
-        return if (newColor.alpha > 0.7f) 0
-               else group
-
     }
 
     private fun getMembersOf(group: Int): MutableList<Int> {
@@ -308,8 +307,9 @@ class TableMergeControllerImpl @Inject constructor(
         groupColorSet.remove(groupColor)
     }
 
-    override fun updateMode(mode: UiTableMode) {
-        this.mode = mode
+    override fun setMode(mode: UiTableMode) {
+        _screenData.update { it.copy(mode = mode) }
+        if (mode == UiTableMode.Main) syncTableList()
     }
 
     override fun setTableListState(state: UiScreenState) {

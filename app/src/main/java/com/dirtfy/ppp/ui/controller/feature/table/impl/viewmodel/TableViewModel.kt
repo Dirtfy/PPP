@@ -29,21 +29,17 @@ class TableViewModel @Inject constructor(
     private val menuController: TableMenuController
 ): ViewModel(), TableController, Tagger {
 
-    private val modeFlow = MutableStateFlow(UiTableMode.Main)
     private var selectedTableNumber: Int = 0
 
     override val screenData: StateFlow<UiTableScreenState>
-        = modeFlow
-        .combine(menuController.screenData) { mode, menuScreenState ->
+        = menuController.screenData
+        .combine(mergeController.screenData) { menuScreenState, mergeScreenData ->
             UiTableScreenState(
-                mode = mode,
                 menuList = menuScreenState.menuList,
-                menuListState = menuScreenState.menuListState
-            )
-        }.combine(mergeController.screenData) { state, mergeScreenData ->
-            state.copy(
+                menuListState = menuScreenState.menuListState,
                 tableList = mergeScreenData.tableList,
                 sourceTableList = mergeScreenData.sourceTableList,
+                mode = mergeScreenData.mode,
                 tableListState = mergeScreenData.tableListState,
                 mergeTableState = mergeScreenData.mergeTableState
             )
@@ -96,13 +92,9 @@ class TableViewModel @Inject constructor(
     }
 
     override fun clickTable(table: UiTable) {
-        when (modeFlow.value) {
+        when (screenData.value.mode) {
             UiTableMode.Merge -> mergeController.clickTableOnMergeMode(table)
-            else -> {
-                val selectedGroup = mergeController.clickTableOnMainOrOrderMode(table)
-                if (selectedGroup > 0) setMode(UiTableMode.Order)
-                else setMode(UiTableMode.Main)
-            }
+            else -> mergeController.clickTableOnMainOrOrderMode(table)
         }
     }
 
@@ -144,8 +136,7 @@ class TableViewModel @Inject constructor(
     }
 
     override fun setMode(mode: UiTableMode) {
-        modeFlow.update { mode }
-        if (mode == UiTableMode.Main) mergeController.syncTableList()
+        mergeController.setMode(mode)
     }
 
     override fun setMenuListState(state: UiScreenState){
