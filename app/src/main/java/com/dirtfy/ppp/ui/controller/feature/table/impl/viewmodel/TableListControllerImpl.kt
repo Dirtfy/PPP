@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToUiTable
-import com.dirtfy.ppp.ui.controller.feature.table.TableMergeController
+import com.dirtfy.ppp.ui.controller.feature.table.TableListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
@@ -24,9 +24,9 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import kotlin.random.Random
 
-class TableMergeControllerImpl @Inject constructor(
+class TableListControllerImpl @Inject constructor(
     private val tableBusinessLogic: TableBusinessLogic
-): TableMergeController, Tagger {
+): TableListController, Tagger {
 
     private val groupColorSet = mutableSetOf<ULong>()
     private val defaultColor = Color.LightGray.value

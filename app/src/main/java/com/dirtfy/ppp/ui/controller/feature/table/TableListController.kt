@@ -6,7 +6,7 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import kotlinx.coroutines.flow.Flow
 
-interface TableMergeController {
+interface TableListController {
     val screenData: Flow<UiTableMergeScreenState>
 
     @Deprecated("screen state synchronized with repository")
