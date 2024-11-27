@@ -6,7 +6,6 @@ import com.dirtfy.ppp.ui.controller.feature.record.RecordController
 import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
 import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
-import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.UiRecordScreenState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode

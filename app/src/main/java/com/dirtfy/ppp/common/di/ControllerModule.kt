@@ -16,11 +16,11 @@ import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
 import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
 import com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel.RecordDetailControllerImpl
 import com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel.RecordListControllerImpl
-import com.dirtfy.ppp.ui.controller.feature.table.TableMenuController
 import com.dirtfy.ppp.ui.controller.feature.table.TableListController
+import com.dirtfy.ppp.ui.controller.feature.table.TableMenuController
 import com.dirtfy.ppp.ui.controller.feature.table.TableOrderController
-import com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel.TableMenuControllerImpl
 import com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel.TableListControllerImpl
+import com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel.TableMenuControllerImpl
 import com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel.TableOrderControllerImpl
 import dagger.Binds
 import dagger.Module

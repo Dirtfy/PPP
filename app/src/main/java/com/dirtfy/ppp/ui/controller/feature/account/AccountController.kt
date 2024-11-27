@@ -7,7 +7,6 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
-import kotlinx.coroutines.flow.update
 
 interface AccountController
     : Controller<UiAccountScreenState, AccountController> {
