@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.record
 
+import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.record.UiRecordListScreenState
 import kotlinx.coroutines.flow.Flow
 
@@ -10,4 +11,6 @@ interface RecordListController {
     suspend fun updateRecordList()
     fun retryUpdateRecordList()
     fun updateSearchClue(clue: String)
+
+    fun setRecordListState(state: UiScreenState)
 }

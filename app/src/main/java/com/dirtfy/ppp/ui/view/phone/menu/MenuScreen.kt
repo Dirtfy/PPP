@@ -59,13 +59,13 @@ class MenuScreen @Inject constructor(
         Component.HandleUiStateDialog(
             uiState = screen.addMenuState,
             onDismissRequest = {controller.setAddMenuState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {}//TODO RetryStream 이후 구현
+            onRetryAction = {}//TODO Retry 이후 구현
 
         )
         Component.HandleUiStateDialog(
             uiState = screen.deleteMenuState,
             onDismissRequest = {controller.setDeleteMenuState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {}//TODO RetryStream 이후 구현
+            onRetryAction = {}//TODO Retry 이후 구현
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -95,7 +95,7 @@ class MenuScreen @Inject constructor(
             Component.HandleUiStateDialog(
                 uiState = screen.menuListState,
                 onDismissRequest = { controller.setMenuListState(UiScreenState(UiState.COMPLETE)) },
-                onRetryAction = {}, //TODO RetryStream 이후 구현
+                onRetryAction = { controller.retryUpdateMenuList() },
                 onComplete = {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(160.dp),

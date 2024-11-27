@@ -6,7 +6,6 @@ import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.UiRecordListScreenState
-import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -30,17 +29,16 @@ class RecordListControllerImpl @Inject constructor(
         .flatMapLatest {
             recordBusinessLogic.recordStream()
                 .map {
-                    _screenData.update { state -> state.copy(recordListState = UiScreenState(UiState.COMPLETE)) }
+                    setRecordListState(UiScreenState(UiState.COMPLETE))
                     val recordList = it.map { data -> data.convertToUiRecord() }
-                    // TODO searchClue 구현되면 여기서 filtering
                     recordList
                 }
                 .onStart {
-                    _screenData.update { it.copy(recordListState = UiScreenState(UiState.LOADING)) }
+                    setRecordListState(UiScreenState(UiState.LOADING))
                     emit(emptyList())
                 }
                 .catch { cause ->
-                    _screenData.update { it.copy(recordListState = UiScreenState(UiState.FAIL, cause)) }
+                    setRecordListState(UiScreenState(UiState.FAIL, cause))
                     emit(emptyList())
                 }
         }
@@ -48,6 +46,7 @@ class RecordListControllerImpl @Inject constructor(
     override val screenData: Flow<UiRecordListScreenState>
         = _screenData
         .combine(recordListFlow) { state, recordList ->
+            // TODO searchClue 구현되면 여기서 filtering
             state.copy(
                 recordList = recordList
             )
@@ -63,6 +62,10 @@ class RecordListControllerImpl @Inject constructor(
 
     override fun updateSearchClue(clue: String) {
         _screenData.update { it.copy(searchClue = clue) }
+    }
+
+    override fun setRecordListState(state: UiScreenState) {
+        _screenData.update { it.copy(recordListState = state) }
     }
 
 }

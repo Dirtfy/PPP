@@ -57,14 +57,17 @@ class RecordScreen @Inject constructor(
                 controller.setMode(UiRecordMode.Main)
             },
             onRetryClick = {
-                //TODO RetryStream 해결 후 실행 recordListState
+                controller.retryUpdateRecordList()
+            },
+            onRecordListFailDismissRequest = {
+                controller.setRecordListState(UiScreenState(UiState.COMPLETE))
             }
         )
 
         Component.HandleUiStateDialog(
             uiState = screenData.nowRecordState,
             onDismissRequest = {controller.setNowRecordState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {}//TODO RetryStream 해결 후 실행 nowRecordState
+            onRetryAction = {}//TODO Retry 해결 후 실행 nowRecordState
         )
 
     }
@@ -80,12 +83,13 @@ class RecordScreen @Inject constructor(
         onClueChanged: (String) -> Unit,
         onItemClick: (UiRecord) -> Unit,
         onDismissRequest: () -> Unit,
-        onRetryClick: () -> Unit
+        onRetryClick: () -> Unit,
+        onRecordListFailDismissRequest: () -> Unit
     ) {
         Column {
             Component.HandleUiStateDialog(
                 uiState = recordListState,
-                onDismissRequest = {},
+                onDismissRequest = onRecordListFailDismissRequest,
                 onRetryAction = onRetryClick,
                 onComplete = {
                     RecordList(

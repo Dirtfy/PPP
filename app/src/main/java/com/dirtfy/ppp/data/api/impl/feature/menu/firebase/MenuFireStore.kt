@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.data.api.impl.feature.menu.firebase
 
 import android.util.Log
+import com.dirtfy.ppp.common.exception.ExternalException
 import com.dirtfy.ppp.data.api.MenuApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
 import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.FireStoreMenu.Companion.convertToFireStoreMenu
@@ -68,13 +69,20 @@ class MenuFireStore @Inject constructor(): MenuApi, Tagger {
 
     override fun menuStream(): Flow<List<DataMenu>> = callbackFlow {
         val menuSubscription = ref.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) { return@addSnapshotListener }
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "menuStream snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "menuStream snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val menuList = readAll(snapshot)
                 trySend(menuList)
             } catch (e: Throwable) {
                 Log.e(TAG, "menu subscription fail\n${e.message}")
-                throw e
+                close(e)
             }
         }
 

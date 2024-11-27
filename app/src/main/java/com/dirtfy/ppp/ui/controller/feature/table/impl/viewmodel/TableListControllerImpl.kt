@@ -47,24 +47,17 @@ class TableListControllerImpl @Inject constructor(
             tableBusinessLogic.tableStream()
                 .map { list ->
                     Log.d(TAG, _screenData.value.toString())
-                    _screenData.update { it.copy(tableListState = UiScreenState(UiState.COMPLETE)) }
+                    setTableListState(UiScreenState(UiState.COMPLETE))
                     val tableList = _updateTableList(list)
                     tableList
                 }
                 .onStart {
-                    _screenData.update { it.copy(tableListState = UiScreenState(UiState.LOADING)) }
+                    setTableListState(UiScreenState(UiState.LOADING))
                     emit(emptyList())
                 }
                 .catch { cause ->
                     Log.e(TAG, "tableList load failed")
-                    _screenData.update {
-                        it.copy(
-                            tableListState = UiScreenState(
-                                UiState.FAIL,
-                                cause
-                            )
-                        )
-                    }
+                    setTableListState(UiScreenState(UiState.FAIL, cause))
                     emit(emptyList())
                 }
         }
@@ -124,7 +117,7 @@ class TableListControllerImpl @Inject constructor(
                 }
             }
 
-        _screenData.update { it.copy(tableListState = UiScreenState(UiState.COMPLETE)) }
+        setTableListState(UiScreenState(UiState.COMPLETE))
         return tableFormation.map { tableNumber ->
             if (tableNumber == 0)
                 UiTable("0", Color.Transparent.value)
@@ -135,11 +128,8 @@ class TableListControllerImpl @Inject constructor(
                 }
                 if (uiTable == null) {
                     // TODO Transaction 구현 후 주석 해제 해보자.
-//                    _screenData.update {
-//                        it.copy(
-//                            tableListState = UiScreenState(UiState.FAIL, TableException.NumberLoss())
-//                        )
-//                    }
+                    // setTableListState(UiScreenState(UiState.FAIL, TableException.NumberLoss()))
+
                     // TODO 일단 더미 테이블로 바꾸기. 오류 처리 방법 논의 필요.
                     UiTable("?", defaultColor)
                 } else uiTable
@@ -152,8 +142,7 @@ class TableListControllerImpl @Inject constructor(
 //        _updateTableList()
     }
 
-    override fun syncTableList() { // 절대 setMode(Main) 외에 호출해선 안된다.. selectedTableSet.clear() 때문
-        selectedTableSet.clear()
+    override fun syncTableList() {
         _screenData.update { before ->
             before.copy(tableList = before.sourceTableList.map { it })
         }
@@ -207,7 +196,7 @@ class TableListControllerImpl @Inject constructor(
         if (selectedTableSet.contains(tableNumber)) {
             Log.d(TAG, "table $tableNumber is already selected")
             setMode(UiTableMode.Main)
-//            selectedTableSet.removeAll(member.toSet()) // 왜 clear가 아니라 removeAll?
+//            selectedTableSet.removeAll(member.toSet()) // setMode 에서 해줌.
             Color(table.color).copy(alpha = 1f)
         } else {
             Log.d(TAG, "table $tableNumber is not selected yet")
@@ -230,8 +219,6 @@ class TableListControllerImpl @Inject constructor(
 
             _screenData.update { it.copy(tableList = tableList) }
 
-//                return if (newColor.alpha > 0.7f) 0
-//                else group
         }
     }
 
@@ -309,7 +296,10 @@ class TableListControllerImpl @Inject constructor(
 
     override fun setMode(mode: UiTableMode) {
         _screenData.update { it.copy(mode = mode) }
-        if (mode == UiTableMode.Main) syncTableList()
+        if (mode == UiTableMode.Main) {
+            selectedTableSet.clear()
+            syncTableList()
+        }
     }
 
     override fun setTableListState(state: UiScreenState) {

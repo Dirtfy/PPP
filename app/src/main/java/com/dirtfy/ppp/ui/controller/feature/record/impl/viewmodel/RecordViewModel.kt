@@ -75,6 +75,10 @@ class RecordViewModel @Inject constructor(
         modeFlow.update { mode }
     }
 
+    override fun setRecordListState(state: UiScreenState) {
+        listController.setRecordListState(state)
+    }
+
     override fun setRecordDetailListState(state: UiScreenState) {
         detailController.setRecordDetailListState(state)
     }

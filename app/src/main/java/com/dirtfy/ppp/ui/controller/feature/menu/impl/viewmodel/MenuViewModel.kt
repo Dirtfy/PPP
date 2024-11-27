@@ -45,6 +45,10 @@ class MenuViewModel @Inject constructor(
     override suspend fun updateMenuList() {
     }
 
+    override fun retryUpdateMenuList() {
+        listController.retryUpdateMenuList()
+    }
+
     override fun updateSearchClue(clue: String) {
         listController.updateSearchClue(clue)
     }
