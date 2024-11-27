@@ -55,6 +55,10 @@ class RecordViewModel @Inject constructor(
     override suspend fun updateRecordList() {
     }
 
+    override fun retryUpdateRecordList() {
+        listController.retryUpdateRecordList()
+    }
+
     override suspend fun updateRecordDetailList() {
         detailController.updateRecordDetailList()
     }

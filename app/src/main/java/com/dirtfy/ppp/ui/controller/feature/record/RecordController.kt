@@ -10,6 +10,7 @@ interface RecordController: Controller<UiRecordScreenState, RecordController> {
 
     @Deprecated("screen state synchronized with repository")
     suspend fun updateRecordList()
+    fun retryUpdateRecordList()
     suspend fun updateRecordDetailList()
     fun updateSearchClue(clue: String)
     suspend fun updateNowRecord(record: UiRecord)
