@@ -31,19 +31,19 @@ class MenuUpdateControllerImpl @Inject constructor(
     }
 
     override suspend fun createMenu() {
-        _screenData.update { it.copy(addMenuState = UiScreenState(UiState.LOADING)) }
+        _screenData.update { it.copy(createMenuState = UiScreenState(UiState.LOADING)) }
 
         val menu = _screenData.value.newMenu
 
         if (menu.name == "") {
             _screenData.update { it.copy(
-                addMenuState = UiScreenState(UiState.FAIL, MenuException.BlankName())
+                createMenuState = UiScreenState(UiState.FAIL, MenuException.BlankName())
             ) }
             return
         }
         if (menu.price == "") {
             _screenData.update { it.copy(
-                addMenuState = UiScreenState(UiState.FAIL, MenuException.BlankPrice())
+                createMenuState = UiScreenState(UiState.FAIL, MenuException.BlankPrice())
             ) }
             return
         }
@@ -53,12 +53,12 @@ class MenuUpdateControllerImpl @Inject constructor(
         ).catch { cause ->
             Log.e(TAG, "createMenu() - createMenu failed")
             _screenData.update { it.copy(
-                addMenuState = UiScreenState(UiState.FAIL, cause)
+                createMenuState = UiScreenState(UiState.FAIL, cause)
             ) }
         }.collect {
             _screenData.update { it.copy(
                 newMenu = UiMenu(),
-                addMenuState = UiScreenState(UiState.COMPLETE)
+                createMenuState = UiScreenState(UiState.COMPLETE)
             ) }
         }
     }
@@ -82,8 +82,8 @@ class MenuUpdateControllerImpl @Inject constructor(
         }
     }
 
-    override fun setAddMenuState(state: UiScreenState) {
-        _screenData.update { it.copy(addMenuState = state) }
+    override fun setCreateMenuState(state: UiScreenState) {
+        _screenData.update { it.copy(createMenuState = state) }
     }
 
     override fun setDeleteMenuState(state: UiScreenState) {

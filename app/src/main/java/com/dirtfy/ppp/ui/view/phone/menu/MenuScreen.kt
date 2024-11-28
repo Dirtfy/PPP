@@ -54,8 +54,8 @@ class MenuScreen @Inject constructor(
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
         Component.HandleUiStateDialog(
-            uiState = screen.addMenuState,
-            onDismissRequest = { controller.setAddMenuState(UiScreenState(UiState.COMPLETE)) },
+            uiState = screen.createMenuState,
+            onDismissRequest = { controller.setCreateMenuState(UiScreenState(UiState.COMPLETE)) },
             onRetryAction = { controller.request { createMenu() } }
 
         )
