@@ -94,8 +94,10 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     }
 
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
-        return recordRef.document(record.id.toString())
+        val detailSnapshot = recordRef.document(record.id.toString())
             .collection(FireStorePath.RECORD_DETAIL).get().await()
+        if (detailSnapshot.metadata.isFromCache) throw ExternalException.NetworkError()
+        return detailSnapshot
             .documents.map { detailDocument ->
                 detailDocument.toObject(FireStoreRecordDetail::class.java)!!
             }.map { recordDetail ->
