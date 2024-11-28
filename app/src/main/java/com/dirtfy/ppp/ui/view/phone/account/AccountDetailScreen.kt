@@ -26,7 +26,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,11 +56,11 @@ class AccountDetailScreen @Inject constructor(
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            controller.request {
-                updateAccountRecordList()
-            }
-        }
+//        LaunchedEffect(key1 = controller) {
+//            controller.request {
+//                updateAccountRecordList()
+//            }
+//        }
 
         ScreenContent(
             nowAccount = screen.nowAccount,
@@ -78,14 +77,14 @@ class AccountDetailScreen @Inject constructor(
                 controller.setAccountRecordListState(UiScreenState(UiState.COMPLETE))
             },
             onRetryClick = {
-                controller.request { updateAccountRecordList() }
+                controller.retryUpdateAccountRecordList()
             }
         )
 
         Component.HandleUiStateDialog(
-            screen.newAccountRecordState,
-            onDismissRequest = {controller.setNewAccountRecordState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {controller.request{addRecord()}}
+            screen.addAccountRecordState,
+            onDismissRequest = { controller.setAddAccountRecordState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request { addRecord() } }
         )
     }
 

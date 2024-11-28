@@ -21,7 +21,7 @@ class RecordBusinessLogic @Inject constructor(
     }
 
     fun readRecordDetail(record: DataRecord) = operate {
-        val detailList = repository.readDetail(record) // TODO record timestamp로 하는게 나을듯?
+        val detailList = repository.readDetail(record)
         detailList
     }
 

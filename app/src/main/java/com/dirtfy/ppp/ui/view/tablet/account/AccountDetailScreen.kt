@@ -57,11 +57,11 @@ class AccountDetailScreen @Inject constructor(
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            controller.request {
-                updateAccountRecordList()
-            }
-        }
+//        LaunchedEffect(key1 = controller) {
+//            controller.request {
+//                updateAccountRecordList()
+//            }
+//        }
 
         ScreenContent(
             nowAccount = screen.nowAccount,
@@ -78,14 +78,14 @@ class AccountDetailScreen @Inject constructor(
                 controller.setAccountRecordListState(UiScreenState(UiState.COMPLETE))
             },
             onRetryClick = {
-                controller.request { updateAccountRecordList() }
+                controller.retryUpdateAccountRecordList()
             }
         )
 
         Component.HandleUiStateDialog(
-            screen.newAccountRecordState,
-            onDismissRequest = {controller.setNewAccountRecordState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {controller.request{addRecord()}}
+            screen.addAccountRecordState,
+            onDismissRequest = { controller.setAddAccountRecordState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request{ addRecord() } }
         )
     }
 

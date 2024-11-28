@@ -142,13 +142,20 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
             .whereEqualTo(key, value)
 
         val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) { return@addSnapshotListener }
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "recordStreamWith(key = $key, value = $value) - snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "recordStreamWith(key = $key, value = $value) - snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val accountRecordList = readAll(snapshot)
                 trySend(accountRecordList)
             } catch (e: Throwable) {
-                Log.e(TAG, "record subscription fail\n${e.message}")
-                throw e
+                Log.e(TAG, "recordStreamWith(key = $key, value = $value) - subscription fail\n${e.message}")
+                close(e)
             }
         }
 
@@ -180,8 +187,15 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
             .whereEqualTo(key, value)
 
         val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) { return@addSnapshotListener }
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "recordStreamSumOf(key = $key, value = $value, target = $target) - snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "recordStreamSumOf(key = $key, value = $value, target = $target) - snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val result = sum(
                     readAllRecordWith(
                         snapshot,
@@ -191,8 +205,8 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
 
                 trySend(result)
             } catch (e: Throwable) {
-                Log.e(TAG, "record subscription fail\n${e.message}")
-                throw e
+                Log.e(TAG, "recordStreamSumOf(key = $key, value = $value, target = $target) - subscription fail\n${e.message}")
+                close(e)
             }
         }
 

@@ -83,13 +83,13 @@ class TableScreen @Inject constructor(
         Component.HandleUiStateDialog(
             uiState = screenData.addOrderState,
             onDismissRequest = { controller.setAddOrderState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = {} // TODO RetryStream 구현후 수정 예정
+            onRetryAction = { } // TODO RetryStream 구현후 수정 예정
         )
 
         Component.HandleUiStateDialog(
             uiState = screenData.cancelOrderState,
             onDismissRequest = { controller.setCancelOrderState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = {} // TODO RetryStream 구현후 수정 예정
+            onRetryAction = { } // TODO RetryStream 구현후 수정 예정
         )
 
 
@@ -143,6 +143,15 @@ class TableScreen @Inject constructor(
             },
             onTableListFailRetryClick = {
                 controller.retryUpdateTableList()
+            },
+            onOrderListFailDismissRequest = {
+                // TODO 이렇게 호출하는 함수가 TableController 내부에 있으면 더 좋을 듯 initOrderListFlow 같은 느낌
+                controller.updateOrderList(UiTable(number = "0", color = Color.Transparent.value))
+
+                controller.setMode(UiTableMode.Main)
+            },
+            onOrderListFailRetryClick = {
+                controller.retryUpdateOrderList()
             }
         )
     }
@@ -181,6 +190,8 @@ class TableScreen @Inject constructor(
         onMenuListFailRetryClick: () -> Unit,
         onTableListFailDismissRequest: () -> Unit,
         onTableListFailRetryClick: () -> Unit,
+        onOrderListFailDismissRequest: () -> Unit,
+        onOrderListFailRetryClick: () -> Unit,
     ) {
         ConstraintLayout {
             val (table, order, menu) = createRefs()
@@ -217,11 +228,8 @@ class TableScreen @Inject constructor(
                 ) {
                     Component.HandleUiStateDialog(
                         uiState = tableOrderListState,
-                        onDismissRequest = {
-                            tableController.updateOrderList(UiTable(number = "0", color = Color.Transparent.value)) // TODO 이렇게 호출하는 함수가 TableController 내부에 있으면 더 좋을 듯 initOrderListFlow 같은 느낌
-                            tableController.setMode(UiTableMode.Main)
-                        },
-                        onRetryAction = { tableController.retryUpdateOrderList() }, // TODO onDismissRequest, onRetryAction 둘 다 함수 매개변수로 받기
+                        onDismissRequest = onOrderListFailDismissRequest,
+                        onRetryAction = onOrderListFailRetryClick,
                         onComplete = {
                             OrderLayout(
                                 tableOrderList = tableOrderList,

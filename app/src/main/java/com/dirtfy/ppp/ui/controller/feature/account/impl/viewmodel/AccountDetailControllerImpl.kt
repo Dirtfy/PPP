@@ -15,8 +15,10 @@ import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
@@ -24,57 +26,65 @@ class AccountDetailControllerImpl @Inject constructor(
     private val accountBusinessLogic: AccountBusinessLogic
 ): AccountDetailController, Tagger {
 
+    private val retryTrigger = MutableStateFlow(0)
+    private val nowAccountNumberFlow = MutableStateFlow(0)
+
+    private val accountRecordListStream: Flow<List<UiAccountRecord>>
+     = retryTrigger.combine(nowAccountNumberFlow) { _, nowAccountNumber ->
+        nowAccountNumber
+    }.flatMapLatest { nowAccountNumber ->
+        accountBusinessLogic.accountRecordStream(nowAccountNumber)
+            .map {
+                val recordList = it.map { account -> account.convertToUiAccountRecord() }
+                _screenData.update { state -> state.copy(
+                    accountRecordListState = UiScreenState(UiState.COMPLETE),
+                    nowAccount = state.nowAccount.copy(
+                        balance = StringFormatConverter.formatCurrency(it.sumOf { data -> data.difference })
+                    )
+                ) }
+                recordList
+            }
+            .onStart {
+                _screenData.update { state -> state.copy(
+                    accountRecordListState = UiScreenState(UiState.LOADING)
+                ) }
+                emit(emptyList())
+            }
+            .catch { cause ->
+                _screenData.update { state -> state.copy(
+                    accountRecordListState = UiScreenState(UiState.FAIL, cause)
+                ) }
+                emit(emptyList())
+            }
+    }
+
     private val _screenData: MutableStateFlow<UiAccountDetailScreenState>
-        = MutableStateFlow(
-        UiAccountDetailScreenState(
-            nowAccount = UiAccount(number = "0")
-        )
-    )
+        = MutableStateFlow(UiAccountDetailScreenState())
     override val screenData: Flow<UiAccountDetailScreenState>
-        get() = _screenData
-
-    private lateinit var accountRecordListStream: Flow<List<UiAccountRecord>>
-
-    override suspend fun updateAccountRecordList(account: UiAccount) {
-        _screenData.update {
-            it.copy(
-                nowAccount = account,
-                accountRecordListState = UiScreenState(UiState.LOADING)
+        = _screenData
+        .combine(accountRecordListStream) { state, recordList ->
+            state.copy(
+                accountRecordList = recordList
             )
         }
-        println("accountRecordListStream init")
-        accountRecordListStream = accountBusinessLogic.accountRecordStream(account.number.toInt())
-            .map { it.map { account -> account.convertToUiAccountRecord() } }
 
-        println("accountRecordListStream collect")
-        // TODO 더 나은 해결책 강구
-        accountRecordListStream
-            .catch { cause ->
-                Log.e(TAG, "updateAccountRecordList() - stream failed \n ${cause.message}")
-                _screenData.update {
-                    it.copy(
-                        accountRecordListState = UiScreenState(UiState.FAIL, cause)
-                    )
-                }
-            }
-            .conflate().collect { listUiRecord ->
-                println("accountRecordListStream collected")
-                _screenData.update { before ->
-                    before.copy(
-                        nowAccount = account.copy(
-                            balance = StringFormatConverter.formatCurrency(
-                                listUiRecord.sumOf { uiRecord ->
-                                    StringFormatConverter.parseCurrency(uiRecord.difference)
-                                }
-                            )
-                        ),
-                        accountRecordList = listUiRecord,
-                        accountRecordListState = UiScreenState(UiState.COMPLETE)
-                    )
-                }
-                println("screenData updated")
-                listUiRecord.forEach { println(it.toString()) }
-            }
+    override fun updateNowAccount(account: UiAccount) {
+        _screenData.update { it.copy(
+            nowAccount = account
+        ) }
+        nowAccountNumberFlow.update { account.number.toInt() }
+    }
+
+    @Deprecated(
+        message = "accountRecordList will be automatically updated when nowAccount is updated",
+        replaceWith = ReplaceWith("updateNowAccount(account)")
+    )
+    override fun updateAccountRecordList(account: UiAccount) {
+        updateNowAccount(account)
+    }
+
+    override fun retryUpdateAccountRecordList() {
+        retryTrigger.value += 1
     }
 
     override fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord) {
@@ -88,7 +98,7 @@ class AccountDetailControllerImpl @Inject constructor(
     override suspend fun addRecord() {
         val accountNumber = _screenData.value.nowAccount.number.toInt()
         val (issuedName, difference) = _screenData.value.newAccountRecord
-        _screenData.update { it.copy(newAccountRecordState = UiScreenState(UiState.LOADING)) }
+        _screenData.update { it.copy(addAccountRecordState = UiScreenState(UiState.LOADING)) }
         accountBusinessLogic.addAccountRecord(
             accountNumber = accountNumber,
             issuedName = issuedName,
@@ -97,14 +107,14 @@ class AccountDetailControllerImpl @Inject constructor(
             Log.e(TAG, "addRecord() - addAccountRecord failed \n ${cause.message}")
             _screenData.update {
                 it.copy(
-                    newAccountRecordState = UiScreenState(UiState.FAIL, cause)
+                    addAccountRecordState = UiScreenState(UiState.FAIL, cause)
                 )
             }
         }.collect {
             _screenData.update {
                 it.copy(
                     newAccountRecord = UiNewAccountRecord(),
-                    newAccountRecordState = UiScreenState(UiState.COMPLETE)
+                    addAccountRecordState = UiScreenState(UiState.COMPLETE)
                 )
             }
         }
@@ -115,9 +125,10 @@ class AccountDetailControllerImpl @Inject constructor(
             it.copy(accountRecordListState = state)
         }
     }
-    override fun setNewAccountRecordState(state: UiScreenState){
+
+    override fun setAddAccountRecordState(state: UiScreenState){
         _screenData.update{
-            it.copy(newAccountRecordState = state)
+            it.copy(addAccountRecordState = state)
         }
     }
 

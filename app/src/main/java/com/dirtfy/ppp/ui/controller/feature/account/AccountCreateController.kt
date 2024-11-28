@@ -8,9 +8,9 @@ import kotlinx.coroutines.flow.Flow
 interface AccountCreateController {
     val screenData: Flow<UiAccountCreateScreenState>
 
-    suspend fun updateNewAccount(newAccountData: UiNewAccount)
+    fun updateNewAccount(newAccountData: UiNewAccount)
     suspend fun addAccount(onComplete: () -> Unit)
     suspend fun setRandomValidAccountNumberToNewAccount()
-    fun setNewAccountState(state: UiScreenState)
+    fun setAddAccountState(state: UiScreenState)
     fun setNumberGeneratingState(state: UiScreenState)
 }

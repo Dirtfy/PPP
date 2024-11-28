@@ -9,10 +9,16 @@ import kotlinx.coroutines.flow.Flow
 interface AccountDetailController {
     val screenData: Flow<UiAccountDetailScreenState>
 
-    suspend fun updateAccountRecordList(account: UiAccount)
+    fun updateNowAccount(account: UiAccount)
+    @Deprecated(
+        message = "accountRecordList will be automatically updated when nowAccount is updated",
+        replaceWith = ReplaceWith("updateNowAccount(account)")
+    )
+    fun updateAccountRecordList(account: UiAccount)
+    fun retryUpdateAccountRecordList()
     fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord)
     suspend fun addRecord()
 
     fun setAccountRecordListState(state: UiScreenState)
-    fun setNewAccountRecordState(state: UiScreenState)
+    fun setAddAccountRecordState(state: UiScreenState)
 }

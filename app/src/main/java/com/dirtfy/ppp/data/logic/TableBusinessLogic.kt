@@ -22,13 +22,11 @@ class TableBusinessLogic @Inject constructor(
         return tableNumber !in 1..11
     }
 
-    // TODO stream 적용 후 deprecate 시키기
     fun readTables() = operate {
         val tableList = tableApi.readAllTable()
         tableList
     }
 
-    // TODO stream 적용 후 deprecate 시키기
     fun readOrders(tableNumber: Int) = operate {
         if (isInValidTableNumber(tableNumber))
             throw TableException.InvalidTableNumber()

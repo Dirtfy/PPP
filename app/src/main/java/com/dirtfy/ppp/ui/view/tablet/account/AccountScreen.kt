@@ -79,7 +79,7 @@ class AccountScreen @Inject constructor(
                 controller.setMode(UiAccountMode.Detail)
             },
             onRetryClick = {
-                //TODO RetryStream 해결후 넣을 예정
+                controller.retryUpdateAccountList()
             },
             onDismissRequest = {
                 controller.setMode(UiAccountMode.Main)

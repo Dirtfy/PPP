@@ -6,12 +6,13 @@ import com.dirtfy.ppp.ui.controller.feature.account.AccountListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.UiAccountListScreenState
-import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
@@ -19,11 +20,23 @@ class AccountListControllerImpl @Inject constructor(
     private val accountBusinessLogic: AccountBusinessLogic
 ): AccountListController {
 
-    private val accountListFlow = accountBusinessLogic.accountStream()
-        .catch { cause ->
-            _screenData.update { it.copy(accountListState = UiScreenState(UiState.FAIL, cause)) }
+    private val retryTrigger = MutableStateFlow(0)
+    private val accountListFlow = retryTrigger
+        .flatMapLatest {
+            accountBusinessLogic.accountStream()
+                .map {
+                    setAccountListState(UiScreenState(UiState.COMPLETE))
+                    it.map { account -> account.convertToUiAccount(0) }
+                }
+                .onStart {
+                    setAccountListState(UiScreenState(UiState.LOADING))
+                    emit(emptyList())
+                }
+                .catch { cause ->
+                    setAccountListState(UiScreenState(UiState.FAIL, cause))
+                    emit(emptyList())
+                }
         }
-        .map { it.map { account -> account.convertToUiAccount(0) } }
 
     private val _screenData: MutableStateFlow<UiAccountListScreenState>
         = MutableStateFlow(UiAccountListScreenState())
@@ -34,22 +47,17 @@ class AccountListControllerImpl @Inject constructor(
                 it.number.contains(state.searchClue)
             }
 
-            var newState = state.copy(
+            state.copy(
                 accountList = filteredAccountList,
             )
-
-            if (state.accountList != accountList // 내용이 달라졌을 때
-                || state.accountList !== accountList // 내용이 같지만 다른 인스턴스
-                || accountList == emptyList<UiAccount>()) // emptyList()는 항상 같은 인스턴스
-                newState = newState.copy(
-                    accountListState = UiScreenState(state = UiState.COMPLETE)
-                )
-
-            newState
         }
 
     @Deprecated("screen state synchronized with repository")
     override suspend fun updateAccountList() {
+    }
+
+    override fun retryUpdateAccountList() {
+        retryTrigger.value += 1
     }
 
     override fun updateSearchClue(clue: String) {
