@@ -47,7 +47,9 @@ class TableViewModel @Inject constructor(
                 orderTotalPrice = orderScreenData.orderTotalPrice,
                 pointUse = orderScreenData.pointUse,
                 orderListState = orderScreenData.orderListState,
-                payTableState = orderScreenData.payTableState,
+                payTableWithCashState = orderScreenData.payTableWithCashState,
+                payTableWithCardState = orderScreenData.payTableWithCardState,
+                payTableWithPointState = orderScreenData.payTableWithPointState,
                 addOrderState = orderScreenData.addOrderState,
                 cancelOrderState = orderScreenData.cancelOrderState
             )
@@ -149,8 +151,16 @@ class TableViewModel @Inject constructor(
         listController.setMergeTableState(state)
     }
 
-    override fun setPayTableState(state: UiScreenState) {
-        orderController.setPayTableState(state)
+    override fun setPayTableWithCashState(state: UiScreenState) {
+        orderController.setPayTableWithCashState(state)
+    }
+
+    override fun setPayTableWithCardState(state: UiScreenState) {
+        orderController.setPayTableWithCardState(state)
+    }
+
+    override fun setPayTableWithPointState(state: UiScreenState) {
+        orderController.setPayTableWithPointState(state)
     }
 
     override fun setOrderListState(state: UiScreenState) {

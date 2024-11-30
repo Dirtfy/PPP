@@ -75,21 +75,31 @@ class TableScreen @Inject constructor(
         )
 
         Component.HandleUiStateDialog(
-            uiState = screenData.payTableState,
-            onDismissRequest = { controller.setPayTableState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = {}   // TODO RetryStream 구현후 수정 예정 //특히 애매... point cash등 뭘로 했는지도 알고 있어야 함...
+            uiState = screenData.payTableWithCashState,
+            onDismissRequest = { controller.setPayTableWithCashState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request { payTableWithCash() } }
+        )
+        Component.HandleUiStateDialog(
+            uiState = screenData.payTableWithCardState,
+            onDismissRequest = { controller.setPayTableWithCardState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request { payTableWithCard() } }
+        )
+        Component.HandleUiStateDialog(
+            uiState = screenData.payTableWithPointState,
+            onDismissRequest = { controller.setPayTableWithPointState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request { payTableWithPoint() } }
         )
 
         Component.HandleUiStateDialog(
             uiState = screenData.addOrderState,
             onDismissRequest = { controller.setAddOrderState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = { } // TODO RetryStream 구현후 수정 예정
+            onRetryAction = { } // TODO Retry 구현후 수정 예정
         )
 
         Component.HandleUiStateDialog(
             uiState = screenData.cancelOrderState,
             onDismissRequest = { controller.setCancelOrderState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = { } // TODO RetryStream 구현후 수정 예정
+            onRetryAction = { } // TODO Retry 구현후 수정 예정
         )
 
 
@@ -103,7 +113,6 @@ class TableScreen @Inject constructor(
             totalPrice = screenData.orderTotalPrice,
             pointUse = screenData.pointUse,
             mode = screenData.mode,
-            payTableState = screenData.payTableState,
             addOrderState = screenData.addOrderState,
             cancelOrderState = screenData.cancelOrderState,
             onTableClick = {
@@ -168,7 +177,6 @@ class TableScreen @Inject constructor(
         totalPrice: String,
         pointUse: UiPointUse,
         mode: UiTableMode,
-        payTableState: UiScreenState,
         addOrderState: UiScreenState,
         cancelOrderState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
@@ -234,7 +242,6 @@ class TableScreen @Inject constructor(
                             OrderLayout(
                                 tableOrderList = tableOrderList,
                                 totalPrice = totalPrice,
-                                payTableState = payTableState,
                                 addOrderState = addOrderState,
                                 cancelOrderState = cancelOrderState,
                                 onCardClick = onCardClick,
@@ -273,7 +280,6 @@ class TableScreen @Inject constructor(
         if (mode == UiTableMode.PointUse) {
             PointUseDataInputDialog(
                 pointUse = pointUse,
-                payTableState = payTableState,
                 onDismissRequest = onPointUseDialogDismissRequest,
                 onUserNameChange = onPointUseUserNameChange,
                 onAccountNumberChange = onPointUseAccountNumberChange,
@@ -389,7 +395,6 @@ class TableScreen @Inject constructor(
     fun OrderLayout(
         tableOrderList: List<UiTableOrder>,
         totalPrice: String,
-        payTableState: UiScreenState,
         addOrderState: UiScreenState,
         cancelOrderState: UiScreenState,
         onCardClick: () -> Unit,
@@ -404,7 +409,6 @@ class TableScreen @Inject constructor(
                 verticalAlignment = Alignment.Top
             ) {
                 PaySelect(
-                    payTableState = payTableState,
                     onCardClick = onCardClick,
                     onCashClick = onCashClick,
                     onPointClick = onPointClick
@@ -425,7 +429,6 @@ class TableScreen @Inject constructor(
 
     @Composable
     fun PaySelect(
-        payTableState: UiScreenState,
         onCardClick: () -> Unit,
         onCashClick: () -> Unit,
         onPointClick: () -> Unit
@@ -446,7 +449,6 @@ class TableScreen @Inject constructor(
     @Composable
     fun PointUseDataInputDialog(
         pointUse: UiPointUse,
-        payTableState: UiScreenState,
         onDismissRequest: () -> Unit,
         onUserNameChange: (String) -> Unit,
         onAccountNumberChange: (String) -> Unit,

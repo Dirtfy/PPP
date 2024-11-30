@@ -102,13 +102,13 @@ class TableOrderControllerImpl @Inject constructor(
     private suspend fun _payTableWithCash(
         tableNumber: Int
     ) {
-        _screenData.update { it.copy(payTableState = UiScreenState(UiState.LOADING)) }
+        _screenData.update { it.copy(payTableWithCashState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.payTableWithCash(tableNumber)
             .catch { cause ->
-                _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause)) }
+                _screenData.update { it.copy(payTableWithCashState = UiScreenState(UiState.FAIL, cause)) }
             }
             .conflate().collect {
-                _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
+                _screenData.update { it.copy(payTableWithCashState = UiScreenState(UiState.COMPLETE)) }
             }
     }
     override suspend fun payTableWithCash(tableNumber: Int) {
@@ -118,13 +118,13 @@ class TableOrderControllerImpl @Inject constructor(
     private suspend fun _payTableWithCard(
         tableNumber: Int
     ) {
-        _screenData.update { it.copy(payTableState = UiScreenState(UiState.LOADING)) }
+        _screenData.update { it.copy(payTableWithCardState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.payTableWithCard(tableNumber)
             .catch { cause ->
-                _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause)) }
+                _screenData.update { it.copy(payTableWithCardState = UiScreenState(UiState.FAIL, cause)) }
             }
             .conflate().collect {
-                _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
+                _screenData.update { it.copy(payTableWithCardState = UiScreenState(UiState.COMPLETE)) }
             }
     }
     override suspend fun payTableWithCard(tableNumber: Int) {
@@ -136,15 +136,15 @@ class TableOrderControllerImpl @Inject constructor(
         accountNumber: Int,
         issuedName: String
     ) {
-        _screenData.update { it.copy(payTableState = UiScreenState(UiState.LOADING)) }
+        _screenData.update { it.copy(payTableWithPointState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.payTableWithPoint(
             tableNumber = tableNumber,
             accountNumber = accountNumber,
             issuedName = issuedName
         ).catch { cause ->
-            _screenData.update { it.copy(payTableState = UiScreenState(UiState.FAIL, cause)) }
+            _screenData.update { it.copy(payTableWithPointState = UiScreenState(UiState.FAIL, cause)) }
         }.conflate().collect {
-            _screenData.update { it.copy(payTableState = UiScreenState(UiState.COMPLETE)) }
+            _screenData.update { it.copy(payTableWithPointState = UiScreenState(UiState.COMPLETE)) }
         }
     }
     override suspend fun payTableWithPoint(tableNumber: Int) {
@@ -196,8 +196,16 @@ class TableOrderControllerImpl @Inject constructor(
         _cancelOrder(tableNumber, name, menuPrice)
     }
 
-    override fun setPayTableState(state: UiScreenState) {
-        _screenData.update { it.copy(payTableState = state) }
+    override fun setPayTableWithCashState(state: UiScreenState) {
+        _screenData.update { it.copy(payTableWithCashState = state) }
+    }
+
+    override fun setPayTableWithCardState(state: UiScreenState) {
+        _screenData.update { it.copy(payTableWithCardState = state) }
+    }
+
+    override fun setPayTableWithPointState(state: UiScreenState) {
+        _screenData.update { it.copy(payTableWithPointState = state) }
     }
 
     override fun setOrderListState(state: UiScreenState) {
