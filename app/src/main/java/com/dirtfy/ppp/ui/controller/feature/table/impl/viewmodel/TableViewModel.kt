@@ -108,7 +108,7 @@ class TableViewModel @Inject constructor(
     }
 
     private fun disbandGroup() {
-        listController.disbandGroup(selectedTableNumber)
+        //listController.disbandGroup(selectedTableNumber)
         setMode(UiTableMode.Main)
     }
 
