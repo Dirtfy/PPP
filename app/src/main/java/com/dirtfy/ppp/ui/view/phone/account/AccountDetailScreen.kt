@@ -47,7 +47,7 @@ import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class AccountDetailScreen @Inject constructor(
-    val accountController: AccountController
+    private val accountController: AccountController
 ) {
 
     @Composable

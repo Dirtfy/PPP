@@ -12,6 +12,7 @@ import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.tagger.Tagger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -41,6 +42,7 @@ class TableListControllerImpl @Inject constructor(
 
     private val retryTrigger: MutableStateFlow<Int> = MutableStateFlow(0)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val tableListFlow: Flow<List<UiTable>> = retryTrigger
         .flatMapLatest {
             Log.d(TAG, "tableListFlow - flatMapLatest")
@@ -238,35 +240,13 @@ class TableListControllerImpl @Inject constructor(
                 Log.e(TAG, "table merge failed - ${cause.message}")
                 _screenData.update { it.copy(mergeTableState = UiScreenState(UiState.FAIL, cause)) }
             }
-            .conflate().collect { groupNumber ->
-                // TODO 아래 코드 state 변경만 빼고 다 지우고 syncTableList() 호출하면 바로 아래 색깔 문제도 해결.
-                val newList = _screenData.value.tableList
-                var groupColor = getRandomColor()
-                while (groupColorSet.contains(groupColor)) {
-                    groupColor = getRandomColor()
-                }
-                groupColorSet.add(groupColor)
-
-                groupColor = Color(groupColor).value
-
+            .conflate().collect {
                 selectedTableSet.clear()
+                syncTableList()
 
-                _screenData.update {
-                    it.copy(
-                        // TODO 이걸 하면 머지 끝났을 때 머지 모드에서 색깔이 바뀜 but 머지 모드 해제하면 색깔이 바뀜
-                        // 색깔이 바뀌는 이유는 stream 이 변경사항을 가져올 때 마다 랜덤 색깔 생성 후 지정하기 때문.
-                        // 이후 랜덤 컬러가 아닌 컬러 프리셋 정하고 갖고와서 하는 걸로 바꾸면 해결 가능
-                        tableList = newList.map { table ->
-                            if (tableList.contains(table.number.toInt())){
-                                groupMap[table.number.toInt()] = groupNumber
-                                table.copy(color = groupColor)
-                            }
-                            else
-                                table
-                        },
-                        mergeTableState = UiScreenState(UiState.COMPLETE)
-                    )
-                }
+                _screenData.update { it.copy(
+                    mergeTableState = UiScreenState(UiState.COMPLETE)
+                ) }
             }
     }
     override suspend fun mergeTable() {

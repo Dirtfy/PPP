@@ -45,9 +45,9 @@ import com.journeyapps.barcodescanner.ScanOptions
 import javax.inject.Inject
 
 class AccountScreen @Inject constructor(
-    val accountController: AccountController,
-    val accountCreateScreen: AccountCreateScreen,
-    val accountDetailScreen: AccountDetailScreen
+    private val accountController: AccountController,
+    private val accountCreateScreen: AccountCreateScreen,
+    private val accountDetailScreen: AccountDetailScreen
 ){
 
     @Composable

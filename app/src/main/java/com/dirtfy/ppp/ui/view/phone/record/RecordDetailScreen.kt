@@ -32,7 +32,7 @@ import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class RecordDetailScreen @Inject constructor(
-    val recordController: RecordController
+    private val recordController: RecordController
 ) {
 
     @Composable

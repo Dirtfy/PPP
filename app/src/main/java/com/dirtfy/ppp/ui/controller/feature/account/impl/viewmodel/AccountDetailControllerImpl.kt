@@ -12,6 +12,7 @@ import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountRecord
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
 import com.dirtfy.tagger.Tagger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -29,6 +30,7 @@ class AccountDetailControllerImpl @Inject constructor(
     private val retryTrigger = MutableStateFlow(0)
     private val nowAccountNumberFlow = MutableStateFlow(0)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val accountRecordListStream: Flow<List<UiAccountRecord>>
      = retryTrigger.combine(nowAccountNumberFlow) { _, nowAccountNumber ->
         nowAccountNumber

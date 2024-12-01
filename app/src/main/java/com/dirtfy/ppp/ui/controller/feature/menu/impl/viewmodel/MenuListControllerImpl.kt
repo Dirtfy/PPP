@@ -7,6 +7,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuListScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -26,6 +27,7 @@ class MenuListControllerImpl @Inject constructor(
     private val _screenData: MutableStateFlow<UiMenuListScreenState>
         = MutableStateFlow(UiMenuListScreenState())
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val menuListFlow: Flow<List<UiMenu>> = retryTrigger
         .flatMapLatest {
             menuBusinessLogic.menuStream()

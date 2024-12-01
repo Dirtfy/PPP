@@ -8,6 +8,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableMenuScreenState
 import com.dirtfy.tagger.Tagger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -23,6 +24,8 @@ class TableMenuControllerImpl @Inject constructor(
 ): TableMenuController, Tagger {
 
     private val retryTrigger = MutableStateFlow(0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val menuListFlow = retryTrigger
         .flatMapLatest {
             menuBusinessLogic.menuStream().map {

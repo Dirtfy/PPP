@@ -56,7 +56,7 @@ import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class TableScreen @Inject constructor(
-    val tableController: TableController
+    private val tableController: TableController
 ){
 
     @Composable

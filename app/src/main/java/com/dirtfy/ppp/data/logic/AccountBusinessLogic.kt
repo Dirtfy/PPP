@@ -90,8 +90,7 @@ class AccountBusinessLogic @Inject constructor(
         if (!accountApi.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()
 
-        // TODO recordApi 활용
-        accountApi.readAllRecord(accountNumber).sortedBy { -it.timestamp }
+        recordApi.readRecordWith("type", "$accountNumber").sortedBy { -it.timestamp }
     }
 
     private suspend fun readBalance(

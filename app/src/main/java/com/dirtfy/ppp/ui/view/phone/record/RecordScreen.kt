@@ -23,7 +23,7 @@ import com.dirtfy.ppp.ui.view.tablet.record.RecordDetailScreen
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(
-    val recordController: RecordController
+    private val recordController: RecordController
 ) {
     @Inject
     lateinit var recordDetailScreen: RecordDetailScreen

@@ -134,6 +134,17 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
         }
     }
 
+    override suspend fun <ValueType> readRecordWith(
+        key: String,
+        value: ValueType
+    ): List<DataRecord> {
+        val targetRecordRef = recordRef
+            .whereEqualTo(key, value)
+
+        val querySnapshot = targetRecordRef.get().await()
+        return readAll(querySnapshot)
+    }
+
     override fun <ValueType> recordStreamWith(
         key: String,
         value: ValueType

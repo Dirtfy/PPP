@@ -42,7 +42,7 @@ import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class AccountCreateScreen @Inject constructor(
-    val accountController: AccountController
+    private val accountController: AccountController
 ) {
 
     @Composable

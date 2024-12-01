@@ -6,6 +6,7 @@ import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.UiRecordListScreenState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -25,6 +26,7 @@ class RecordListControllerImpl @Inject constructor(
     private val _screenData: MutableStateFlow<UiRecordListScreenState>
             = MutableStateFlow(UiRecordListScreenState())
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val recordListFlow = retryTrigger
         .flatMapLatest {
             recordBusinessLogic.recordStream()

@@ -44,7 +44,7 @@ import javax.inject.Inject
 
 
 class MenuScreen @Inject constructor(
-    val menuController: MenuController
+    private val menuController: MenuController
 ): Tagger {
 
     @Composable
@@ -57,7 +57,6 @@ class MenuScreen @Inject constructor(
             uiState = screen.createMenuState,
             onDismissRequest = { controller.setCreateMenuState(UiScreenState(UiState.COMPLETE)) },
             onRetryAction = { controller.request { createMenu() } }
-
         )
         Component.HandleUiStateDialog(
             uiState = screen.deleteMenuState,

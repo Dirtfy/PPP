@@ -11,6 +11,7 @@ import com.dirtfy.ppp.ui.state.feature.table.UiTableOrderScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.tagger.Tagger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -29,6 +30,8 @@ class TableOrderControllerImpl @Inject constructor(
 
     private val retryTrigger = MutableStateFlow(0)
     private val nowTableNumberFlow = MutableStateFlow(0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val orderListFlow: Flow<UiTableOrderScreenState>
         = retryTrigger
         .combine(nowTableNumberFlow) { retryCnt, nowTableNumber ->
@@ -168,7 +171,7 @@ class TableOrderControllerImpl @Inject constructor(
             tableNumber, menuName, menuPrice
         ).catch { cause ->
             _screenData.update { it.copy(addOrderState = UiScreenState(UiState.FAIL, cause)) }
-        }.conflate().collect { data ->
+        }.conflate().collect {
             _screenData.update { it.copy(addOrderState = UiScreenState(UiState.COMPLETE)) }
         }
     }

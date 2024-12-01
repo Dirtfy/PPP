@@ -6,13 +6,12 @@ import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.ktx.Firebase
 
 class FireStoreManager private constructor() {
     init {
         Firebase.firestore.firestoreSettings = FirebaseFirestoreSettings.Builder()
-            .setLocalCacheSettings(memoryCacheSettings { })
+            .setPersistenceEnabled(false) // TODO deprecated function call
             .build()
     }
 

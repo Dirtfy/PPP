@@ -6,6 +6,7 @@ import com.dirtfy.ppp.ui.controller.feature.account.AccountListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.UiAccountListScreenState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -21,6 +22,8 @@ class AccountListControllerImpl @Inject constructor(
 ): AccountListController {
 
     private val retryTrigger = MutableStateFlow(0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val accountListFlow = retryTrigger
         .flatMapLatest {
             accountBusinessLogic.accountStream()
