@@ -109,7 +109,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             .collection(FireStorePath.TABLE_ORDER)
     }
 
-    private suspend fun getOrderID(tableNumber: Int, menuName: String): String? {
+    /*private suspend fun getOrderID(tableNumber: Int, menuName: String): String? {
         val orderRef = getOrderRef(tableNumber)
         val query = orderRef.whereEqualTo("name", menuName)
         val documents = query.get().await().documents
@@ -123,30 +123,21 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             0 -> null
             else -> throw TableException.NonUniqueOrderName()
         }
-    }
+    }*/
     private suspend fun setOrder(tableNumber: Int, order: FireStoreTableOrder) {
         Log.d("WeGlonD", "source setOrder")
         Log.d("WeGlonD", "$tableNumber")
         Log.d("WeGlonD", order.toString())
-        val orderID = getOrderID(tableNumber, order.name!!)
 
-        val orderRef = tableRef
-            .document("$tableNumber")
-            .collection(FireStorePath.TABLE_ORDER)
+        val orderRef =getOrderRef(tableNumber)
 
-        if (orderID == null)
-            orderRef.document().set(order).await()
-        else {
-            Log.d("WeGlonD", "orderID not null")
-            orderRef.document(orderID).set(order).await()
-        }
+        orderRef.document(order.name!!).set(order).await()
     }
 
     override suspend fun createOrder(tableNumber: Int, menuName: String, menuPrice: Int) {
         Log.d("WeGlonD", "fireStore createOrder")
         val orderRef = getOrderRef(tableNumber)
-
-        orderRef.document().set(
+        orderRef.document(menuName).set(
             FireStoreTableOrder(
                 name = menuName,
                 price = menuPrice,
@@ -156,11 +147,10 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     }
 
     override suspend fun readOrder(tableNumber: Int, menuName: String): DataTableOrder {
-        val orderID = getOrderID(tableNumber, menuName)
-            ?: throw TableException.InvalidOrderName()
+        if(!isOrderExist(tableNumber,menuName)) throw TableException.InvalidOrderName()
 
         val order = getOrderRef(tableNumber)
-            .document(orderID)
+            .document(menuName)
             .get().await()
             .toObject(FireStoreTableOrder::class.java)!!
             .convertToDataTableOrder()
@@ -185,18 +175,15 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
 
     override suspend fun updateOrder(tableNumber: Int, order: DataTableOrder) {
         Log.d("WeGlonD", "source updateOrder")
-        getOrderID(tableNumber, order.name)
-            ?: throw TableException.InvalidOrderName()
-
+        if(!isOrderExist(tableNumber,order.name)) throw TableException.InvalidOrderName()
         setOrder(tableNumber, order.convertToFireStoreTableOrder())
     }
 
     override suspend fun deleteOrder(tableNumber: Int, menuName: String) {
-        val orderID = getOrderID(tableNumber, menuName)
-            ?: throw TableException.InvalidOrderName()
+        if(!isOrderExist(tableNumber,menuName)) throw TableException.InvalidOrderName()
 
         getOrderRef(tableNumber)
-            .document(orderID)
+            .document(menuName)
             .delete()
             .await()
     }
@@ -212,7 +199,9 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     }
 
     override suspend fun isOrderExist(tableNumber: Int, menuName: String): Boolean {
-        return getOrderID(tableNumber, menuName) != null
+        val orderRef = getOrderRef(tableNumber)
+        val document = orderRef.document(menuName).get().await()
+        return document.exists() // 이름 중복으로 firebase에 넣을 수 없다 무조건 0 or 1
     }
 
     override fun orderStream(tableNumber: Int): Flow<List<DataTableOrder>> = callbackFlow {
