@@ -6,7 +6,6 @@ sealed class TableException(
     class InvalidTableNumber: TableException("it's invalid table number")
     class InvalidPay: TableException("it's invalid pay")
 
-    @Deprecated("change repository structure")
     class GroupLoss: TableException("group is not found")
     class NumberLoss: TableException("number is not found")
     class NameLoss: TableException("name is not found")
@@ -21,5 +20,6 @@ sealed class TableException(
 
     class NonEnoughMergingTargets: TableException("number of merging table is not enough")
     class NonEnoughMenuToCancel: TableException("menu count can not be minus")
+    class IllegalGroupIdAssignment: RecordException("id is already assigned (illegal)")
     class InValidGroupState: TableException("group table has error!")
 }

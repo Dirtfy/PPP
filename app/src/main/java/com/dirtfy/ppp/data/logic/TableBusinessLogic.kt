@@ -30,13 +30,11 @@ class TableBusinessLogic @Inject constructor(
         tableList
     }
 
-    fun readOrders(tableNumber: Int) = operate {
-        if (isInValidTableNumber(tableNumber))
-            throw TableException.InvalidTableNumber()
+    fun readOrders(groupNumber: Int) = operate {
+        if (!tableApi.isGroupExist(groupNumber))
+            throw TableException.GroupLoss()
 
-        val group = tableApi.readTable(tableNumber).group
-
-        val tableOrderList = tableApi.readAllOrder(group)
+        val tableOrderList = tableApi.readAllOrder(groupNumber)
         tableOrderList
     }
 
@@ -44,7 +42,7 @@ class TableBusinessLogic @Inject constructor(
     fun orderStream(tableNumber: Int) = tableApi.orderStream(tableNumber)
 
     fun mergeTables(tableList: List<DataTable>) = operate {
-        if (tableList.size <= 1)
+        if (tableList.isEmpty())
             throw TableException.NonEnoughMergingTargets()
 
         for (table in tableList) {
@@ -54,14 +52,14 @@ class TableBusinessLogic @Inject constructor(
 
         val groupUniqueList = tableList.map {
             it.group
+        }.filter {
+            it != DataTable.GROUP_NOT_ASSIGNED
         }.toSet().toList()
 
-        val groupOrderMap = mutableMapOf<Int, List<DataTableOrder>>()
         val orderCombineList = mutableListOf<DataTableOrder>()
 
         groupUniqueList.map {
             val orderList = tableApi.readAllOrder(it)
-            groupOrderMap[it] = orderList
             orderList
         }.forEach { list ->
             list.forEach { order ->
@@ -83,31 +81,21 @@ class TableBusinessLogic @Inject constructor(
         }
 
         transactionManager.transaction { transaction ->
-            groupUniqueList.forEach {
-                tableApi.deleteOrders(it, groupOrderMap[it] ?: emptyList(), transaction)
-            }
-
-            val baseGroupNumber = groupUniqueList[0]
-            var baseGroup = DataTableGroup(
-                group = baseGroupNumber,
-                member = tableList.filter { it.number == baseGroupNumber }.map { it.number }
+            val mergedGroup = DataTableGroup(
+                member = tableList.map { it.number }
             )
 
+            val createdGroup = tableApi.createGroup(mergedGroup, transaction)
+            Log.d("WeGlonD", "merge - group created")
             orderCombineList.forEach {
-                tableApi.setOrder(baseGroupNumber, it, transaction)
+                tableApi.setOrder(createdGroup.group, it, transaction)
             }
-
-            groupUniqueList.filter {
-                it != baseGroupNumber
-            }.forEach { targetGroupNumber ->
-                val targetGroup = DataTableGroup(
-                    group = targetGroupNumber,
-                    member = tableList.filter { it.number == targetGroupNumber }.map { it.number }
-                )
-                baseGroup = tableApi.combineGroup(baseGroup, targetGroup, transaction)
+            Log.d("WeGlonD", "merge - order list set")
+            groupUniqueList.forEach {
+                tableApi.deleteGroup(it, transaction)
             }
-
-            baseGroupNumber
+            Log.d("WeGlonD", "merge - original group deleted")
+            createdGroup.group
         }
     }
 
@@ -136,11 +124,9 @@ class TableBusinessLogic @Inject constructor(
     }
 
     fun payTableWithCash(
-        tableNumber: Int
+        groupNumber: Int
     ) = operate {
-        val group = tableApi.readTable(tableNumber).group
-
-        val orderList = tableApi.readAllOrder(group)
+        val orderList = tableApi.readAllOrder(groupNumber)
 
         val payment = recordApi.create(
             record = DataRecord(
@@ -151,15 +137,13 @@ class TableBusinessLogic @Inject constructor(
         )
         // TODO 다른 DB간 transaction 처리
 
-        cleanGroup(group)
+        cleanGroup(groupNumber)
         payment
     }
     fun payTableWithCard(
-        tableNumber: Int
+        groupNumber: Int
     ) = operate {
-        val group = tableApi.readTable(tableNumber).group
-
-        val orderList = tableApi.readAllOrder(group)
+        val orderList = tableApi.readAllOrder(groupNumber)
 
         val payment = recordApi.create(
             record = DataRecord(
@@ -170,17 +154,15 @@ class TableBusinessLogic @Inject constructor(
         )
         // TODO 다른 DB간 transaction 처리
 
-        cleanGroup(group)
+        cleanGroup(groupNumber)
         payment
     }
     fun payTableWithPoint(
-        tableNumber: Int,
+        groupNumber: Int,
         accountNumber: Int,
         issuedName: String
     ) = operate {
-        val group = tableApi.readTable(tableNumber).group
-
-        val orderList = tableApi.readAllOrder(group)
+        val orderList = tableApi.readAllOrder(groupNumber)
 
         val nowBalance = recordApi.readSumOf("type", "$accountNumber", "income")
         val totalPrice = orderList.calcTotalPrice()
@@ -198,88 +180,100 @@ class TableBusinessLogic @Inject constructor(
         )
         // TODO 다른 DB간 transaction 처리
 
-        cleanGroup(group)
+        cleanGroup(groupNumber)
         payment
     }
 
     fun addOrder(
-        tableNumber: Int,
+        selectedTable: DataTable,
         menuName: String,
         menuPrice: Int
     ) = operate {
         Log.d("WeGlonD", "service addOrder")
-        tableApi.run {
-            val group = readTable(tableNumber).group
+        transactionManager.transaction { transaction ->
+            tableApi.run {
+                val groupNumber = selectedTable.group
+//                val createdGroup: DataTableGroup?
+//                if (groupNumber == DataTable.GROUP_NOT_ASSIGNED) {
+//                    createdGroup =
+//                        createGroup(DataTableGroup(member = arrayListOf(selectedTable.number)), transaction)
+//                    groupNumber = createdGroup.group
+//                } else
+//                    createdGroup = null
 
-            val count: Int
-            if (isOrderExist(group, menuName)) {
-                val order = readOrder(group, menuName)
-                count = order.count + 1
-                setOrder(
-                    group,
-                    order.copy(count = count)
-                )
-            } else {
-                count = 1
-                setOrder(
-                    group,
-                    DataTableOrder(
-                        name = menuName,
-                        price = menuPrice,
-                        count = count
+                val count: Int
+                if (isOrderExist(groupNumber, menuName, transaction)) {
+                    val order = readOrder(groupNumber, menuName, transaction) // TODO 비동기로 가져오지 말고 controller에서 전달받자
+                    count = order.count + 1
+                    setOrder(
+                        groupNumber,
+                        order.copy(count = count),
+                        transaction
                     )
+                } else {
+                    count = 1
+                    setOrder(
+                        groupNumber,
+                        DataTableOrder(
+                            name = menuName,
+                            price = menuPrice,
+                            count = count
+                        ),
+                        transaction
+                    )
+                }
+
+                DataTableOrder(
+                    menuName,
+                    menuPrice,
+                    count
                 )
             }
-
-            DataTableOrder(
-                menuName,
-                menuPrice,
-                count
-            )
         }
     }
 
     fun cancelOrder(
-        tableNumber: Int,
+        selectedTable: DataTable,
         menuName: String,
         menuPrice: Int
     ) = operate {
-        tableApi.run {
-            val group = readTable(tableNumber).group
+        transactionManager.transaction { transaction ->
+            tableApi.run {
+                val count: Int
+                val groupNumber = selectedTable.group
+                if (isOrderExist(groupNumber, menuName, transaction)) {
+                    when (val menuCount = readOrder(groupNumber, menuName, transaction).count) { // TODO 비동기로 가져오지 말고 controller에서 전달받자
+                        0 -> {
+                            throw TableException.NonEnoughMenuToCancel()
+                        }
 
-            val count: Int
-            if (isOrderExist(group, menuName)) {
-                when(val menuCount = readOrder(group, menuName).count) {
-                    0 -> { throw TableException.NonEnoughMenuToCancel() }
-                    1 -> {
-                        count = 0
-                        deleteOrder(group, menuName)
-                    }
-                    else -> {
-                        count = menuCount-1
-                        setOrder(
-                            group,
-                            DataTableOrder(
-                                menuName,
-                                menuPrice,
-                                count
+                        1 -> {
+                            count = 0
+                            deleteOrder(groupNumber, menuName, transaction)
+                        }
+
+                        else -> {
+                            count = menuCount - 1
+                            setOrder(
+                                groupNumber,
+                                DataTableOrder(
+                                    menuName,
+                                    menuPrice,
+                                    count
+                                ),
+                                transaction
                             )
-                        )
+                        }
                     }
-                }
-            }
-            else throw TableException.InvalidOrderName()
+                } else throw TableException.InvalidOrderName()
 
-            DataTableOrder(
-                menuName,
-                menuPrice,
-                count
-            )
+                DataTableOrder(
+                    menuName,
+                    menuPrice,
+                    count
+                )
+            }
         }
     }
 
-    fun getGroup(tableNumber: Int) = operate {
-        val group = tableApi.readTable(tableNumber).group
-        group
-    }
 }

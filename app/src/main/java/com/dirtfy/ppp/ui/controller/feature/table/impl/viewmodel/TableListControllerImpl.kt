@@ -3,6 +3,7 @@ package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
+import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToUiTable
 import com.dirtfy.ppp.ui.controller.feature.table.TableListController
@@ -37,7 +38,7 @@ class TableListControllerImpl @Inject constructor(
         0, 0, 0, 0, 0, 0, 0, 0, 0, 1
     )
     private val selectedTableSet: MutableSet<Int> = mutableSetOf()
-    private val groupMap: MutableList<Int> = MutableList(12) { it }
+    private val groupMap: MutableMap<Int, Int> = mutableMapOf()
 
     private val retryTrigger: MutableStateFlow<Int> = MutableStateFlow(0)
 
@@ -95,8 +96,18 @@ class TableListControllerImpl @Inject constructor(
         retryTrigger.value += 1
     }
 
+    override fun getGroupNumber(tableNumber: Int): Int {
+        return groupMap[tableNumber] ?: DataTable.GROUP_NOT_ASSIGNED
+    }
+
+    override fun getGroup(groupNumber: Int): DataTableGroup {
+        val member = groupMap.filter { it.value == groupNumber }.map { it.key }
+        return DataTableGroup(groupNumber, member)
+    }
+
     private fun _updateTableList(dbTableList: List<DataTable>): List<UiTable> {
         val newList = dbTableList.map { data -> data.convertToUiTable() }.toMutableList()
+        groupMap.clear()
 
         val groupColorsMap = dbTableList
             .map { it.group } //group 번호와 color 매칭
@@ -188,8 +199,9 @@ class TableListControllerImpl @Inject constructor(
 
     override fun clickTableOnMergeMode(table: UiTable) {
         val tableNumber = table.number.toInt()
-        val group = groupMap[tableNumber]
+        val group = getGroupNumber(tableNumber)
         val member = getMembersOf(group)
+        if (member.isEmpty()) member.add(tableNumber)
 
         val newColor = if (selectedTableSet.contains(tableNumber)) {
             selectedTableSet.removeAll(member.toSet())
@@ -214,19 +226,15 @@ class TableListControllerImpl @Inject constructor(
 
     override fun clickTableOnMainOrOrderMode(table: UiTable) {
         val tableNumber = table.number.toInt()
-        val group = groupMap[tableNumber]
+        val group = getGroupNumber(tableNumber)
         val member = getMembersOf(group)
+        if (member.isEmpty()) member.add(tableNumber)
 
-        var tableList = _screenData.value.tableList.map {
-            val nowColor = Color(it.color)
-            it.copy(color = nowColor.copy(alpha = 1f).value)
-        }
-
-        if (selectedTableSet.contains(tableNumber)) {
+        if (selectedTableSet.contains(tableNumber) || table.color == defaultColor) {
             Log.d(TAG, "table $tableNumber is already selected")
             setMode(UiTableMode.Main)
 //            selectedTableSet.removeAll(member.toSet()) // setMode 에서 해줌.
-            Color(table.color).copy(alpha = 1f)
+//            Color(table.color).copy(alpha = 1f)
         } else {
             Log.d(TAG, "table $tableNumber is not selected yet")
             setMode(UiTableMode.Order)
@@ -234,6 +242,10 @@ class TableListControllerImpl @Inject constructor(
             selectedTableSet.addAll(member.toSet())
             val newColor = Color(table.color).copy(alpha = 0.5f)
 
+            var tableList = _screenData.value.tableList.map {
+                val nowColor = Color(it.color)
+                it.copy(color = nowColor.copy(alpha = 1f).value)
+            }
             Log.d(TAG, "tableList size: ${tableList.size}")
             tableList = tableList.map { nowTable ->
                 Log.d(TAG, "$nowTable")
@@ -251,11 +263,11 @@ class TableListControllerImpl @Inject constructor(
         }
     }
 
-    private fun getMembersOf(group: Int): MutableList<Int> {
+    private fun getMembersOf(groupNum: Int): MutableList<Int> {
         val member = mutableListOf<Int>()
-        groupMap.indices.forEach {
-            if (groupMap[it] == group)
-                member.add(it)
+        groupMap.forEach { (table, group) ->
+            if (group == groupNum)
+                member.add(table)
         }
         return member
     }
@@ -265,9 +277,11 @@ class TableListControllerImpl @Inject constructor(
         val dataTableList = tableNumberList.map {
             DataTable(
                 number = it,
-                group = groupMap[it]
+                group = getGroupNumber(it)
             )
         }
+        Log.d("WeGlonD", "controller - mergeTable - dataTableList")
+        dataTableList.forEach { Log.d("WeGlonD", it.toString()) }
         tableBusinessLogic.mergeTables(dataTableList)
             .catch { cause ->
                 Log.e(TAG, "table merge failed - ${cause.message}")
@@ -287,20 +301,20 @@ class TableListControllerImpl @Inject constructor(
     }
 
     override fun disbandGroup(tableNumber: Int) {
-        val member = mutableListOf<Int>()
-        val group = groupMap[tableNumber]
-        groupMap.indices.forEach {
-            if (groupMap[it] == group) {
-                member.add(it)
-                groupMap[it] = it
-            }
-        }
-
-        if (selectedTableSet.contains(tableNumber))
-            selectedTableSet.removeAll(member.toSet())
-
-        val groupColor = _screenData.value.tableList.find { it.number.toInt() == tableNumber }!!.color
-        groupColorSet.remove(groupColor)
+//        val member = mutableListOf<Int>()
+//        val group = groupMap[tableNumber]
+//        groupMap.indices.forEach {
+//            if (groupMap[it] == group) {
+//                member.add(it)
+//                groupMap[it] = it
+//            }
+//        }
+//
+//        if (selectedTableSet.contains(tableNumber))
+//            selectedTableSet.removeAll(member.toSet())
+//
+//        val groupColor = _screenData.value.tableList.find { it.number.toInt() == tableNumber }!!.color
+//        groupColorSet.remove(groupColor)
     }
 
     override fun setMode(mode: UiTableMode) {

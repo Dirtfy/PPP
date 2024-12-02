@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.table
 
+import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
@@ -11,6 +12,8 @@ interface TableListController {
 
     @Deprecated("screen state synchronized with repository")
     suspend fun updateTableList()
+    fun getGroupNumber(tableNumber: Int): Int
+    fun getGroup(groupNumber: Int): DataTableGroup
     fun clickTableOnMergeMode(table: UiTable)
     fun clickTableOnMainOrOrderMode(table: UiTable)
     suspend fun mergeTable()

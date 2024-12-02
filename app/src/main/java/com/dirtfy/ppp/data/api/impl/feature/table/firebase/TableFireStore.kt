@@ -11,6 +11,7 @@ import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.firestore.ktx.firestore
@@ -24,6 +25,7 @@ import javax.inject.Inject
 class TableFireStore @Inject constructor(): TableApi, Tagger {
 
     private val tableRef = Firebase.firestore.collection(FireStorePath.TABLE)
+    private val groupIdRef = Firebase.firestore.document(FireStorePath.GROUP_ID_COUNT)
 
     private suspend fun readGroup(tableNumber: Int): Int {
         val query = tableRef.whereArrayContains("member", tableNumber)
@@ -41,6 +43,30 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             .toObject(FireStoreGroup::class.java)!!
 
         return result.member?: emptyList()
+    }
+
+    override fun createGroup(group: DataTableGroup, transaction: Transaction): DataTableGroup {
+        if (group.group != DataTable.GROUP_NOT_ASSIGNED)
+            throw TableException.IllegalGroupIdAssignment()
+
+        val snapshot = transaction.get(groupIdRef)
+        val groupId = snapshot.getLong("count")!!.toInt()
+        transaction.update(groupIdRef, "count", FieldValue.increment(1))
+
+        val createdGroup = group.copy(group = groupId)
+        transaction.set(tableRef.document("$groupId"), createdGroup)
+
+        return createdGroup
+    }
+
+    override fun deleteGroup(groupNumber: Int, transaction: Transaction) {
+        val groupRef = tableRef.document("$groupNumber")
+        Log.d("WeGlonD", "delete group $groupNumber")
+//        if (isGroupExist(groupNumber, transaction)) // transaction 내부에서는 모든 read 연산 후 write 연산을 진행해야함.
+        transaction.delete(groupRef)
+//        else
+//            throw TableException.GroupLoss()
+        Log.d("WeGlonD", "group$groupNumber deleted")
     }
 
     override suspend fun readTable(tableNumber: Int): DataTable {
@@ -75,6 +101,20 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             }
         }
         return resultList
+    }
+
+    override suspend fun isGroupExist(groupNumber: Int): Boolean {
+        val groupRef = tableRef.document("$groupNumber")
+        val document = groupRef.get().await()
+        Log.d("donggi","in isGroupExist ${document.exists()}")
+        return document.exists()
+    }
+
+    override fun isGroupExist(groupNumber: Int, transaction: Transaction): Boolean {
+        val groupRef = tableRef.document("$groupNumber")
+        val document = transaction.get(groupRef)
+        Log.d("WeGlonD","in isGroupExist ${document.exists()}")
+        return document.exists()
     }
 
     override suspend fun updateTable(table: DataTable) {
@@ -151,67 +191,50 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             .collection(FireStorePath.TABLE_ORDER)
     }
 
-    /*private suspend fun getOrderID(tableNumber: Int, menuName: String): String? {
-        val orderRef = getOrderRef(tableNumber)
-        val query = orderRef.whereEqualTo("name", menuName)
-        val documents = query.get().await().documents
-        Log.d("WeGlonD", "documents count: ${documents.size}")
-        documents.forEach {
-            Log.d("WeGlonD", "${it.id} - ${it.data}")
-        }
-
-        return when (documents.size) {
-            1 -> documents[0].id
-            0 -> null
-            else -> throw TableException.NonUniqueOrderName()
-        }
-    }*/
-    override suspend fun setOrder(tableNumber: Int, order: DataTableOrder) {
+    override suspend fun setOrder(groupNumber: Int, order: DataTableOrder) {
         Log.d("WeGlonD", "source setOrder")
-        Log.d("WeGlonD", "$tableNumber")
+        Log.d("WeGlonD", "$groupNumber")
         Log.d("WeGlonD", order.toString())
 
-        val orderRef = getOrderRef(tableNumber)
+        val orderRef = getOrderRef(groupNumber)
         val firestoreOrder = order.convertToFireStoreTableOrder()
         orderRef.document(firestoreOrder.name!!).set(firestoreOrder).await()
     }
 
-    override fun setOrder(tableNumber: Int, order: DataTableOrder, transaction: Transaction) {
-        val orderRef = getOrderRef(tableNumber)
+    override fun setOrder(groupNumber: Int, order: DataTableOrder, transaction: Transaction) {
+        val orderRef = getOrderRef(groupNumber)
         val firestoreOrder = order.convertToFireStoreTableOrder()
         transaction.set(orderRef.document(firestoreOrder.name!!), firestoreOrder)
     }
 
-    /*override suspend fun createOrder(tableNumber: Int, menuName: String, menuPrice: Int) {
-        Log.d("WeGlonD", "fireStore createOrder")
-        val orderRef = getOrderRef(tableNumber)
-        orderRef.document(menuName).set(
-            FireStoreTableOrder(
-                name = menuName,
-                price = menuPrice,
-                count = 1
-            )
-        ).await()
-    }*/
+    override suspend fun readOrder(groupNumber: Int, menuName: String): DataTableOrder {
+        if(!isOrderExist(groupNumber,menuName)) throw TableException.InvalidOrderName()
 
-    override suspend fun readOrder(tableNumber: Int, menuName: String): DataTableOrder {
-        if(!isOrderExist(tableNumber,menuName)) throw TableException.InvalidOrderName()
-
-        val order = getOrderRef(tableNumber)
+        val order = getOrderRef(groupNumber)
             .document(menuName)
             .get().await()
             .toObject(FireStoreTableOrder::class.java)!!
             .convertToDataTableOrder()
 
-        return DataTableOrder(
-            name = menuName,
-            price = order.price,
-            count = order.count
-        )
+        return order
     }
 
-    override suspend fun readAllOrder(tableNumber: Int): List<DataTableOrder> {
-        val snapshot = getOrderRef(tableNumber).get().await()
+    override fun readOrder(
+        groupNumber: Int,
+        menuName: String,
+        transaction: Transaction
+    ): DataTableOrder {
+        if (!isOrderExist(groupNumber,menuName, transaction)) throw TableException.InvalidOrderName()
+
+        val orderRef = getOrderRef(groupNumber).document(menuName)
+        val orderSnapshot = transaction.get(orderRef)
+
+        return orderSnapshot.toObject(FireStoreTableOrder::class.java)!!.convertToDataTableOrder()
+    }
+
+    override suspend fun readAllOrder(groupNumber: Int): List<DataTableOrder> {
+        val snapshot = getOrderRef(groupNumber).get().await()
+        if(snapshot.isEmpty) return emptyList()
         return readAllOrder(snapshot)
     }
 
@@ -221,23 +244,24 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             .map { it.convertToDataTableOrder() }
     }
 
-    /*override suspend fun updateOrder(tableNumber: Int, order: DataTableOrder) {
-        Log.d("WeGlonD", "source updateOrder")
-        if(!isOrderExist(tableNumber,order.name)) throw TableException.InvalidOrderName()
-        setOrder(tableNumber, order.convertToFireStoreTableOrder())
-    }*/
+    override suspend fun deleteOrder(groupNumber: Int, menuName: String) {
+        if(!isOrderExist(groupNumber,menuName)) throw TableException.InvalidOrderName()
 
-    override suspend fun deleteOrder(tableNumber: Int, menuName: String) {
-        if(!isOrderExist(tableNumber,menuName)) throw TableException.InvalidOrderName()
-
-        getOrderRef(tableNumber)
+        getOrderRef(groupNumber)
             .document(menuName)
             .delete()
             .await()
     }
 
-    override suspend fun deleteAllOrder(tableNumber: Int) {
-        val orderRef = getOrderRef(tableNumber)
+    override fun deleteOrder(groupNumber: Int, menuName: String, transaction: Transaction) {
+        if(!isOrderExist(groupNumber,menuName,transaction)) throw TableException.InvalidOrderName()
+
+        val orderRef = getOrderRef(groupNumber).document(menuName)
+        transaction.delete(orderRef)
+    }
+
+    override suspend fun deleteAllOrder(groupNumber: Int) {
+        val orderRef = getOrderRef(groupNumber)
         orderRef
             .get().await()
             .documents
@@ -247,25 +271,36 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     }
 
     override fun deleteOrders(
-        tableNumber: Int,
+        groupNumber: Int,
         orderList: List<DataTableOrder>,
         transaction: Transaction
     ) {
-        val orderRef = getOrderRef(tableNumber)
+        val orderRef = getOrderRef(groupNumber)
         orderList.forEach {
             transaction.delete(orderRef.document(it.name))
         }
     }
 
-    override suspend fun isOrderExist(tableNumber: Int, menuName: String): Boolean {
-        val orderRef = getOrderRef(tableNumber)
+    override suspend fun isOrderExist(groupNumber: Int, menuName: String): Boolean {
+        val orderRef = getOrderRef(groupNumber)
         val document = orderRef.document(menuName).get().await()
         Log.d("donggi","in isOrderExist${document.exists()}")
         return document.exists() // 이름 중복으로 firebase에 넣을 수 없다 무조건 0 or 1
     }
 
-    override fun orderStream(tableNumber: Int): Flow<List<DataTableOrder>> = callbackFlow {
-        val targetRef = getOrderRef(readGroup(tableNumber))
+    override fun isOrderExist(
+        groupNumber: Int,
+        menuName: String,
+        transaction: Transaction
+    ): Boolean {
+        val orderRef = getOrderRef(groupNumber)
+        val document = transaction.get(orderRef.document(menuName))
+        Log.d("donggi","in isOrderExist${document.exists()}")
+        return document.exists()
+    }
+
+    override fun orderStream(groupNumber: Int): Flow<List<DataTableOrder>> = callbackFlow {
+        val targetRef = getOrderRef(groupNumber)
         val orderSubscription = targetRef.addSnapshotListener { snapshot, error ->
             try {
                 if (snapshot == null) {
