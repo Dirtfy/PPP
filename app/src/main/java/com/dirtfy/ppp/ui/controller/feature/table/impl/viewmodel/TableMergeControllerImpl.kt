@@ -82,7 +82,11 @@ class TableMergeControllerImpl @Inject constructor(
         }
 
     private fun _updateTableList(dbTableList: List<DataTable>): List<UiTable> {
+        for (i in dbTableList){
+            Log.d("donggi","updateTableList ${i.group} and ${i.number}")
+        }
         val newList = dbTableList.map { data -> data.convertToUiTable() }.toMutableList()
+
         val groupMemberCount = MutableList(12) { 0 }
         dbTableList.forEach { table ->
             groupMap[table.number] = table.group
@@ -91,7 +95,7 @@ class TableMergeControllerImpl @Inject constructor(
 
         groupMemberCount
             .zip((0..11))
-            .filter { zip -> zip.first > 1 }
+            .filter { zip -> zip.first > 1 } // order Collection 이 있는것만 필터링.
             .map { zip -> zip.second }
             .forEach { group ->
                 var groupColor = getRandomColor()
@@ -110,6 +114,8 @@ class TableMergeControllerImpl @Inject constructor(
                     }
                 }
             }
+
+
 
         _screenData.update { it.copy(tableListState = UiScreenState(UiState.COMPLETE)) }
         return tableFormation.map { tableNumber ->

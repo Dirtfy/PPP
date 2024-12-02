@@ -201,6 +201,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     override suspend fun isOrderExist(tableNumber: Int, menuName: String): Boolean {
         val orderRef = getOrderRef(tableNumber)
         val document = orderRef.document(menuName).get().await()
+        Log.d("donggi","in isOrderExist${document.exists()}")
         return document.exists() // 이름 중복으로 firebase에 넣을 수 없다 무조건 0 or 1
     }
 
