@@ -138,17 +138,17 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             else -> throw TableException.NonUniqueOrderName()
         }
     }*/
-    private suspend fun setOrder(tableNumber: Int, order: FireStoreTableOrder) {
+    override suspend fun setOrder(tableNumber: Int, order: DataTableOrder) {
         Log.d("WeGlonD", "source setOrder")
         Log.d("WeGlonD", "$tableNumber")
         Log.d("WeGlonD", order.toString())
 
-        val orderRef =getOrderRef(tableNumber)
-
-        orderRef.document(order.name!!).set(order).await()
+        val orderRef = getOrderRef(tableNumber)
+        val firestoreOrder = order.convertToFireStoreTableOrder()
+        orderRef.document(firestoreOrder.name!!).set(firestoreOrder).await()
     }
 
-    override suspend fun createOrder(tableNumber: Int, menuName: String, menuPrice: Int) {
+    /*override suspend fun createOrder(tableNumber: Int, menuName: String, menuPrice: Int) {
         Log.d("WeGlonD", "fireStore createOrder")
         val orderRef = getOrderRef(tableNumber)
         orderRef.document(menuName).set(
@@ -158,7 +158,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
                 count = 1
             )
         ).await()
-    }
+    }*/
 
     override suspend fun readOrder(tableNumber: Int, menuName: String): DataTableOrder {
         if(!isOrderExist(tableNumber,menuName)) throw TableException.InvalidOrderName()
@@ -187,11 +187,11 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             .map { it.convertToDataTableOrder() }
     }
 
-    override suspend fun updateOrder(tableNumber: Int, order: DataTableOrder) {
+    /*override suspend fun updateOrder(tableNumber: Int, order: DataTableOrder) {
         Log.d("WeGlonD", "source updateOrder")
         if(!isOrderExist(tableNumber,order.name)) throw TableException.InvalidOrderName()
         setOrder(tableNumber, order.convertToFireStoreTableOrder())
-    }
+    }*/
 
     override suspend fun deleteOrder(tableNumber: Int, menuName: String) {
         if(!isOrderExist(tableNumber,menuName)) throw TableException.InvalidOrderName()

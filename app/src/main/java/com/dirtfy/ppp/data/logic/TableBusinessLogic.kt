@@ -83,8 +83,9 @@ class TableBusinessLogic @Inject constructor(
         val baseGroup = groupUniqueList[0]
 
         orderCombineList.forEach {
-            tableApi.createOrder(baseGroup, it.name, it.price)
-            tableApi.updateOrder(baseGroup, it)
+            /*tableApi.createOrder(baseGroup, it.name, it.price)
+            tableApi.updateOrder(baseGroup, it)*/
+            tableApi.setOrder(baseGroup, it)
         }
 
         tableList.filter {
@@ -200,16 +201,24 @@ class TableBusinessLogic @Inject constructor(
             if (isOrderExist(group, menuName)) {
                 val order = readOrder(group, menuName)
                 count = order.count + 1
-                updateOrder(
+
+                /*updateOrder(
+                    group,
+                    order.copy(count = count)
+                )*/
+                setOrder(
                     group,
                     order.copy(count = count)
                 )
             } else {
                 count = 1
-                createOrder(
+                setOrder(
                     group,
-                    menuName,
-                    menuPrice
+                    DataTableOrder(
+                        name = menuName,
+                        price = menuPrice,
+                        count = count
+                    )
                 )
             }
 
@@ -239,7 +248,7 @@ class TableBusinessLogic @Inject constructor(
                     }
                     else -> {
                         count = menuCount-1
-                        updateOrder(
+                        setOrder(
                             group,
                             DataTableOrder(
                                 menuName,
