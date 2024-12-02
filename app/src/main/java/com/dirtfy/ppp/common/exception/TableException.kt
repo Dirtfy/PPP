@@ -6,6 +6,7 @@ sealed class TableException(
     class InvalidTableNumber: TableException("it's invalid table number")
     class InvalidPay: TableException("it's invalid pay")
 
+    @Deprecated("change repository structure")
     class GroupLoss: TableException("group is not found")
     class NumberLoss: TableException("number is not found")
     class NameLoss: TableException("name is not found")
