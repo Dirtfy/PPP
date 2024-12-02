@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.data.api.impl.feature.table.firebase
 
 import android.util.Log
+import com.dirtfy.ppp.common.exception.ExternalException
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.api.TableApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
@@ -89,17 +90,30 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     }
 
     override fun tableStream(): Flow<List<DataTable>> = callbackFlow {
+        Log.d(TAG, "tableStream start")
         val tableSubscription = tableRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) return@addSnapshotListener
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "tableStream snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "tableStream snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
+                if (snapshot.isEmpty) {
+                    Log.e(TAG, "tableStream snapshot is empty")
+                    throw ExternalException.ServerError()
+                }
+
                 val tableList = readAllTable(snapshot)
                 trySend(tableList)
             } catch (e: Throwable) {
                 Log.e(TAG, "table subscription fail\n${e.message}")
-                throw e
+                close(e)
             }
         }
-
+        Log.d(TAG, "tableStream end")
         awaitClose { tableSubscription.remove() }
     }
 
@@ -208,13 +222,20 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     override fun orderStream(tableNumber: Int): Flow<List<DataTableOrder>> = callbackFlow {
         val targetRef = getOrderRef(readGroup(tableNumber))
         val orderSubscription = targetRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) return@addSnapshotListener
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "orderStream snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "orderStream snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val orderList = readAllOrder(snapshot)
                 trySend(orderList)
             } catch (e: Throwable) {
                 Log.e(TAG, "order subscription fail\n${e.message}")
-                throw e
+                close(e)
             }
         }
 

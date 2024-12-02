@@ -17,18 +17,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +44,7 @@ import javax.inject.Inject
 
 
 class MenuScreen @Inject constructor(
-    val menuController: MenuController
+    private val menuController: MenuController
 ): Tagger {
 
     @Composable
@@ -57,15 +54,14 @@ class MenuScreen @Inject constructor(
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
         Component.HandleUiStateDialog(
-            uiState = screen.addMenuState,
-            onDismissRequest = {controller.setAddMenuState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {}//TODO RetryStream 이후 구현
-
+            uiState = screen.createMenuState,
+            onDismissRequest = { controller.setCreateMenuState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request { createMenu() } }
         )
         Component.HandleUiStateDialog(
             uiState = screen.deleteMenuState,
-            onDismissRequest = {controller.setDeleteMenuState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {}//TODO RetryStream 이후 구현
+            onDismissRequest = { controller.setDeleteMenuState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { } // TODO Retry 이후 구현
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -95,7 +91,7 @@ class MenuScreen @Inject constructor(
             Component.HandleUiStateDialog(
                 uiState = screen.menuListState,
                 onDismissRequest = { controller.setMenuListState(UiScreenState(UiState.COMPLETE)) },
-                onRetryAction = {}, //TODO RetryStream 이후 구현
+                onRetryAction = { controller.retryUpdateMenuList() },
                 onComplete = {
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(160.dp),

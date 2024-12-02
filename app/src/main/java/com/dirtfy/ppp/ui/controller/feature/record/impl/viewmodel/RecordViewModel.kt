@@ -6,7 +6,6 @@ import com.dirtfy.ppp.ui.controller.feature.record.RecordController
 import com.dirtfy.ppp.ui.controller.feature.record.RecordDetailController
 import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
-import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.UiRecordScreenState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
@@ -55,6 +54,10 @@ class RecordViewModel @Inject constructor(
     override suspend fun updateRecordList() {
     }
 
+    override fun retryUpdateRecordList() {
+        listController.retryUpdateRecordList()
+    }
+
     override suspend fun updateRecordDetailList() {
         detailController.updateRecordDetailList()
     }
@@ -69,6 +72,10 @@ class RecordViewModel @Inject constructor(
 
     override fun setMode(mode: UiRecordMode) {
         modeFlow.update { mode }
+    }
+
+    override fun setRecordListState(state: UiScreenState) {
+        listController.setRecordListState(state)
     }
 
     override fun setRecordDetailListState(state: UiScreenState) {

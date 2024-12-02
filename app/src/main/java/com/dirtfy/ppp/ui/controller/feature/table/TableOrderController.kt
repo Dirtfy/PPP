@@ -9,14 +9,17 @@ import kotlinx.coroutines.flow.Flow
 interface TableOrderController {
     val screenData: Flow<UiTableOrderScreenState>
 
-    suspend fun updateOrderList(table: UiTable)
+    fun updateOrderList(table: UiTable)
+    fun retryUpdateOrderList()
     fun updatePointUse(pointUse: UiPointUse)
     suspend fun payTableWithCash(tableNumber: Int)
     suspend fun payTableWithCard(tableNumber: Int)
     suspend fun payTableWithPoint(tableNumber: Int)
     suspend fun addOrder(tableNumber: Int, name: String, price: String)
     suspend fun cancelOrder(tableNumber: Int, name: String, price: String)
-    fun setPayTableState(state: UiScreenState)
+    fun setPayTableWithCashState(state: UiScreenState)
+    fun setPayTableWithCardState(state: UiScreenState)
+    fun setPayTableWithPointState(state: UiScreenState)
     fun setOrderListState(state: UiScreenState)
     fun setAddOrderState(state: UiScreenState)
     fun setCancelOrderState(state: UiScreenState)

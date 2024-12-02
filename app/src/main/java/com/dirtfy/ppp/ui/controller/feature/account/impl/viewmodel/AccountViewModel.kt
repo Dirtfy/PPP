@@ -45,7 +45,7 @@ class AccountViewModel @Inject constructor(
         }.combine(accountCreateController.screenData) { state, createScreenData ->
             state.copy(
                 newAccount = createScreenData.newAccount,
-                newAccountState = createScreenData.newAccountState,
+                addAccountState = createScreenData.addAccountState,
                 numberGeneratingState = createScreenData.numberGeneratingState
             )
         }.combine(accountDetailController.screenData) { state, detailScreenData ->
@@ -54,7 +54,7 @@ class AccountViewModel @Inject constructor(
                 newAccountRecord = detailScreenData.newAccountRecord,
                 accountRecordList = detailScreenData.accountRecordList,
                 accountRecordListState = detailScreenData.accountRecordListState,
-                newAccountRecordState = detailScreenData.newAccountRecordState
+                addAccountRecordState = detailScreenData.addAccountRecordState
             )
         }.combine(accountUpdateController.screenData) { state, updateScreenData ->
             state.copy(
@@ -73,7 +73,11 @@ class AccountViewModel @Inject constructor(
         // TODO 다른 기기에서 어카운트 변경시 어떻게 뷰를 변경할 지 정해야 할 듯
     }
 
-    override suspend fun updateNewAccount(newAccountData: UiNewAccount) {
+    override fun retryUpdateAccountList() {
+        accountListController.retryUpdateAccountList()
+    }
+
+    override fun updateNewAccount(newAccountData: UiNewAccount) {
         accountCreateController.updateNewAccount(newAccountData)
     }
 
@@ -85,12 +89,20 @@ class AccountViewModel @Inject constructor(
         accountCreateController.setRandomValidAccountNumberToNewAccount()
     }
 
-    override suspend fun updateAccountRecordList() {
+    @Deprecated(
+        message = "accountRecordList will be automatically updated when nowAccount is updated",
+        replaceWith = ReplaceWith("updateNowAccount(account)")
+    )
+    override fun updateAccountRecordList() {
         accountDetailController.updateAccountRecordList(_screenData.value.nowAccount)
     }
 
+    override fun retryUpdateAccountRecordList() {
+        accountDetailController.retryUpdateAccountRecordList()
+    }
+
     override fun updateNowAccount(account: UiAccount) {
-        _screenData.update { it.copy(nowAccount = account) }
+        accountDetailController.updateNowAccount(account)
     }
 
     override fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord) {
@@ -113,8 +125,8 @@ class AccountViewModel @Inject constructor(
         _screenData.update { it.copy(mode = mode) }
     }
 
-    override fun setNewAccountState(state: UiScreenState){
-        accountCreateController.setNewAccountState(state)
+    override fun setAddAccountState(state: UiScreenState){
+        accountCreateController.setAddAccountState(state)
     }
 
     override fun setNumberGeneratingState(state: UiScreenState) {
@@ -125,8 +137,8 @@ class AccountViewModel @Inject constructor(
         accountDetailController.setAccountRecordListState(state)
     }
 
-    override fun setNewAccountRecordState(state: UiScreenState){
-        accountDetailController.setNewAccountRecordState(state)
+    override fun setAddAccountRecordState(state: UiScreenState){
+        accountDetailController.setAddAccountRecordState(state)
     }
 
     override fun setAccountListState(state: UiScreenState) {

@@ -10,6 +10,7 @@ interface MenuListController {
 
     @Deprecated("screen state synchronized with repository")
     suspend fun updateMenuList()
+    fun retryUpdateMenuList()
 
     fun updateSearchClue(clue: String)
     fun setMenuListState(state: UiScreenState)

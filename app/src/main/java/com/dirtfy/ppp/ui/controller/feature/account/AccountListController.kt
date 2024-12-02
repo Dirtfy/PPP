@@ -9,6 +9,7 @@ interface AccountListController {
 
     @Deprecated("screen state synchronized with repository")
     suspend fun updateAccountList()
+    fun retryUpdateAccountList()
     fun updateSearchClue(clue: String)
     fun setAccountListState(state: UiScreenState)
 }
