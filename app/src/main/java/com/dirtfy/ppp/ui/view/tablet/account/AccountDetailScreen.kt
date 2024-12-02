@@ -1,12 +1,9 @@
 package com.dirtfy.ppp.ui.view.tablet.account
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,10 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -32,7 +26,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +47,7 @@ import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class AccountDetailScreen @Inject constructor(
-    val accountController: AccountController
+    private val accountController: AccountController
 ) {
 
     @Composable
@@ -63,11 +56,11 @@ class AccountDetailScreen @Inject constructor(
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            controller.request {
-                updateAccountRecordList()
-            }
-        }
+//        LaunchedEffect(key1 = controller) {
+//            controller.request {
+//                updateAccountRecordList()
+//            }
+//        }
 
         ScreenContent(
             nowAccount = screen.nowAccount,
@@ -84,14 +77,14 @@ class AccountDetailScreen @Inject constructor(
                 controller.setAccountRecordListState(UiScreenState(UiState.COMPLETE))
             },
             onRetryClick = {
-                controller.request { updateAccountRecordList() }
+                controller.retryUpdateAccountRecordList()
             }
         )
 
         Component.HandleUiStateDialog(
-            screen.newAccountRecordState,
-            onDismissRequest = {controller.setNewAccountRecordState(UiScreenState(UiState.COMPLETE))},
-            onRetryAction = {controller.request{addRecord()}}
+            screen.addAccountRecordState,
+            onDismissRequest = { controller.setAddAccountRecordState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request{ addRecord() } }
         )
     }
 

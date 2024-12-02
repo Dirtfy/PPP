@@ -23,19 +23,15 @@ class AccountCreateControllerImpl @Inject constructor(
     override val screenData: Flow<UiAccountCreateScreenState>
         get() = _screenData
 
-    private fun _updateNewAccount(newAccountData: UiNewAccount) {
+    override fun updateNewAccount(newAccountData: UiNewAccount) {
         _screenData.update {
             it.copy(newAccount = newAccountData)
         }
     }
 
-    override suspend fun updateNewAccount(newAccountData: UiNewAccount) {
-        _updateNewAccount(newAccountData)
-    }
-
     override suspend fun addAccount(onComplete: () -> Unit) {
         val (number, name, phoneNumber) = _screenData.value.newAccount
-        _screenData.update { it.copy(newAccountState = UiScreenState(UiState.LOADING)) }
+        _screenData.update { it.copy(addAccountState = UiScreenState(UiState.LOADING)) }
         accountBusinessLogic.createAccount(
             number = number.toInt(),
             name = name,
@@ -44,14 +40,14 @@ class AccountCreateControllerImpl @Inject constructor(
             Log.e(TAG, "addAccount() - createAccount failed \n ${cause.message}")
             _screenData.update {
                 it.copy(
-                    newAccountState = UiScreenState(UiState.FAIL, cause)
+                    addAccountState = UiScreenState(UiState.FAIL, cause)
                 )
             }
         }.collect {
             _screenData.update { before ->
                 before.copy(
                     newAccount = UiNewAccount(),
-                    newAccountState = UiScreenState(UiState.COMPLETE)
+                    addAccountState = UiScreenState(UiState.COMPLETE)
                 )
             }
             onComplete()
@@ -83,9 +79,9 @@ class AccountCreateControllerImpl @Inject constructor(
             }
     }
 
-    override fun setNewAccountState(state: UiScreenState){
+    override fun setAddAccountState(state: UiScreenState){
         _screenData.update {
-            it.copy(newAccountState = state)
+            it.copy(addAccountState = state)
         }
     }
 

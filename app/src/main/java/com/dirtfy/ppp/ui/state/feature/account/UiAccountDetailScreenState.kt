@@ -12,5 +12,5 @@ data class UiAccountDetailScreenState(
     val accountRecordList: List<UiAccountRecord> = emptyList(),
 
     val accountRecordListState: UiScreenState = UiScreenState(),
-    val newAccountRecordState: UiScreenState = UiScreenState(UiState.COMPLETE)
+    val addAccountRecordState: UiScreenState = UiScreenState(UiState.COMPLETE)
 )

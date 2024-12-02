@@ -11,7 +11,9 @@ data class UiTableOrderScreenState(
     val pointUse: UiPointUse = UiPointUse(),
 
     val orderListState: UiScreenState = UiScreenState(),
-    val payTableState: UiScreenState = UiScreenState(UiState.COMPLETE),
+    val payTableWithCashState: UiScreenState = UiScreenState(UiState.COMPLETE),
+    val payTableWithCardState: UiScreenState = UiScreenState(UiState.COMPLETE),
+    val payTableWithPointState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val addOrderState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val cancelOrderState: UiScreenState = UiScreenState(UiState.COMPLETE),
 )

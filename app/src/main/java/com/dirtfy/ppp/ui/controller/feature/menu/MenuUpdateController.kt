@@ -13,6 +13,6 @@ interface MenuUpdateController {
 
     suspend fun createMenu()
     suspend fun deleteMenu(menu: UiMenu)
-    fun setAddMenuState(state:UiScreenState)
-    fun setDeleteMenuState(state:UiScreenState)
+    fun setCreateMenuState(state: UiScreenState)
+    fun setDeleteMenuState(state: UiScreenState)
 }

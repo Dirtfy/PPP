@@ -5,15 +5,20 @@ import com.dirtfy.ppp.ui.state.feature.account.UiAccountDetailScreenState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.update
 
 interface AccountDetailController {
     val screenData: Flow<UiAccountDetailScreenState>
 
-    suspend fun updateAccountRecordList(account: UiAccount)
+    fun updateNowAccount(account: UiAccount)
+    @Deprecated(
+        message = "accountRecordList will be automatically updated when nowAccount is updated",
+        replaceWith = ReplaceWith("updateNowAccount(account)")
+    )
+    fun updateAccountRecordList(account: UiAccount)
+    fun retryUpdateAccountRecordList()
     fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord)
     suspend fun addRecord()
 
     fun setAccountRecordListState(state: UiScreenState)
-    fun setNewAccountRecordState(state: UiScreenState)
+    fun setAddAccountRecordState(state: UiScreenState)
 }

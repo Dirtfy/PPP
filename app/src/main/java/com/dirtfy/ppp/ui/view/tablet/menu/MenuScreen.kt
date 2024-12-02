@@ -39,7 +39,7 @@ import com.dirtfy.tagger.Tagger
 import javax.inject.Inject
 
 class MenuScreen @Inject constructor(
-    val menuController: MenuController
+    private val menuController: MenuController
 ): Tagger {
 
     @Composable

@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface TableMenuController {
     val screenData: Flow<UiTableMenuScreenState>
 
+    @Deprecated("screen state synchronized with repository")
     suspend fun updateMenuList()
+    fun retryUpdateMenuList()
     fun setMenuListState(state: UiScreenState)
 }

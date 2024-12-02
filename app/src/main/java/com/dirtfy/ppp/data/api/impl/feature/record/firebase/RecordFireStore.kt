@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.data.api.impl.feature.record.firebase
 
 import android.util.Log
+import com.dirtfy.ppp.common.exception.ExternalException
 import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
@@ -93,8 +94,10 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     }
 
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
-        return recordRef.document(record.id.toString())
+        val detailSnapshot = recordRef.document(record.id.toString())
             .collection(FireStorePath.RECORD_DETAIL).get().await()
+        if (detailSnapshot.metadata.isFromCache) throw ExternalException.NetworkError()
+        return detailSnapshot
             .documents.map { detailDocument ->
                 detailDocument.toObject(FireStoreRecordDetail::class.java)!!
             }.map { recordDetail ->
@@ -109,19 +112,37 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
 
     override fun recordStream(): Flow<List<DataRecord>> = callbackFlow {
         val recordSubscription = recordRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) { return@addSnapshotListener }
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "recordStream snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "recordStream snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val recordList = readAll(snapshot)
                 trySend(recordList)
             } catch (e: Throwable) {
                 Log.e(TAG, "record subscription\n${e.message}")
-                throw e
+                close(e)
             }
         }
 
         awaitClose {
             recordSubscription.remove()
         }
+    }
+
+    override suspend fun <ValueType> readRecordWith(
+        key: String,
+        value: ValueType
+    ): List<DataRecord> {
+        val targetRecordRef = recordRef
+            .whereEqualTo(key, value)
+
+        val querySnapshot = targetRecordRef.get().await()
+        return readAll(querySnapshot)
     }
 
     override fun <ValueType> recordStreamWith(
@@ -132,13 +153,20 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
             .whereEqualTo(key, value)
 
         val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) { return@addSnapshotListener }
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "recordStreamWith(key = $key, value = $value) - snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "recordStreamWith(key = $key, value = $value) - snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val accountRecordList = readAll(snapshot)
                 trySend(accountRecordList)
             } catch (e: Throwable) {
-                Log.e(TAG, "record subscription fail\n${e.message}")
-                throw e
+                Log.e(TAG, "recordStreamWith(key = $key, value = $value) - subscription fail\n${e.message}")
+                close(e)
             }
         }
 
@@ -170,8 +198,15 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
             .whereEqualTo(key, value)
 
         val recordSubscription = targetRecordRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) { return@addSnapshotListener }
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "recordStreamSumOf(key = $key, value = $value, target = $target) - snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "recordStreamSumOf(key = $key, value = $value, target = $target) - snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val result = sum(
                     readAllRecordWith(
                         snapshot,
@@ -181,8 +216,8 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
 
                 trySend(result)
             } catch (e: Throwable) {
-                Log.e(TAG, "record subscription fail\n${e.message}")
-                throw e
+                Log.e(TAG, "recordStreamSumOf(key = $key, value = $value, target = $target) - subscription fail\n${e.message}")
+                close(e)
             }
         }
 

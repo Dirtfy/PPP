@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.data.api.impl.feature.account.firebase
 
 import android.util.Log
+import com.dirtfy.ppp.common.exception.ExternalException
 import com.dirtfy.ppp.common.exception.RecordException
 import com.dirtfy.ppp.data.api.AccountApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
@@ -140,15 +141,21 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
     }
 
     override fun accountStream(): Flow<List<DataAccount>> = callbackFlow {
-
         val accountSubscription = accountRef.addSnapshotListener { snapshot, error ->
-            if (snapshot == null) { return@addSnapshotListener }
             try {
+                if (snapshot == null) {
+                    Log.e(TAG, "accountStream snapshot null")
+                    throw (error ?: ExternalException.ServerError())
+                }
+                if (snapshot.metadata.isFromCache) {
+                    Log.e(TAG, "accountStream snapshot is from cache")
+                    throw ExternalException.NetworkError()
+                }
                 val accountList = readAllAccount(snapshot)
                 trySend(accountList)
             } catch (e: Throwable) {
                 Log.e(TAG, "account subscription fail\n${e.message}")
-                throw e
+                close(e)
             }
         }
 

@@ -3,56 +3,43 @@ package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
+import com.dirtfy.ppp.ui.controller.feature.table.TableListController
 import com.dirtfy.ppp.ui.controller.feature.table.TableMenuController
-import com.dirtfy.ppp.ui.controller.feature.table.TableMergeController
 import com.dirtfy.ppp.ui.controller.feature.table.TableOrderController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
-import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
-import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import com.dirtfy.tagger.Tagger
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class TableViewModel @Inject constructor(
-    private val mergeController: TableMergeController,
+    private val listController: TableListController,
     private val orderController: TableOrderController,
     private val menuController: TableMenuController
 ): ViewModel(), TableController, Tagger {
 
-    private val modeFlow = MutableStateFlow(UiTableMode.Main)
     private var selectedTableNumber: Int = 0
 
     override val screenData: StateFlow<UiTableScreenState>
-        = modeFlow
-        .combine(menuController.screenData) { mode, menuScreenState ->
+        = menuController.screenData
+        .combine(listController.screenData) { menuScreenState, listScreenData ->
             UiTableScreenState(
-                mode = mode,
                 menuList = menuScreenState.menuList,
-                menuListState = menuScreenState.menuListState
-            )
-        }.combine(mergeController.screenData) { state, mergeScreenData ->
-            state.copy(
-                tableList = mergeScreenData.tableList,
-                sourceTableList = mergeScreenData.sourceTableList,
-                tableListState = mergeScreenData.tableListState,
-                mergeTableState = mergeScreenData.mergeTableState
+                menuListState = menuScreenState.menuListState,
+                tableList = listScreenData.tableList,
+                sourceTableList = listScreenData.sourceTableList,
+                mode = listScreenData.mode,
+                tableListState = listScreenData.tableListState,
+                mergeTableState = listScreenData.mergeTableState
             )
         }.combine(orderController.screenData) { state, orderScreenData ->
             state.copy(
@@ -60,7 +47,9 @@ class TableViewModel @Inject constructor(
                 orderTotalPrice = orderScreenData.orderTotalPrice,
                 pointUse = orderScreenData.pointUse,
                 orderListState = orderScreenData.orderListState,
-                payTableState = orderScreenData.payTableState,
+                payTableWithCashState = orderScreenData.payTableWithCashState,
+                payTableWithCardState = orderScreenData.payTableWithCardState,
+                payTableWithPointState = orderScreenData.payTableWithPointState,
                 addOrderState = orderScreenData.addOrderState,
                 cancelOrderState = orderScreenData.cancelOrderState
             )
@@ -70,18 +59,32 @@ class TableViewModel @Inject constructor(
             initialValue = UiTableScreenState()
         )
 
+    @Deprecated("screen state synchronized with repository")
     override suspend fun updateTableList() {
-        mergeController.updateTableList()
+        listController.updateTableList()
     }
 
-    override suspend fun updateOrderList(table: UiTable) {
+    override fun retryUpdateTableList() {
+        listController.retryUpdateTableList()
+    }
+
+    override fun updateOrderList(table: UiTable) {
         selectedTableNumber = table.number.toInt()
         println(selectedTableNumber.toString())
         orderController.updateOrderList(table)
     }
 
+    override fun retryUpdateOrderList() {
+        orderController.retryUpdateOrderList()
+    }
+
+    @Deprecated("screen state synchronized with repository")
     override suspend fun updateMenuList() {
         menuController.updateMenuList()
+    }
+
+    override fun retryUpdateMenuList() {
+        menuController.retryUpdateMenuList()
     }
 
     override fun updatePointUse(pointUse: UiPointUse) {
@@ -89,27 +92,23 @@ class TableViewModel @Inject constructor(
     }
 
     override fun clickTable(table: UiTable) {
-        when (modeFlow.value) {
-            UiTableMode.Merge -> mergeController.clickTableOnMergeMode(table)
-            else -> {
-                val selectedGroup = mergeController.clickTableOnMainOrOrderMode(table)
-                if (selectedGroup > 0) setMode(UiTableMode.Order)
-                else setMode(UiTableMode.Main)
-            }
+        when (screenData.value.mode) {
+            UiTableMode.Merge -> listController.clickTableOnMergeMode(table)
+            else -> listController.clickTableOnMainOrOrderMode(table)
         }
     }
 
     override suspend fun mergeTable() {
-        mergeController.mergeTable()
+        listController.mergeTable()
     }
 
     override fun cancelMergeTable() {
-        mergeController.cancelMergeTable()
+        listController.cancelMergeTable()
         setMode(UiTableMode.Main)
     }
 
     private fun disbandGroup() {
-        mergeController.disbandGroup(selectedTableNumber)
+        //listController.disbandGroup(selectedTableNumber)
         setMode(UiTableMode.Main)
     }
 
@@ -137,7 +136,7 @@ class TableViewModel @Inject constructor(
     }
 
     override fun setMode(mode: UiTableMode) {
-        modeFlow.update { mode }
+        listController.setMode(mode)
     }
 
     override fun setMenuListState(state: UiScreenState){
@@ -145,15 +144,23 @@ class TableViewModel @Inject constructor(
     }
 
     override fun setTableListState(state: UiScreenState) {
-        mergeController.setTableListState(state)
+        listController.setTableListState(state)
     }
 
     override fun setMergeTableState(state: UiScreenState) {
-        mergeController.setMergeTableState(state)
+        listController.setMergeTableState(state)
     }
 
-    override fun setPayTableState(state: UiScreenState) {
-        orderController.setPayTableState(state)
+    override fun setPayTableWithCashState(state: UiScreenState) {
+        orderController.setPayTableWithCashState(state)
+    }
+
+    override fun setPayTableWithCardState(state: UiScreenState) {
+        orderController.setPayTableWithCardState(state)
+    }
+
+    override fun setPayTableWithPointState(state: UiScreenState) {
+        orderController.setPayTableWithPointState(state)
     }
 
     override fun setOrderListState(state: UiScreenState) {

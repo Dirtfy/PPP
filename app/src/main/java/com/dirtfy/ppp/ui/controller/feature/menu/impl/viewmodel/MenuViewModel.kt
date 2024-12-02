@@ -31,7 +31,7 @@ class MenuViewModel @Inject constructor(
                 searchClue = listScreenData.searchClue,
                 newMenu = updateScreenData.newMenu,
                 menuListState = listScreenData.menuListState,
-                addMenuState = updateScreenData.addMenuState,
+                createMenuState = updateScreenData.createMenuState,
                 deleteMenuState = updateScreenData.deleteMenuState
             )
         }
@@ -43,6 +43,10 @@ class MenuViewModel @Inject constructor(
 
     @Deprecated("screen state synchronized with repository")
     override suspend fun updateMenuList() {
+    }
+
+    override fun retryUpdateMenuList() {
+        listController.retryUpdateMenuList()
     }
 
     override fun updateSearchClue(clue: String) {
@@ -65,8 +69,8 @@ class MenuViewModel @Inject constructor(
         listController.setMenuListState(state)
     }
 
-    override fun setAddMenuState(state: UiScreenState) {
-        updateController.setAddMenuState(state)
+    override fun setCreateMenuState(state: UiScreenState) {
+        updateController.setCreateMenuState(state)
     }
 
     override fun setDeleteMenuState(state: UiScreenState) {

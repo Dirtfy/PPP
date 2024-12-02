@@ -37,13 +37,12 @@ import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatCon
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
-import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
 import com.dirtfy.ppp.ui.view.phone.Component
 import javax.inject.Inject
 
 class AccountCreateScreen @Inject constructor(
-    val accountController: AccountController
+    private val accountController: AccountController
 ) {
 
     @Composable
@@ -65,8 +64,8 @@ class AccountCreateScreen @Inject constructor(
         )
 
         Component.HandleUiStateDialog(
-            uiState = screen.newAccountState,
-            onDismissRequest = {controller.setNewAccountState(UiScreenState(UiState.COMPLETE))},
+            uiState = screen.addAccountState,
+            onDismissRequest = {controller.setAddAccountState(UiScreenState(UiState.COMPLETE))},
             onRetryAction = { controller.request { addAccount() } }
         )
 

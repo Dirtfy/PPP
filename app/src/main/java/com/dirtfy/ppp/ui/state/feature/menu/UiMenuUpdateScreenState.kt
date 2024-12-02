@@ -7,6 +7,6 @@ import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
 data class UiMenuUpdateScreenState(
     val newMenu: UiMenu = UiMenu(),
 
-    val addMenuState: UiScreenState = UiScreenState(UiState.COMPLETE),
+    val createMenuState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val deleteMenuState: UiScreenState = UiScreenState(UiState.COMPLETE),
 )

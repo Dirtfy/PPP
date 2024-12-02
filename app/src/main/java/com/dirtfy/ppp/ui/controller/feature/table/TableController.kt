@@ -2,7 +2,6 @@ package com.dirtfy.ppp.ui.controller.feature.table
 
 import com.dirtfy.ppp.ui.controller.common.Controller
 import com.dirtfy.ppp.ui.state.common.UiScreenState
-import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
@@ -10,9 +9,14 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 
 interface TableController: Controller<UiTableScreenState, TableController> {
 
+    @Deprecated("screen state synchronized with repository")
     suspend fun updateTableList()
-    suspend fun updateOrderList(table: UiTable)
+    fun retryUpdateTableList()
+    fun updateOrderList(table: UiTable)
+    fun retryUpdateOrderList()
+    @Deprecated("screen state synchronized with repository")
     suspend fun updateMenuList()
+    fun retryUpdateMenuList()
     fun updatePointUse(pointUse: UiPointUse)
 
     fun clickTable(table: UiTable)
@@ -28,7 +32,9 @@ interface TableController: Controller<UiTableScreenState, TableController> {
     fun setMenuListState(state: UiScreenState)
     fun setTableListState(state: UiScreenState)
     fun setMergeTableState(state: UiScreenState)
-    fun setPayTableState(state: UiScreenState)
+    fun setPayTableWithCashState(state: UiScreenState)
+    fun setPayTableWithCardState(state: UiScreenState)
+    fun setPayTableWithPointState(state: UiScreenState)
     fun setOrderListState(state: UiScreenState)
     fun setAddOrderState(state: UiScreenState)
     fun setCancelOrderState(state: UiScreenState)

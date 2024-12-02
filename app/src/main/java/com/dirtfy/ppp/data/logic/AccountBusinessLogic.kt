@@ -18,7 +18,7 @@ class AccountBusinessLogic @Inject constructor(
 ): BusinessLogic {
 
     private fun isValidPhoneNumber(phoneNumber: String): Boolean {
-        val regex = Regex("""^010-\d{3,4}-\d{4}$""")
+        val regex = Regex("""^010-\d{3,4}-\d{4}$""") // TODO 053 등 집전화 적용?
         return regex.matches(phoneNumber)
     }
 
@@ -86,12 +86,11 @@ class AccountBusinessLogic @Inject constructor(
         account
     }
 
-    // TODO deprecate 시키기
     fun readAccountRecord(accountNumber: Int) = operate {
         if (!accountApi.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()
 
-        accountApi.readAllRecord(accountNumber).sortedBy { -it.timestamp }
+        recordApi.readRecordWith("type", "$accountNumber").sortedBy { -it.timestamp }
     }
 
     private suspend fun readBalance(

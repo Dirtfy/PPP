@@ -10,6 +10,6 @@ data class UiMenuScreenState(
     val newMenu: UiMenu = UiMenu(),
 
     val menuListState: UiScreenState = UiScreenState(),
-    val addMenuState: UiScreenState = UiScreenState(UiState.COMPLETE),
+    val createMenuState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val deleteMenuState: UiScreenState = UiScreenState(UiState.COMPLETE)
 )

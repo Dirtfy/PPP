@@ -4,38 +4,34 @@ import com.dirtfy.ppp.data.api.AccountApi
 import com.dirtfy.ppp.data.api.MenuApi
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.TableApi
-import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
-import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
-import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
-import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
-import dagger.Binds
+import com.dirtfy.ppp.data.api.impl.common.firebase.FireStoreManager
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class DataModule {
+class DataModule {
 
-    @Binds
-    abstract fun bindsAccountApi(
-        accountImplementation: AccountFireStore
-    ): AccountApi
+    @Provides
+    fun providesAccountApi(): AccountApi {
+        return FireStoreManager.getInstance().accountFireStore
+    }
 
-    @Binds
-    abstract fun bindsMenuApi(
-        menuImplementation: MenuFireStore
-    ): MenuApi
+    @Provides
+    fun providesMenuApi(): MenuApi {
+        return FireStoreManager.getInstance().menuFireStore
+    }
 
-    @Binds
-    abstract fun bindsRecordApi(
-        recordImplementation: RecordFireStore
-    ): RecordApi
+    @Provides
+    fun providesRecordApi(): RecordApi {
+        return FireStoreManager.getInstance().recordFireStore
+    }
 
-    @Binds
-    abstract fun bindsTableApi(
-        tableImplementation: TableFireStore
-    ): TableApi
-
+    @Provides
+    fun providesTableApi(): TableApi {
+        return FireStoreManager.getInstance().tableFireStore
+    }
 
 }

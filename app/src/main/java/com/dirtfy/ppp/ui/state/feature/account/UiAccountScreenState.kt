@@ -20,9 +20,9 @@ data class UiAccountScreenState(
     val mode: UiAccountMode = UiAccountMode.Main,
 
     val accountListState: UiScreenState = UiScreenState(),
-    val newAccountState: UiScreenState = UiScreenState(UiState.COMPLETE),
+    val addAccountState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val numberGeneratingState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val accountRecordListState: UiScreenState = UiScreenState(),
-    val newAccountRecordState: UiScreenState = UiScreenState(UiState.COMPLETE),
+    val addAccountRecordState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val updateAccountState: UiScreenState = UiScreenState(UiState.COMPLETE),
 )

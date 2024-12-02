@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel
 
+import android.util.Log
 import com.dirtfy.ppp.data.logic.RecordBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToDataRecordFromNowRecord
 import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToNowRecord
@@ -25,12 +26,14 @@ class RecordDetailControllerImpl @Inject constructor(
     override val screenData: Flow<UiRecordDetailScreenState>
         get() = _screenData
 
-    private suspend fun _updateRecordDetailList(record: UiRecord) {
+    override suspend fun updateRecordDetailList() {
         _screenData.update { it.copy(recordDetailListState = UiScreenState(UiState.LOADING)) }
-        
+
+        val record = _screenData.value.nowRecord
         recordBusinessLogic.readRecordDetail(record.convertToDataRecordFromNowRecord())
             .map { it.map { data -> data.convertToUiRecordDetail() } }
             .catch { cause ->
+                Log.e(TAG, "readRecordDetail fail - ${cause.message}")
                 _screenData.update {
                     it.copy(
                         recordDetailListState = UiScreenState(UiState.FAIL, cause)
@@ -45,10 +48,6 @@ class RecordDetailControllerImpl @Inject constructor(
                     )
                 }
             }
-    }
-
-    override suspend fun updateRecordDetailList() {
-        _updateRecordDetailList(_screenData.value.nowRecord)
     }
 
     override suspend fun updateNowRecord(record: UiRecord) {
