@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.data.api.impl.common.firebase
 
+import com.dirtfy.ppp.data.api.ApiProvider
 import com.dirtfy.ppp.data.api.impl.feature.account.firebase.AccountFireStore
 import com.dirtfy.ppp.data.api.impl.feature.menu.firebase.MenuFireStore
 import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
@@ -8,7 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-class FireStoreManager private constructor() {
+class FireStoreProvider private constructor(): ApiProvider {
     init {
         Firebase.firestore.firestoreSettings = FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(false) // TODO deprecated function call
@@ -16,18 +17,18 @@ class FireStoreManager private constructor() {
     }
 
     companion object {
-        private var instance: FireStoreManager? = null
-
-        fun getInstance(): FireStoreManager {
+        private var instance: FireStoreProvider? = null
+        fun getInstance(): FireStoreProvider {
             if (instance == null)
-                instance = FireStoreManager()
+                instance = FireStoreProvider()
 
-            return instance as FireStoreManager
+            return instance as FireStoreProvider
         }
     }
 
-    val accountFireStore = AccountFireStore()
-    val menuFireStore = MenuFireStore()
-    val recordFireStore = RecordFireStore()
-    val tableFireStore = TableFireStore()
+    override val accountApi = AccountFireStore()
+    override val menuApi = MenuFireStore()
+    override val recordApi = RecordFireStore()
+    override val tableApi = TableFireStore()
+
 }

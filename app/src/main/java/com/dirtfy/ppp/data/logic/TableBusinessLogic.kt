@@ -4,6 +4,7 @@ import android.util.Log
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.TableApi
+import com.dirtfy.ppp.data.api.TransactionManager
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordType
@@ -11,14 +12,13 @@ import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.ppp.data.logic.common.BusinessLogic
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.Transaction
 import javax.inject.Inject
 
 class TableBusinessLogic @Inject constructor(
     private val tableApi: TableApi,
-    private val recordApi: RecordApi
+    private val recordApi: RecordApi,
+    private val transactionManager: TransactionManager<Transaction> // TODO com.google.firebase.firestore.Transaction 숨기기
 ): BusinessLogic {
 
     private fun isInValidTableNumber(tableNumber: Int): Boolean {
@@ -52,9 +52,6 @@ class TableBusinessLogic @Inject constructor(
                 throw TableException.InvalidTableNumber()
         }
 
-//        val tableList = tableApi.readAllTable()
-//            .filter { tableNumberList.contains(it.number) }
-
         val groupUniqueList = tableList.map {
             it.group
         }.toSet().toList()
@@ -85,7 +82,7 @@ class TableBusinessLogic @Inject constructor(
             }
         }
 
-        val mergedGroupNum = Firebase.firestore.runTransaction { transaction ->
+        transactionManager.transaction { transaction ->
             groupUniqueList.forEach {
                 tableApi.deleteOrders(it, groupOrderMap[it] ?: emptyList(), transaction)
             }
@@ -110,9 +107,8 @@ class TableBusinessLogic @Inject constructor(
                 baseGroup = tableApi.combineGroup(baseGroup, targetGroup, transaction)
             }
 
-            return@runTransaction baseGroupNumber
-        }.await()
-        mergedGroupNum
+            baseGroupNumber
+        }
     }
 
     private suspend fun cleanGroup(group: Int) {
@@ -219,11 +215,6 @@ class TableBusinessLogic @Inject constructor(
             if (isOrderExist(group, menuName)) {
                 val order = readOrder(group, menuName)
                 count = order.count + 1
-
-                /*updateOrder(
-                    group,
-                    order.copy(count = count)
-                )*/
                 setOrder(
                     group,
                     order.copy(count = count)
