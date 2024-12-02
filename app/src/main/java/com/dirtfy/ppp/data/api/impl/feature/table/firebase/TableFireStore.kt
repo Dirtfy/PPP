@@ -29,7 +29,8 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
 
         return when (documents.size) {
             1 -> documents[0].id.toInt()
-            0 -> throw TableException.GroupLoss()
+            // 0 -> throw TableException.GroupLoss()
+            0 -> //TODO readTable 에서 이 함수를 호출하는데 이때 다 바꿔야 함 group이 없을 수 있다....
             else -> throw TableException.NonUniqueGroup()
         }
     }
@@ -55,7 +56,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         return readAllTable(snapshot)
     }
 
-    private fun readAllTable(
+    private fun readAllTable( // order가 있는 것들만 가져온다
         tableSnapshot: QuerySnapshot
     ): List<DataTable> {
         val resultList = mutableListOf<DataTable>()
@@ -101,10 +102,11 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
                     Log.e(TAG, "tableStream snapshot is from cache")
                     throw ExternalException.NetworkError()
                 }
+                /*
                 if (snapshot.isEmpty) {
                     Log.e(TAG, "tableStream snapshot is empty")
                     throw ExternalException.ServerError()
-                }
+                }*/
 
                 val tableList = readAllTable(snapshot)
                 trySend(tableList)

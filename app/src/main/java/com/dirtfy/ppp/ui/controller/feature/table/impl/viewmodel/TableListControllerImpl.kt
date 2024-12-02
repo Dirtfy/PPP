@@ -90,11 +90,28 @@ class TableListControllerImpl @Inject constructor(
     }
 
     private fun _updateTableList(dbTableList: List<DataTable>): List<UiTable> {
-        for (i in dbTableList){
-            Log.d("donggi","updateTableList ${i.group} and ${i.number}")
-        }
         val newList = dbTableList.map { data -> data.convertToUiTable() }.toMutableList()
 
+        val groupColorsMap = dbTableList
+            .map { it.group } //group 번호와 color 매칭
+            .distinct()
+            .associateWith {
+                var groupColor = getRandomColor()
+                while (groupColorSet.contains(groupColor)) {
+                    groupColor = getRandomColor()
+                }
+                groupColorSet.add(groupColor)
+                groupColor
+            }
+
+        for(idx in dbTableList.indices){
+            val dataTable = dbTableList[idx]
+            val color = groupColorsMap[dataTable.group]
+            newList[idx].color = color!!
+            groupMap[dataTable.number] = dataTable.group
+        }
+
+        /*
         val groupMemberCount = MutableList(12) { 0 }
         dbTableList.forEach { table ->
             groupMap[table.number] = table.group
@@ -122,7 +139,7 @@ class TableListControllerImpl @Inject constructor(
                     }
                 }
             }
-
+        */
         setTableListState(UiScreenState(UiState.COMPLETE))
         return tableFormation.map { tableNumber ->
             if (tableNumber == 0)
@@ -137,7 +154,7 @@ class TableListControllerImpl @Inject constructor(
                     // setTableListState(UiScreenState(UiState.FAIL, TableException.NumberLoss()))
 
                     // TODO 일단 더미 테이블로 바꾸기. 오류 처리 방법 논의 필요.
-                    UiTable("?", defaultColor)
+                    UiTable("$tableNumber", defaultColor)
                 } else uiTable
             }
         }
