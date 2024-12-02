@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -78,6 +77,13 @@ class TableListControllerImpl @Inject constructor(
                 newState = newState.copy(
                     tableList = tableList.map { table -> table },
                 )
+
+            if (state.mode == UiTableMode.Merge && state.sourceTableList != tableList && state.mergeTableState.state == UiState.LOADING) {
+                newState = newState.copy(
+                    tableList = tableList.map { table -> table },
+                    mergeTableState = UiScreenState(UiState.COMPLETE),
+                )
+            }
 
             Log.d(TAG, "screenData\n$newState")
             _screenData.update { newState }
@@ -237,20 +243,22 @@ class TableListControllerImpl @Inject constructor(
         return member
     }
 
-    private suspend fun _mergeTable(tableList: List<Int>) {
+    private suspend fun _mergeTable(tableNumberList: List<Int>) {
         _screenData.update { it.copy(mergeTableState = UiScreenState(UiState.LOADING)) }
-        tableBusinessLogic.mergeTables(tableList)
+        val dataTableList = tableNumberList.map {
+            DataTable(
+                number = it,
+                group = groupMap[it]
+            )
+        }
+        tableBusinessLogic.mergeTables(dataTableList)
             .catch { cause ->
                 Log.e(TAG, "table merge failed - ${cause.message}")
                 _screenData.update { it.copy(mergeTableState = UiScreenState(UiState.FAIL, cause)) }
             }
-            .conflate().collect {
+            .collect { mergedGroupNum ->
                 selectedTableSet.clear()
-                syncTableList()
-
-                _screenData.update { it.copy(
-                    mergeTableState = UiScreenState(UiState.COMPLETE)
-                ) }
+                Log.d("WeGlonD", "merged group number: $mergedGroupNum")
             }
     }
     override suspend fun mergeTable() {

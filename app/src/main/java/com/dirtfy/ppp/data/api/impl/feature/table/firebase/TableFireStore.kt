@@ -7,10 +7,12 @@ import com.dirtfy.ppp.data.api.TableApi
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
 import com.dirtfy.ppp.data.api.impl.feature.table.firebase.FireStoreTableOrder.Companion.convertToFireStoreTableOrder
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
+import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.tagger.Tagger
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Transaction
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
@@ -89,6 +91,31 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         ).await()
     }
 
+    override fun combineGroup(
+        group1: DataTableGroup,
+        group2: DataTableGroup,
+        transaction: Transaction
+    ): DataTableGroup {
+        if (group1.group == group2.group || group1.member.intersect(group2.member.toSet()).isNotEmpty()) {
+            throw TableException.InValidGroupState()
+        }
+
+        val baseGroupRef = tableRef.document("${group1.group}")
+        val combinedGroup = FireStoreGroup(member = group1.member + group2.member)
+        transaction.set(
+            baseGroupRef,
+            combinedGroup
+        )
+
+        val movedGroupRef = tableRef.document("${group2.group}")
+        transaction.set(
+            movedGroupRef,
+            FireStoreGroup(member = emptyList())
+        )
+
+        return combinedGroup.convertToDataTableGroup(group1.group)
+    }
+
     override fun tableStream(): Flow<List<DataTable>> = callbackFlow {
         Log.d(TAG, "tableStream start")
         val tableSubscription = tableRef.addSnapshotListener { snapshot, error ->
@@ -146,6 +173,12 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         val orderRef = getOrderRef(tableNumber)
         val firestoreOrder = order.convertToFireStoreTableOrder()
         orderRef.document(firestoreOrder.name!!).set(firestoreOrder).await()
+    }
+
+    override fun setOrder(tableNumber: Int, order: DataTableOrder, transaction: Transaction) {
+        val orderRef = getOrderRef(tableNumber)
+        val firestoreOrder = order.convertToFireStoreTableOrder()
+        transaction.set(orderRef.document(firestoreOrder.name!!), firestoreOrder)
     }
 
     /*override suspend fun createOrder(tableNumber: Int, menuName: String, menuPrice: Int) {
@@ -210,6 +243,17 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             .forEach {
                 orderRef.document(it.id).delete().await()
             }
+    }
+
+    override fun deleteOrders(
+        tableNumber: Int,
+        orderList: List<DataTableOrder>,
+        transaction: Transaction
+    ) {
+        val orderRef = getOrderRef(tableNumber)
+        orderList.forEach {
+            transaction.delete(orderRef.document(it.name))
+        }
     }
 
     override suspend fun isOrderExist(tableNumber: Int, menuName: String): Boolean {

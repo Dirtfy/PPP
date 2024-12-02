@@ -7,8 +7,13 @@ import com.dirtfy.ppp.data.api.TableApi
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordType
+import com.dirtfy.ppp.data.dto.feature.table.DataTable
+import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.ppp.data.logic.common.BusinessLogic
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class TableBusinessLogic @Inject constructor(
@@ -38,25 +43,29 @@ class TableBusinessLogic @Inject constructor(
     fun tableStream() = tableApi.tableStream()
     fun orderStream(tableNumber: Int) = tableApi.orderStream(tableNumber)
 
-    fun mergeTables(tableNumberList: List<Int>) = operate {
-        if (tableNumberList.size <= 1)
+    fun mergeTables(tableList: List<DataTable>) = operate {
+        if (tableList.size <= 1)
             throw TableException.NonEnoughMergingTargets()
 
-        for (tableNumber in tableNumberList) {
-            if (isInValidTableNumber(tableNumber))
+        for (table in tableList) {
+            if (isInValidTableNumber(table.number))
                 throw TableException.InvalidTableNumber()
         }
 
-        val tableList = tableApi.readAllTable()
-            .filter { tableNumberList.contains(it.number) }
+//        val tableList = tableApi.readAllTable()
+//            .filter { tableNumberList.contains(it.number) }
 
         val groupUniqueList = tableList.map {
             it.group
         }.toSet().toList()
 
+        val groupOrderMap = mutableMapOf<Int, List<DataTableOrder>>()
         val orderCombineList = mutableListOf<DataTableOrder>()
+
         groupUniqueList.map {
-            tableApi.readAllOrder(it)
+            val orderList = tableApi.readAllOrder(it)
+            groupOrderMap[it] = orderList
+            orderList
         }.forEach { list ->
             list.forEach { order ->
                 val hasSameMenu = orderCombineList
@@ -76,25 +85,34 @@ class TableBusinessLogic @Inject constructor(
             }
         }
 
-        groupUniqueList.forEach {
-            tableApi.deleteAllOrder(it)
-        }
+        val mergedGroupNum = Firebase.firestore.runTransaction { transaction ->
+            groupUniqueList.forEach {
+                tableApi.deleteOrders(it, groupOrderMap[it] ?: emptyList(), transaction)
+            }
 
-        val baseGroup = groupUniqueList[0]
+            val baseGroupNumber = groupUniqueList[0]
+            var baseGroup = DataTableGroup(
+                group = baseGroupNumber,
+                member = tableList.filter { it.number == baseGroupNumber }.map { it.number }
+            )
 
-        orderCombineList.forEach {
-            /*tableApi.createOrder(baseGroup, it.name, it.price)
-            tableApi.updateOrder(baseGroup, it)*/
-            tableApi.setOrder(baseGroup, it)
-        }
+            orderCombineList.forEach {
+                tableApi.setOrder(baseGroupNumber, it, transaction)
+            }
 
-        tableList.filter {
-            it.group != baseGroup
-        }.forEach {
-            tableApi.updateTable(it.copy(group = baseGroup))
-        }
+            groupUniqueList.filter {
+                it != baseGroupNumber
+            }.forEach { targetGroupNumber ->
+                val targetGroup = DataTableGroup(
+                    group = targetGroupNumber,
+                    member = tableList.filter { it.number == targetGroupNumber }.map { it.number }
+                )
+                baseGroup = tableApi.combineGroup(baseGroup, targetGroup, transaction)
+            }
 
-        baseGroup
+            return@runTransaction baseGroupNumber
+        }.await()
+        mergedGroupNum
     }
 
     private suspend fun cleanGroup(group: Int) {
