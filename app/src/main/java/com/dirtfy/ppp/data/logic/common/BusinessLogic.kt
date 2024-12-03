@@ -18,8 +18,12 @@ interface BusinessLogic {
             Log.e("BusinessLogic-exceptionWithRetry: ", "error catch\n $cause")
             when(cause) {
                 is FirebaseFirestoreException -> {
-                    println("FirebaseFirestoreException: Retry attemp ${attempt + 1} ")
-                    attempt <= 3
+                    if (cause.message!!.contains("Unable to resolve host firestore.googleapis.com"))
+                        false
+                    else {
+                        println("FirebaseFirestoreException: Retry attemp ${attempt + 1} ")
+                        attempt <= 3
+                    }
                 }
                 else -> {
                     println("NotFirebaseFirestoreException: Not Retry")
@@ -33,7 +37,11 @@ interface BusinessLogic {
 
             when(e) {
                 is CustomException -> throw e
-                is FirebaseFirestoreException -> throw ExternalException.ServerError()
+                is FirebaseFirestoreException -> {
+                    if (e.message!!.contains("Unable to resolve host firestore.googleapis.com"))
+                        throw ExternalException.NetworkError()
+                    else throw ExternalException.ServerError()
+                }
                 else -> {
                     e.message.let {
                         if (it == null)

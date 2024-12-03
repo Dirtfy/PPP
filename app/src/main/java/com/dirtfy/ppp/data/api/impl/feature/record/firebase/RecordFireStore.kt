@@ -125,7 +125,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
         val detailSnapshot = recordRef.document(record.id.toString())
             .collection(FireStorePath.RECORD_DETAIL).get().await()
-        if (detailSnapshot.metadata.isFromCache) throw ExternalException.NetworkError()
+        if (detailSnapshot.metadata.isFromCache) Log.e(TAG, "detailSnapshot is from cache")
         return detailSnapshot
             .documents.map { detailDocument ->
                 detailDocument.toObject(FireStoreRecordDetail::class.java)!!
@@ -148,7 +148,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "recordStream snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val recordList = readAll(snapshot)
                 trySend(recordList)
@@ -189,7 +189,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "recordStreamWith(key = $key, value = $value) - snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val accountRecordList = readAll(snapshot)
                 trySend(accountRecordList)
@@ -234,7 +234,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "recordStreamSumOf(key = $key, value = $value, target = $target) - snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val result = sum(
                     readAllRecordWith(

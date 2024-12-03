@@ -166,7 +166,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "tableStream snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 /*
                 if (snapshot.isEmpty) {
@@ -317,7 +317,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "orderStream snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val orderList = readAllOrder(snapshot)
                 trySend(orderList)
