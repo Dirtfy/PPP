@@ -15,6 +15,7 @@ import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Transaction
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -56,6 +57,34 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
         }.await()
 
         return createdRecord
+    }
+
+    override fun create(
+        record: DataRecord,
+        detailList: List<DataRecordDetail>,
+        transaction: Transaction
+    ): DataRecord {
+        if (record.id != DataRecord.ID_NOT_ASSIGNED)
+            throw RecordException.IllegalIdAssignment()
+
+        val snapshot = transaction.get(recordIdRef)
+        val newRecordId = snapshot.getLong("count")!!.toInt()
+
+        val newRecord = recordRef.document(newRecordId.toString())
+
+        transaction.update(recordIdRef, "count", FieldValue.increment(1))
+
+        val recordWithId = record.copy(id = newRecordId)
+        transaction.set(newRecord, recordWithId.convertToFireStoreRecord())
+
+        detailList.forEach {
+            transaction.set(
+                newRecord.collection(FireStorePath.RECORD_DETAIL).document(),
+                it.convertToFireStoreRecordDetail()
+            )
+        }
+
+        return recordWithId
     }
 
     override suspend fun read(id: Int): DataRecord {

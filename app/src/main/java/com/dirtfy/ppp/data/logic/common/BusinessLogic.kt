@@ -9,15 +9,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
-import java.net.UnknownHostException
 
 interface BusinessLogic {
 
     fun <T> Flow<T>.convertExceptionAsCheckedException() =
     this.retryWhen { cause, attempt ->
-            Log.e("BusinessLogic-exceptionWithRetry: ","error catch\n " + "${cause.message}")
+            Log.e("BusinessLogic-exceptionWithRetry: ", "error catch\n $cause")
             when(cause) {
                 is FirebaseFirestoreException -> {
                     println("FirebaseFirestoreException: Retry attemp ${attempt + 1} ")
@@ -30,8 +28,9 @@ interface BusinessLogic {
             }
         }.catch { e ->
         Log.e("BusinessLogic-convertExceptionAsCheckedException",
-            "error catch\n " +
-                    "${e.message}")
+            "error catch\n $e"
+        )
+
             when(e) {
                 is CustomException -> throw e
                 is FirebaseFirestoreException -> throw ExternalException.ServerError()
@@ -51,4 +50,5 @@ interface BusinessLogic {
     fun <T> operate(func: suspend () -> T) = flow {
         emit(func())
     }.flowOn(Dispatchers.Default).convertExceptionAsCheckedException()
+
 }

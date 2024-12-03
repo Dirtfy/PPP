@@ -4,12 +4,14 @@ import android.util.Log
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
+import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToDataTableOrder
 import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToUiTableOrder
 import com.dirtfy.ppp.ui.controller.feature.table.TableOrderController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableOrderScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -95,10 +97,14 @@ class TableOrderControllerImpl @Inject constructor(
     }
 
     private suspend fun _payTableWithCash(
-        groupNumber: Int
+        groupNumber: Int,
+        orderList: List<UiTableOrder>
     ) {
         _screenData.update { it.copy(payTableWithCashState = UiScreenState(UiState.LOADING)) }
-        tableBusinessLogic.payTableWithCash(groupNumber)
+        tableBusinessLogic.payTableWithCash(
+            groupNumber = groupNumber,
+            orderList = orderList.map { it.convertToDataTableOrder() }
+        )
             .catch { cause ->
                 _screenData.update { it.copy(payTableWithCashState = UiScreenState(UiState.FAIL, cause)) }
             }
@@ -107,14 +113,19 @@ class TableOrderControllerImpl @Inject constructor(
             }
     }
     override suspend fun payTableWithCash() {
-        _payTableWithCash(nowTableGroupFlow.value)
+        val orderList = _screenData.value.orderList
+        _payTableWithCash(nowTableGroupFlow.value, orderList)
     }
 
     private suspend fun _payTableWithCard(
-        groupNumber: Int
+        groupNumber: Int,
+        orderList: List<UiTableOrder>
     ) {
         _screenData.update { it.copy(payTableWithCardState = UiScreenState(UiState.LOADING)) }
-        tableBusinessLogic.payTableWithCard(groupNumber)
+        tableBusinessLogic.payTableWithCard(
+            groupNumber = groupNumber,
+            orderList = orderList.map { it.convertToDataTableOrder() }
+        )
             .catch { cause ->
                 _screenData.update { it.copy(payTableWithCardState = UiScreenState(UiState.FAIL, cause)) }
             }
@@ -123,19 +134,22 @@ class TableOrderControllerImpl @Inject constructor(
             }
     }
     override suspend fun payTableWithCard() {
-        _payTableWithCard(nowTableGroupFlow.value)
+        val orderList = _screenData.value.orderList
+        _payTableWithCard(nowTableGroupFlow.value, orderList)
     }
 
     private suspend fun _payTableWithPoint(
         groupNumber: Int,
         accountNumber: Int,
-        issuedName: String
+        issuedName: String,
+        orderList: List<UiTableOrder>
     ) {
         _screenData.update { it.copy(payTableWithPointState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.payTableWithPoint(
             groupNumber = groupNumber,
             accountNumber = accountNumber,
-            issuedName = issuedName
+            issuedName = issuedName,
+            orderList = orderList.map { it.convertToDataTableOrder() }
         ).catch { cause ->
             _screenData.update { it.copy(payTableWithPointState = UiScreenState(UiState.FAIL, cause)) }
         }.conflate().collect {
@@ -145,10 +159,12 @@ class TableOrderControllerImpl @Inject constructor(
     override suspend fun payTableWithPoint() {
         val accountNumber = _screenData.value.pointUse.accountNumber.toInt()
         val issuedName = _screenData.value.pointUse.userName
+        val orderList = _screenData.value.orderList
         _payTableWithPoint(
             nowTableGroupFlow.value,
             accountNumber,
-            issuedName
+            issuedName,
+            orderList
         )
     }
 

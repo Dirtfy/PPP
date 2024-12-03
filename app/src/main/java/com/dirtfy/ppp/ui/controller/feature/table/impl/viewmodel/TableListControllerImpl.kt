@@ -163,16 +163,9 @@ class TableListControllerImpl @Inject constructor(
                 UiTable("0", Color.Transparent.value)
             else {
                 Log.d(TAG, "$tableNumber")
-                val uiTable = newList.find { table ->
+                newList.find { table ->
                     table.number == tableNumber.toString()
-                }
-                if (uiTable == null) {
-                    // TODO Transaction 구현 후 주석 해제 해보자.
-                    // setTableListState(UiScreenState(UiState.FAIL, TableException.NumberLoss()))
-
-                    // TODO 일단 더미 테이블로 바꾸기. 오류 처리 방법 논의 필요.
-                    UiTable("$tableNumber", defaultColor)
-                } else uiTable
+                } ?: UiTable("$tableNumber", defaultColor)
             }
         }
     }

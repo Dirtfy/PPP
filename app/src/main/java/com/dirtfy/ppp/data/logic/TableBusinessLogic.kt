@@ -99,19 +99,6 @@ class TableBusinessLogic @Inject constructor(
         }
     }
 
-    private suspend fun cleanGroup(group: Int) {
-        tableApi.apply {
-            deleteAllOrder(group)
-            readAllTable()
-                .filter { it.group == group }
-                .forEach {
-                    updateTable(
-                        it.copy(group = it.number)
-                    )
-                }
-        }
-    }
-
     private fun List<DataTableOrder>.calcTotalPrice(): Int {
         return this.sumOf { it.count * it.price }
     }
@@ -124,64 +111,85 @@ class TableBusinessLogic @Inject constructor(
     }
 
     fun payTableWithCash(
-        groupNumber: Int
+        groupNumber: Int,
+        orderList: List<DataTableOrder>
     ) = operate {
-        val orderList = tableApi.readAllOrder(groupNumber)
+        transactionManager.transaction { transaction ->
+            val payment = payTable(
+                orderList = orderList,
+                type = DataRecordType.Cash.name,
+                transaction = transaction
+            )
 
-        val payment = recordApi.create(
-            record = DataRecord(
-                income = orderList.calcTotalPrice(),
-                type = DataRecordType.Cash.name
-            ),
-            detailList = orderList.map{ it.convertToRecordDetail() }
-        )
-        // TODO 다른 DB간 transaction 처리
-
-        cleanGroup(groupNumber)
-        payment
+            cleanGroup(groupNumber, transaction)
+            payment
+        }
     }
+
     fun payTableWithCard(
-        groupNumber: Int
+        groupNumber: Int,
+        orderList: List<DataTableOrder>
     ) = operate {
-        val orderList = tableApi.readAllOrder(groupNumber)
+        transactionManager.transaction { transaction ->
+            val payment = payTable(
+                orderList = orderList,
+                type = DataRecordType.Card.name,
+                transaction = transaction
+            )
 
-        val payment = recordApi.create(
-            record = DataRecord(
-                income = orderList.calcTotalPrice(),
-                type = DataRecordType.Card.name
-            ),
-            detailList = orderList.map{ it.convertToRecordDetail() }
-        )
-        // TODO 다른 DB간 transaction 처리
-
-        cleanGroup(groupNumber)
-        payment
+            cleanGroup(groupNumber, transaction)
+            payment
+        }
     }
+
     fun payTableWithPoint(
         groupNumber: Int,
         accountNumber: Int,
-        issuedName: String
+        issuedName: String,
+        orderList: List<DataTableOrder>
     ) = operate {
-        val orderList = tableApi.readAllOrder(groupNumber)
-
         val nowBalance = recordApi.readSumOf("type", "$accountNumber", "income")
         val totalPrice = orderList.calcTotalPrice()
 
         if (nowBalance < totalPrice)
             throw TableException.InvalidPay()
 
-        val payment = recordApi.create(
-            record = DataRecord(
-                income = -totalPrice,
-                type = accountNumber.toString(),
-                issuedBy = issuedName
-            ),
-            detailList = orderList.map{ it.convertToRecordDetail() }
-        )
-        // TODO 다른 DB간 transaction 처리
+        transactionManager.transaction { transaction ->
+            val payment = payTable(
+                orderList = orderList,
+                type = "$accountNumber",
+                issuedName = issuedName,
+                transaction = transaction
+            )
 
-        cleanGroup(groupNumber)
-        payment
+            cleanGroup(groupNumber, transaction)
+            payment
+        }
+    }
+
+    private fun payTable(
+        orderList: List<DataTableOrder>,
+        type: String,
+        issuedName: String? = null,
+        transaction: Transaction
+    ): DataRecord {
+        val absoluteTotalPrice = orderList.calcTotalPrice()
+        val isPoint = !(type == DataRecordType.Cash.name || type == DataRecordType.Card.name)
+        var record = DataRecord(
+            income = if (isPoint) -absoluteTotalPrice else absoluteTotalPrice,
+            type = type
+        )
+        if (issuedName != null) record = record.copy(issuedBy = issuedName)
+
+        return recordApi.create(
+            record = record,
+            detailList = orderList.map { it.convertToRecordDetail() },
+            transaction = transaction
+        )
+    }
+
+    private fun cleanGroup(group: Int, transaction: Transaction) {
+        tableApi.deleteGroup(group, transaction)
     }
 
     fun addOrder(
