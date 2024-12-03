@@ -104,7 +104,7 @@ class AccountDetailControllerImpl @Inject constructor(
         accountBusinessLogic.addAccountRecord(
             accountNumber = accountNumber,
             issuedName = issuedName,
-            difference = difference.toInt()
+            differenceString = difference
         ).catch { cause ->
             Log.e(TAG, "addRecord() - addAccountRecord failed \n ${cause.message}")
             _screenData.update {

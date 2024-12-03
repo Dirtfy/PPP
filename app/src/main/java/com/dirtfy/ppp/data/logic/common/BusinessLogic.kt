@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
+import java.net.UnknownHostException
 
 interface BusinessLogic {
 
@@ -30,7 +32,6 @@ interface BusinessLogic {
         Log.e("BusinessLogic-convertExceptionAsCheckedException",
             "error catch\n " +
                     "${e.message}")
-
             when(e) {
                 is CustomException -> throw e
                 is FirebaseFirestoreException -> throw ExternalException.ServerError()
@@ -50,5 +51,4 @@ interface BusinessLogic {
     fun <T> operate(func: suspend () -> T) = flow {
         emit(func())
     }.flowOn(Dispatchers.Default).convertExceptionAsCheckedException()
-
 }
