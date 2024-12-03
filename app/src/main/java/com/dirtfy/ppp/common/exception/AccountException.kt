@@ -18,4 +18,8 @@ sealed class AccountException(
     class PhoneNumberLoss: AccountException("phone number is not found")
     class BalanceLoss: AccountException("balance is not found")
     class RegisterTimestampLoss: AccountException("register timestamp is not found")
+
+    class BlankNumber: MenuException("account number can not be a blank")
+    class BlankName: MenuException("account name can not be a blank")
+    class BlankPhoneNumber: MenuException("account phone number can not be a blank")
 }

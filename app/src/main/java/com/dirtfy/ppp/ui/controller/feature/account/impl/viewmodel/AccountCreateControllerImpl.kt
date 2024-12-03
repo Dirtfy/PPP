@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel
 
 import android.util.Log
+import com.dirtfy.ppp.common.exception.AccountException
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController
@@ -33,7 +34,7 @@ class AccountCreateControllerImpl @Inject constructor(
         val (number, name, phoneNumber) = _screenData.value.newAccount
         _screenData.update { it.copy(addAccountState = UiScreenState(UiState.LOADING)) }
         accountBusinessLogic.createAccount(
-            number = number.toInt(),
+            numberString = number,
             name = name,
             phoneNumber = formatPhoneNumber(phoneNumber)
         ).catch { cause ->

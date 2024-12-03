@@ -23,10 +23,15 @@ class AccountBusinessLogic @Inject constructor(
     }
 
     fun createAccount(
-        number: Int,
+        numberString: String,
         name: String,
         phoneNumber: String
     ) = operate {
+        if(numberString == "")throw AccountException.BlankNumber()
+        else if(name == "")throw AccountException.BlankName()
+        else if(phoneNumber == "")throw AccountException.BlankPhoneNumber()
+
+        val number = numberString.toInt()
         val account = accountApi.let {
             if (it.isSameNumberExist(number))
                 throw AccountException.NonUniqueNumber()
