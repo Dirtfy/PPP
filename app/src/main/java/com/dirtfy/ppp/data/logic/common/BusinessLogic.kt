@@ -15,7 +15,7 @@ interface BusinessLogic {
 
     fun <T> Flow<T>.convertExceptionAsCheckedException() =
     this.retryWhen { cause, attempt ->
-            Log.e("BusinessLogic-exceptionWithRetry: ","error catch\n " + "${cause.message}")
+            Log.e("BusinessLogic-exceptionWithRetry: ", "error catch\n $cause")
             when(cause) {
                 is FirebaseFirestoreException -> {
                     println("FirebaseFirestoreException: Retry attemp ${attempt + 1} ")
@@ -28,8 +28,8 @@ interface BusinessLogic {
             }
         }.catch { e ->
         Log.e("BusinessLogic-convertExceptionAsCheckedException",
-            "error catch\n " +
-                    "${e.message}")
+            "error catch\n $e"
+        )
 
             when(e) {
                 is CustomException -> throw e
