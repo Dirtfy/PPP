@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.data.logic.common
 
+import android.util.Log
 import com.dirtfy.ppp.common.exception.CustomException
 import com.dirtfy.ppp.common.exception.ExternalException
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -13,7 +14,8 @@ interface BusinessLogic {
 
     fun <T> Flow<T>.convertExceptionAsCheckedException() =
         this.catch { e ->
-            println("BusinessLogic-convertExceptionAsCheckedException: error catch\n " +
+            Log.e("BusinessLogic-convertExceptionAsCheckedException",
+                "error catch\n " +
                     "${e.message}")
 
             when(e) {

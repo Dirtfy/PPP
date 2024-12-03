@@ -185,40 +185,28 @@ class TableBusinessLogic @Inject constructor(
     }
 
     fun addOrder(
-        selectedTable: DataTable,
+        groupNumber: Int,
         menuName: String,
-        menuPrice: Int
+        menuPrice: Int,
+        nowCount: UInt
     ) = operate {
         Log.d("WeGlonD", "service addOrder")
         transactionManager.transaction { transaction ->
             tableApi.run {
-                val groupNumber = selectedTable.group
-//                val createdGroup: DataTableGroup?
-//                if (groupNumber == DataTable.GROUP_NOT_ASSIGNED) {
-//                    createdGroup =
-//                        createGroup(DataTableGroup(member = arrayListOf(selectedTable.number)), transaction)
-//                    groupNumber = createdGroup.group
-//                } else
-//                    createdGroup = null
-
-                val count: Int
-                if (isOrderExist(groupNumber, menuName, transaction)) {
-                    val order = readOrder(groupNumber, menuName, transaction) // TODO 비동기로 가져오지 말고 controller에서 전달받자
-                    count = order.count + 1
-                    setOrder(
-                        groupNumber,
-                        order.copy(count = count),
-                        transaction
-                    )
-                } else {
-                    count = 1
+                if (nowCount.toInt() == 0) {
                     setOrder(
                         groupNumber,
                         DataTableOrder(
                             name = menuName,
                             price = menuPrice,
-                            count = count
+                            count = 1
                         ),
+                        transaction
+                    )
+                } else {
+                    incrementOrder(
+                        groupNumber,
+                        menuName,
                         transaction
                     )
                 }
@@ -226,51 +214,36 @@ class TableBusinessLogic @Inject constructor(
                 DataTableOrder(
                     menuName,
                     menuPrice,
-                    count
+                    nowCount.toInt() + 1
                 )
             }
         }
     }
 
     fun cancelOrder(
-        selectedTable: DataTable,
+        groupNumber: Int,
         menuName: String,
-        menuPrice: Int
+        menuPrice: Int,
+        nowCount: UInt
     ) = operate {
         transactionManager.transaction { transaction ->
             tableApi.run {
-                val count: Int
-                val groupNumber = selectedTable.group
-                if (isOrderExist(groupNumber, menuName, transaction)) {
-                    when (val menuCount = readOrder(groupNumber, menuName, transaction).count) { // TODO 비동기로 가져오지 말고 controller에서 전달받자
-                        0 -> {
-                            throw TableException.NonEnoughMenuToCancel()
-                        }
-
-                        1 -> {
-                            count = 0
-                            deleteOrder(groupNumber, menuName, transaction)
-                        }
-
-                        else -> {
-                            count = menuCount - 1
-                            setOrder(
-                                groupNumber,
-                                DataTableOrder(
-                                    menuName,
-                                    menuPrice,
-                                    count
-                                ),
-                                transaction
-                            )
-                        }
+                when (nowCount.toInt()) {
+                    0 -> throw TableException.NonEnoughMenuToCancel()
+                    1 -> deleteOrder(groupNumber, menuName, transaction)
+                    else -> {
+                        decrementOrder(
+                            groupNumber,
+                            menuName,
+                            transaction
+                        )
                     }
-                } else throw TableException.InvalidOrderName()
+                }
 
                 DataTableOrder(
                     menuName,
                     menuPrice,
-                    count
+                    nowCount.toInt() - 1
                 )
             }
         }

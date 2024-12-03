@@ -2,7 +2,6 @@ package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.controller.feature.table.TableListController
 import com.dirtfy.ppp.ui.controller.feature.table.TableMenuController
@@ -27,8 +26,6 @@ class TableViewModel @Inject constructor(
     private val orderController: TableOrderController,
     private val menuController: TableMenuController
 ): ViewModel(), TableController, Tagger {
-
-    private lateinit var selectedDataTable: DataTable
 
     override val screenData: StateFlow<UiTableScreenState>
         = menuController.screenData
@@ -70,9 +67,9 @@ class TableViewModel @Inject constructor(
     }
 
     override fun updateOrderList(table: UiTable) {
-        selectedDataTable = DataTable(table.number.toInt(), listController.getGroupNumber(table.number.toInt()))
-        println(selectedDataTable.toString())
-        orderController.updateOrderList(selectedDataTable.group)
+        val groupNumber = listController.getGroupNumber(table.number.toInt())
+        println("table${table.number} is group$groupNumber")
+        orderController.updateOrderList(groupNumber)
     }
 
     override fun retryUpdateOrderList() {
@@ -114,26 +111,26 @@ class TableViewModel @Inject constructor(
     }
 
     override suspend fun payTableWithCash() {
-        orderController.payTableWithCash(selectedDataTable.group)
+        orderController.payTableWithCash()
         disbandGroup()
     }
 
     override suspend fun payTableWithCard() {
-        orderController.payTableWithCard(selectedDataTable.group)
+        orderController.payTableWithCard()
         disbandGroup()
     }
 
     override suspend fun payTableWithPoint() {
-        orderController.payTableWithPoint(selectedDataTable.group)
+        orderController.payTableWithPoint()
         disbandGroup()
     }
 
     override suspend fun addOrder(name: String, price: String) {
-        orderController.addOrder(selectedDataTable, name, price)
+        orderController.addOrder(name, price)
     }
 
     override suspend fun cancelOrder(name: String, price: String) {
-        orderController.cancelOrder(selectedDataTable, name, price)
+        orderController.cancelOrder(name, price)
     }
 
     override fun setMode(mode: UiTableMode) {
