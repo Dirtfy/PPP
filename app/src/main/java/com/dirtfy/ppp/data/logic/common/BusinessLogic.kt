@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.data.logic.common
 
+import android.util.Log
 import com.dirtfy.ppp.common.exception.CustomException
 import com.dirtfy.ppp.common.exception.ExternalException
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -8,13 +9,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.retryWhen
 
 interface BusinessLogic {
 
     fun <T> Flow<T>.convertExceptionAsCheckedException() =
-        this.catch { e ->
-            println("BusinessLogic-convertExceptionAsCheckedException: error catch\n " +
-                    "${e.message}")
+    this.retryWhen { cause, attempt ->
+            Log.e("BusinessLogic-exceptionWithRetry: ","error catch\n " + "${cause.message}")
+            when(cause) {
+                is FirebaseFirestoreException -> {
+                    println("FirebaseFirestoreException: Retry attemp ${attempt + 1} ")
+                    attempt <= 3
+                }
+                else -> {
+                    println("NotFirebaseFirestoreException: Not Retry")
+                    false
+                }
+            }
+        }.catch { e ->
+            Log.e("BusinessLogic-convertExceptionAsCheckedException: ","error catch\n " + "${e.message}")
 
             when(e) {
                 is CustomException -> throw e
