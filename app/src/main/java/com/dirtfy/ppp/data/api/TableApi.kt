@@ -27,6 +27,8 @@ interface TableApi {
     /*suspend fun updateOrder(tableNumber: Int, order: DataTableOrder)*/
     suspend fun setOrder(groupNumber: Int, order: DataTableOrder)
     fun setOrder(groupNumber: Int, order: DataTableOrder, transaction: Transaction)
+    fun incrementOrder(groupNumber: Int, menuName: String, transaction: Transaction)
+    fun decrementOrder(groupNumber: Int, menuName: String, transaction: Transaction)
     suspend fun deleteOrder(groupNumber: Int, menuName: String)
     fun deleteOrder(groupNumber: Int, menuName: String, transaction: Transaction)
     suspend fun deleteAllOrder(groupNumber: Int)

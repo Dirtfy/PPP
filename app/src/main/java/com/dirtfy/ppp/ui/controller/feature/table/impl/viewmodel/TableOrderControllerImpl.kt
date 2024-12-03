@@ -1,9 +1,7 @@
 package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 
 import android.util.Log
-import com.dirtfy.ppp.data.dto.feature.table.DataTable
-import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
-import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
+import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToUiTableOrder
@@ -34,7 +32,7 @@ class TableOrderControllerImpl @Inject constructor(
     private val nowTableGroupFlow = MutableStateFlow(0)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val orderListFlow: Flow<UiTableOrderScreenState>
+    private val orderStreamFlow: Flow<String>
         = retryTrigger
         .combine(nowTableGroupFlow) { retryCnt, nowGroupNumber ->
             Pair(retryCnt, nowGroupNumber)
@@ -42,40 +40,34 @@ class TableOrderControllerImpl @Inject constructor(
             val groupNumber = pair.second
             if (groupNumber <= 0) {
                 flow {
-                    _screenData.update { it.copy(orderListState = UiScreenState(UiState.COMPLETE)) }
-                    emit(
-                        UiTableOrderScreenState(
-                            orderList = emptyList(),
-                            orderTotalPrice = StringFormatConverter.formatCurrency(0)
-                        )
-                    )
+                    _screenData.update { it.copy(
+                        orderList = emptyList(),
+                        orderListState = UiScreenState(UiState.COMPLETE)
+                    ) }
+                    emit(StringFormatConverter.formatCurrency(0))
                 }
             } else {
                 tableBusinessLogic.orderStream(groupNumber).map {
-                    _screenData.update { before -> before.copy(orderListState = UiScreenState(UiState.COMPLETE)) }
                     val orderList = it.map { data -> data.convertToUiTableOrder() }
-                    UiTableOrderScreenState(
+                    _screenData.update { before -> before.copy(
                         orderList = orderList,
-                        orderTotalPrice = StringFormatConverter.formatCurrency(
-                            it.sumOf { order -> order.price * order.count }
-                        )
+                        orderListState = UiScreenState(UiState.COMPLETE)
+                    ) }
+                    StringFormatConverter.formatCurrency(
+                        it.sumOf { order -> order.price * order.count }
                     )
                 }.onStart {
-                    _screenData.update { it.copy(orderListState = UiScreenState(UiState.LOADING)) }
-                    emit(
-                        UiTableOrderScreenState(
-                            orderList = emptyList(),
-                            orderTotalPrice = StringFormatConverter.formatCurrency(0)
-                        )
-                    )
+                    _screenData.update { it.copy(
+                        orderList = emptyList(),
+                        orderListState = UiScreenState(UiState.LOADING)
+                    ) }
+                    emit(StringFormatConverter.formatCurrency(0))
                 }.catch { cause ->
-                    _screenData.update { it.copy(orderListState = UiScreenState(UiState.FAIL, cause)) }
-                    emit(
-                        UiTableOrderScreenState(
-                            orderList = emptyList(),
-                            orderTotalPrice = StringFormatConverter.formatCurrency(0)
-                        )
-                    )
+                    _screenData.update { it.copy(
+                        orderList = emptyList(),
+                        orderListState = UiScreenState(UiState.FAIL, cause)
+                    ) }
+                    emit(StringFormatConverter.formatCurrency(0))
                 }
             }
         }
@@ -84,10 +76,9 @@ class TableOrderControllerImpl @Inject constructor(
         = MutableStateFlow(UiTableOrderScreenState())
     override val screenData: Flow<UiTableOrderScreenState>
         = _screenData
-        .combine(orderListFlow) { state, orderListFlowState ->
+        .combine(orderStreamFlow) { state, orderTotalPrice ->
             state.copy(
-                orderList = orderListFlowState.orderList,
-                orderTotalPrice = orderListFlowState.orderTotalPrice,
+                orderTotalPrice = orderTotalPrice,
             )
         }
 
@@ -115,8 +106,8 @@ class TableOrderControllerImpl @Inject constructor(
                 _screenData.update { it.copy(payTableWithCashState = UiScreenState(UiState.COMPLETE)) }
             }
     }
-    override suspend fun payTableWithCash(groupNumber: Int) {
-        _payTableWithCash(groupNumber)
+    override suspend fun payTableWithCash() {
+        _payTableWithCash(nowTableGroupFlow.value)
     }
 
     private suspend fun _payTableWithCard(
@@ -131,8 +122,8 @@ class TableOrderControllerImpl @Inject constructor(
                 _screenData.update { it.copy(payTableWithCardState = UiScreenState(UiState.COMPLETE)) }
             }
     }
-    override suspend fun payTableWithCard(groupNumber: Int) {
-        _payTableWithCard(groupNumber)
+    override suspend fun payTableWithCard() {
+        _payTableWithCard(nowTableGroupFlow.value)
     }
 
     private suspend fun _payTableWithPoint(
@@ -151,53 +142,59 @@ class TableOrderControllerImpl @Inject constructor(
             _screenData.update { it.copy(payTableWithPointState = UiScreenState(UiState.COMPLETE)) }
         }
     }
-    override suspend fun payTableWithPoint(groupNumber: Int) {
+    override suspend fun payTableWithPoint() {
         val accountNumber = _screenData.value.pointUse.accountNumber.toInt()
         val issuedName = _screenData.value.pointUse.userName
         _payTableWithPoint(
-            groupNumber,
+            nowTableGroupFlow.value,
             accountNumber,
             issuedName
         )
     }
 
     private suspend fun _addOrder(
-        selectedTable: DataTable,
+        groupNumber: Int,
         menuName: String,
-        menuPrice: Int
+        menuPrice: Int,
+        nowCount: UInt
     ) {
         Log.d("WeGlonD", "viewmodel addorder")
         _screenData.update { it.copy(addOrderState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.addOrder(
-            selectedTable, menuName, menuPrice
+            groupNumber, menuName, menuPrice, nowCount
         ).catch { cause ->
             _screenData.update { it.copy(addOrderState = UiScreenState(UiState.FAIL, cause)) }
         }.conflate().collect {
             _screenData.update { it.copy(addOrderState = UiScreenState(UiState.COMPLETE)) }
         }
     }
-    override suspend fun addOrder(selectedTable: DataTable, name: String, price: String) {
+    override suspend fun addOrder(name: String, price: String) {
         val menuPrice = StringFormatConverter.parseCurrency(price)
-        _addOrder(selectedTable, name, menuPrice)
+        val order = _screenData.value.orderList.find { it.name == name }
+        val count = order?.count?.toInt() ?: 0
+        _addOrder(nowTableGroupFlow.value, name, menuPrice, count.toUInt())
     }
 
     private suspend fun _cancelOrder(
-        selectedTable: DataTable,
+        groupNumber: Int,
         menuName: String,
-        menuPrice: Int
+        menuPrice: Int,
+        nowCount: UInt
     ) {
         _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.cancelOrder(
-            selectedTable, menuName, menuPrice
+            groupNumber, menuName, menuPrice, nowCount
         ).catch { cause ->
             _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.FAIL, cause)) }
         }.conflate().collect {
             _screenData.update { it.copy(cancelOrderState = UiScreenState(UiState.COMPLETE)) }
         }
     }
-    override suspend fun cancelOrder(selectedTable: DataTable, name: String, price: String) {
+    override suspend fun cancelOrder(name: String, price: String) {
         val menuPrice = StringFormatConverter.parseCurrency(price)
-        _cancelOrder(selectedTable, name, menuPrice)
+        val order = _screenData.value.orderList.find { it.name == name }
+        val count = order?.count?.toInt() ?: 0
+        _cancelOrder(nowTableGroupFlow.value, name, menuPrice, count.toUInt())
     }
 
     override fun setPayTableWithCashState(state: UiScreenState) {

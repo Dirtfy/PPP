@@ -27,7 +27,9 @@ interface BusinessLogic {
                 }
             }
         }.catch { e ->
-            Log.e("BusinessLogic-convertExceptionAsCheckedException: ","error catch\n " + "${e.message}")
+        Log.e("BusinessLogic-convertExceptionAsCheckedException",
+            "error catch\n " +
+                    "${e.message}")
 
             when(e) {
                 is CustomException -> throw e

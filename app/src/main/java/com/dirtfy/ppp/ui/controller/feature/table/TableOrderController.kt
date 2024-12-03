@@ -1,7 +1,5 @@
 package com.dirtfy.ppp.ui.controller.feature.table
 
-import com.dirtfy.ppp.data.dto.feature.table.DataTable
-import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableOrderScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
@@ -13,11 +11,11 @@ interface TableOrderController {
     fun updateOrderList(groupNumber: Int)
     fun retryUpdateOrderList()
     fun updatePointUse(pointUse: UiPointUse)
-    suspend fun payTableWithCash(groupNumber: Int)
-    suspend fun payTableWithCard(groupNumber: Int)
-    suspend fun payTableWithPoint(groupNumber: Int)
-    suspend fun addOrder(selectedTable: DataTable, name: String, price: String)
-    suspend fun cancelOrder(selectedTable: DataTable, name: String, price: String)
+    suspend fun payTableWithCash()
+    suspend fun payTableWithCard()
+    suspend fun payTableWithPoint()
+    suspend fun addOrder(name: String, price: String)
+    suspend fun cancelOrder(name: String, price: String)
     fun setPayTableWithCashState(state: UiScreenState)
     fun setPayTableWithCardState(state: UiScreenState)
     fun setPayTableWithPointState(state: UiScreenState)

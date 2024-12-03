@@ -224,11 +224,9 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         menuName: String,
         transaction: Transaction
     ): DataTableOrder {
-        if (!isOrderExist(groupNumber,menuName, transaction)) throw TableException.InvalidOrderName()
-
         val orderRef = getOrderRef(groupNumber).document(menuName)
         val orderSnapshot = transaction.get(orderRef)
-
+        if (!orderSnapshot.exists()) throw TableException.InvalidOrderName()
         return orderSnapshot.toObject(FireStoreTableOrder::class.java)!!.convertToDataTableOrder()
     }
 
@@ -242,6 +240,16 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         return orderSnapshot.documents
             .map { it.toObject(FireStoreTableOrder::class.java)!! }
             .map { it.convertToDataTableOrder() }
+    }
+
+    override fun incrementOrder(groupNumber: Int, menuName: String, transaction: Transaction) {
+        val orderRef = getOrderRef(groupNumber).document(menuName)
+        transaction.update(orderRef, "count", FieldValue.increment(1))
+    }
+
+    override fun decrementOrder(groupNumber: Int, menuName: String, transaction: Transaction) {
+        val orderRef = getOrderRef(groupNumber).document(menuName)
+        transaction.update(orderRef, "count", FieldValue.increment(-1))
     }
 
     override suspend fun deleteOrder(groupNumber: Int, menuName: String) {
