@@ -2,6 +2,7 @@ package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color
+import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
@@ -9,7 +10,7 @@ import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConv
 import com.dirtfy.ppp.ui.controller.feature.table.TableListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
-import com.dirtfy.ppp.ui.state.feature.table.UiTableMergeScreenState
+import com.dirtfy.ppp.ui.state.feature.table.UiTableListScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.tagger.Tagger
@@ -17,6 +18,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -29,7 +31,6 @@ class TableListControllerImpl @Inject constructor(
     private val tableBusinessLogic: TableBusinessLogic
 ): TableListController, Tagger {
 
-    private val groupColorSet = mutableSetOf<ULong>()
     private val defaultColor = Color.LightGray.value
 
     private val tableFormation: List<Int> = listOf(
@@ -49,8 +50,8 @@ class TableListControllerImpl @Inject constructor(
             tableBusinessLogic.tableStream()
                 .map { list ->
                     Log.d(TAG, _screenData.value.toString())
-                    setTableListState(UiScreenState(UiState.COMPLETE))
                     val tableList = _updateTableList(list)
+                    setTableListState(UiScreenState(UiState.COMPLETE))
                     tableList
                 }
                 .onStart {
@@ -64,9 +65,9 @@ class TableListControllerImpl @Inject constructor(
                 }
         }
 
-    private val _screenData: MutableStateFlow<UiTableMergeScreenState> =
-        MutableStateFlow(UiTableMergeScreenState())
-    override val screenData: Flow<UiTableMergeScreenState> = _screenData
+    private val _screenData: MutableStateFlow<UiTableListScreenState> =
+        MutableStateFlow(UiTableListScreenState())
+    override val screenData: Flow<UiTableListScreenState> = _screenData
         .combine(tableListFlow) { state, tableList ->
             var newState = state.copy(
                 sourceTableList = tableList,
@@ -74,7 +75,7 @@ class TableListControllerImpl @Inject constructor(
             )
 
             if (state.tableList == emptyList<UiTable>() && tableList != emptyList<UiTable>()
-                || state.tableList !== tableList && state.mode == UiTableMode.Main)
+                || state.tableList != tableList && state.mode == UiTableMode.Main)
                 newState = newState.copy(
                     tableList = tableList.map { table -> table },
                 )
@@ -107,7 +108,7 @@ class TableListControllerImpl @Inject constructor(
 
     private fun _updateTableList(dbTableList: List<DataTable>): List<UiTable> {
         val newList = dbTableList.map { data -> data.convertToUiTable() }.toMutableList()
-        groupMap.clear()
+        val groupColorSet = mutableSetOf<ULong>()
 
         val groupColorsMap = dbTableList
             .map { it.group } //group 번호와 color 매칭
@@ -121,51 +122,23 @@ class TableListControllerImpl @Inject constructor(
                 groupColor
             }
 
-        for(idx in dbTableList.indices){
+        groupMap.clear()
+        for (idx in dbTableList.indices) {
             val dataTable = dbTableList[idx]
             val color = groupColorsMap[dataTable.group]
             newList[idx].color = color!!
             groupMap[dataTable.number] = dataTable.group
         }
 
-        /*
-        val groupMemberCount = MutableList(12) { 0 }
-        dbTableList.forEach { table ->
-            groupMap[table.number] = table.group
-            groupMemberCount[table.group]++
-        }
-
-        groupMemberCount
-            .zip((0..11))
-            .filter { zip -> zip.first > 1 } // order Collection 이 있는것만 필터링.
-            .map { zip -> zip.second }
-            .forEach { group ->
-                var groupColor = getRandomColor()
-                while (groupColorSet.contains(groupColor)) {
-                    groupColor = getRandomColor()
-                }
-                groupColorSet.add(groupColor)
-
-                (1..11).filter { tableNumber ->
-                    groupMap[tableNumber] == group
-                }.let { member ->
-                    newList.replaceAll { table ->
-                        if (member.contains(table.number.toInt()))
-                            table.copy(color = groupColor)
-                        else table
-                    }
-                }
-            }
-        */
-        setTableListState(UiScreenState(UiState.COMPLETE))
         return tableFormation.map { tableNumber ->
             if (tableNumber == 0)
                 UiTable("0", Color.Transparent.value)
             else {
                 Log.d(TAG, "$tableNumber")
-                newList.find { table ->
+                val uiTable = newList.find { table ->
                     table.number == tableNumber.toString()
                 } ?: UiTable("$tableNumber", defaultColor)
+                uiTable
             }
         }
     }
@@ -256,6 +229,28 @@ class TableListControllerImpl @Inject constructor(
         }
     }
 
+    override suspend fun trySetMergeMode() {
+        setTrySetMergeModeState(UiScreenState(UiState.LOADING))
+        tableBusinessLogic.getTableGroupLock()
+            .catch { cause ->
+                setTrySetMergeModeState(UiScreenState(UiState.FAIL, cause))
+            }.collect {
+                setTrySetMergeModeState(UiScreenState(UiState.COMPLETE))
+                _screenData.update { it.copy(mode = UiTableMode.Merge) }
+            }
+    }
+
+    override suspend fun escapeFromMergeMode() {
+        setEscapeFromMergeModeState(UiScreenState(UiState.LOADING))
+        tableBusinessLogic.releaseTableGroupLock()
+            .catch { cause ->
+                setEscapeFromMergeModeState(UiScreenState(UiState.FAIL, cause))
+            }.collect {
+                setEscapeFromMergeModeState(UiScreenState(UiState.COMPLETE))
+                _screenData.update { it.copy(mode = UiTableMode.Main) }
+            }
+    }
+
     private fun getMembersOf(groupNum: Int): MutableList<Int> {
         val member = mutableListOf<Int>()
         groupMap.forEach { (table, group) ->
@@ -293,24 +288,13 @@ class TableListControllerImpl @Inject constructor(
         selectedTableSet.clear()
     }
 
-    override fun disbandGroup(tableNumber: Int) {
-//        val member = mutableListOf<Int>()
-//        val group = groupMap[tableNumber]
-//        groupMap.indices.forEach {
-//            if (groupMap[it] == group) {
-//                member.add(it)
-//                groupMap[it] = it
-//            }
-//        }
-//
-//        if (selectedTableSet.contains(tableNumber))
-//            selectedTableSet.removeAll(member.toSet())
-//
-//        val groupColor = _screenData.value.tableList.find { it.number.toInt() == tableNumber }!!.color
-//        groupColorSet.remove(groupColor)
+    override suspend fun dissolveGroup(groupNumber: Int) {
+        tableBusinessLogic.dissolveGroup(groupNumber)
     }
 
     override fun setMode(mode: UiTableMode) {
+        if (mode == UiTableMode.Merge) throw TableException.IllegalMergeModeSet()
+
         _screenData.update { it.copy(mode = mode) }
         if (mode == UiTableMode.Main) {
             selectedTableSet.clear()
@@ -320,6 +304,14 @@ class TableListControllerImpl @Inject constructor(
 
     override fun setTableListState(state: UiScreenState) {
         _screenData.update { it.copy(tableListState = state) }
+    }
+
+    override fun setTrySetMergeModeState(state: UiScreenState) {
+        _screenData.update { it.copy(trySetMergeModeState = state) }
+    }
+
+    override fun setEscapeFromMergeModeState(state: UiScreenState) {
+        _screenData.update { it.copy(escapeFromMergeModeState = state) }
     }
 
     override fun setMergeTableState(state: UiScreenState) {

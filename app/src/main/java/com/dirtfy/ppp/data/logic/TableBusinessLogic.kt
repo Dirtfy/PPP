@@ -41,6 +41,21 @@ class TableBusinessLogic @Inject constructor(
     fun tableStream() = tableApi.tableStream()
     fun orderStream(tableNumber: Int) = tableApi.orderStream(tableNumber)
 
+    fun getTableGroupLock() = operate {
+        transactionManager.transaction { transaction ->
+            tableApi.checkTableGroupLock(transaction)
+            tableApi.getTableGroupLock(transaction)
+            true
+        }
+    }
+
+    fun releaseTableGroupLock() = operate {
+        transactionManager.transaction {transaction ->
+            tableApi.releaseTableGroupLock(transaction)
+            true
+        }
+    }
+
     fun mergeTables(tableList: List<DataTable>) = operate {
         if (tableList.isEmpty())
             throw TableException.NonEnoughMergingTargets()
@@ -115,13 +130,16 @@ class TableBusinessLogic @Inject constructor(
         orderList: List<DataTableOrder>
     ) = operate {
         transactionManager.transaction { transaction ->
+            tableApi.checkTableGroupLock(transaction)
             val payment = payTable(
                 orderList = orderList,
                 type = DataRecordType.Cash.name,
                 transaction = transaction
             )
 
+            tableApi.getTableGroupLock(transaction)
             cleanGroup(groupNumber, transaction)
+            tableApi.releaseTableGroupLock(transaction)
             payment
         }
     }
@@ -131,13 +149,16 @@ class TableBusinessLogic @Inject constructor(
         orderList: List<DataTableOrder>
     ) = operate {
         transactionManager.transaction { transaction ->
+            tableApi.checkTableGroupLock(transaction)
             val payment = payTable(
                 orderList = orderList,
                 type = DataRecordType.Card.name,
                 transaction = transaction
             )
 
+            tableApi.getTableGroupLock(transaction)
             cleanGroup(groupNumber, transaction)
+            tableApi.releaseTableGroupLock(transaction)
             payment
         }
     }
@@ -155,6 +176,7 @@ class TableBusinessLogic @Inject constructor(
             throw TableException.InvalidPay()
 
         transactionManager.transaction { transaction ->
+            tableApi.checkTableGroupLock(transaction)
             val payment = payTable(
                 orderList = orderList,
                 type = "$accountNumber",
@@ -162,7 +184,9 @@ class TableBusinessLogic @Inject constructor(
                 transaction = transaction
             )
 
+            tableApi.getTableGroupLock(transaction)
             cleanGroup(groupNumber, transaction)
+            tableApi.releaseTableGroupLock(transaction)
             payment
         }
     }
@@ -190,6 +214,15 @@ class TableBusinessLogic @Inject constructor(
 
     private fun cleanGroup(group: Int, transaction: Transaction) {
         tableApi.deleteGroup(group, transaction)
+    }
+
+    fun dissolveGroup(groupNumber: Int) = operate {
+        transactionManager.transaction { transaction ->
+            tableApi.getTableGroupLock(transaction)
+            cleanGroup(groupNumber, transaction)
+            tableApi.releaseTableGroupLock(transaction)
+            groupNumber
+        }
     }
 
     fun addOrder(

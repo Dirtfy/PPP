@@ -18,5 +18,8 @@ object FireStorePath {
     const val TABLE: String = "table_exp"
     const val TABLE_ORDER: String = "order"
 
+    private const val LOCK: String = "lock_exp"
+
+    const val TABLE_GROUP_LOCK = "$LOCK/TABLE_GROUP_LOCK"
 
 }

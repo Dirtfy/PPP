@@ -25,6 +25,7 @@ import javax.inject.Inject
 class TableFireStore @Inject constructor(): TableApi, Tagger {
 
     private val tableRef = Firebase.firestore.collection(FireStorePath.TABLE)
+    private val mergeLockRef = Firebase.firestore.document(FireStorePath.TABLE_GROUP_LOCK)
     private val groupIdRef = Firebase.firestore.document(FireStorePath.GROUP_ID_COUNT)
 
     private suspend fun readGroup(tableNumber: Int): Int {
@@ -129,6 +130,20 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         tableRef.document("${table.group}").set(
             FireStoreGroup(member = targetGroupMember + table.number)
         ).await()
+    }
+
+    override fun checkTableGroupLock(transaction: Transaction) {
+        val snapshot = transaction.get(mergeLockRef)
+        val preoccupied = snapshot.getBoolean("occupied")!!
+        if (preoccupied) throw TableException.TableLockPreempted()
+    }
+
+    override fun getTableGroupLock(transaction: Transaction) {
+        transaction.update(mergeLockRef, "occupied", true)
+    }
+
+    override fun releaseTableGroupLock(transaction: Transaction) {
+        transaction.update(mergeLockRef, "occupied", false)
     }
 
     override fun combineGroup(

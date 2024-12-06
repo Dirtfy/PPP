@@ -3,6 +3,10 @@ package com.dirtfy.ppp.common.exception
 sealed class TableException(
     massage: String
 ): CustomException(massage) {
+
+    class TableLockPreempted: TableException("simultaneous group edition is not allowed")
+    class IllegalMergeModeSet: TableException("setMode(Merge) is not allowed. use trySetMergeMode()")
+
     class InvalidTableNumber: TableException("it's invalid table number")
     class InvalidPay: TableException("it's invalid pay")
 

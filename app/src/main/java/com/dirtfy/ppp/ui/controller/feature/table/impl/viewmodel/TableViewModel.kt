@@ -37,6 +37,8 @@ class TableViewModel @Inject constructor(
                 sourceTableList = listScreenData.sourceTableList,
                 mode = listScreenData.mode,
                 tableListState = listScreenData.tableListState,
+                trySetMergeModeState = listScreenData.trySetMergeModeState,
+                escapeFromMergeModeState = listScreenData.escapeFromMergeModeState,
                 mergeTableState = listScreenData.mergeTableState
             )
         }.combine(orderController.screenData) { state, orderScreenData ->
@@ -96,6 +98,14 @@ class TableViewModel @Inject constructor(
         }
     }
 
+    override suspend fun trySetMergeMode() {
+        listController.trySetMergeMode()
+    }
+
+    override suspend fun escapeFromMergeMode() {
+        listController.escapeFromMergeMode()
+    }
+
     override suspend fun mergeTable() {
         listController.mergeTable()
     }
@@ -143,6 +153,14 @@ class TableViewModel @Inject constructor(
 
     override fun setTableListState(state: UiScreenState) {
         listController.setTableListState(state)
+    }
+
+    override fun setTrySetMergeModeState(state: UiScreenState) {
+        listController.setTrySetMergeModeState(state)
+    }
+
+    override fun setEscapeFromMergeModeState(state: UiScreenState) {
+        listController.setEscapeFromMergeModeState(state)
     }
 
     override fun setMergeTableState(state: UiScreenState) {

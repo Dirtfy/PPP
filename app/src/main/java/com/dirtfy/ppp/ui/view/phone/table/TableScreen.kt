@@ -68,10 +68,16 @@ class TableScreen @Inject constructor(
         LaunchedEffect(key1 = controller) {
             controller.updateTableList()
         }
+
+        Component.HandleUiStateDialog(
+            uiState = screenData.trySetMergeModeState,
+            onDismissRequest = { controller.setTrySetMergeModeState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request { trySetMergeMode() } }
+        )
         Component.HandleUiStateDialog(
             uiState = screenData.mergeTableState,
             onDismissRequest = { controller.setMergeTableState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = {controller.request { mergeTable() }}
+            onRetryAction = { controller.request { mergeTable() } }
         )
 
         Component.HandleUiStateDialog(
@@ -122,9 +128,9 @@ class TableScreen @Inject constructor(
                     updateMenuList()
                 }
             },
-            onMergeClick = {controller.setMode(UiTableMode.Merge)},
+            onMergeClick = { controller.request { trySetMergeMode() } },
             onMergeOkClick = { controller.request { mergeTable() } },
-            onMergeCancelClick = { controller.cancelMergeTable() },
+            onMergeCancelClick = { controller.request { escapeFromMergeMode() } },
             onCashClick = { controller.request { payTableWithCash() } },
             onCardClick = { controller.request { payTableWithCard() } },
             onPointClick = { controller.setMode(UiTableMode.PointUse) },

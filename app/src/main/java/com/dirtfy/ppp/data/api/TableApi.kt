@@ -13,6 +13,9 @@ interface TableApi {
     suspend fun readTable(tableNumber: Int): DataTable
     suspend fun readAllTable(): List<DataTable>
     suspend fun updateTable(table: DataTable)
+    fun checkTableGroupLock(transaction: Transaction)
+    fun getTableGroupLock(transaction: Transaction)
+    fun releaseTableGroupLock(transaction: Transaction)
     fun combineGroup(group1: DataTableGroup, group2: DataTableGroup, transaction: Transaction): DataTableGroup
     fun tableStream(): Flow<List<DataTable>>
 
