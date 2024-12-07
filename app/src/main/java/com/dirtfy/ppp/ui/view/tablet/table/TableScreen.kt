@@ -124,6 +124,7 @@ class TableScreen @Inject constructor(
             totalPrice = screenData.orderTotalPrice,
             pointUse = screenData.pointUse,
             mode = screenData.mode,
+            timeLeftUntilEndOfMergeMode = screenData.timeLeftUntilEndOfMergeMode,
             addOrderState = screenData.addOrderState,
             cancelOrderState = screenData.cancelOrderState,
             onTableClick = {
@@ -188,6 +189,7 @@ class TableScreen @Inject constructor(
         totalPrice: String,
         pointUse: UiPointUse,
         mode: UiTableMode,
+        timeLeftUntilEndOfMergeMode: String,
         addOrderState: UiScreenState,
         cancelOrderState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
@@ -228,6 +230,7 @@ class TableScreen @Inject constructor(
                         TableLayout(
                             tableList = tableList,
                             mode = mode,
+                            timeLeftUntilEndOfMergeMode = timeLeftUntilEndOfMergeMode,
                             onTableClick = onTableClick,
                             onMergeClick = onMergeClick,
                             onMergeOkClick = onMergeOkClick,
@@ -303,6 +306,7 @@ class TableScreen @Inject constructor(
     fun TableLayout(
         tableList: List<UiTable>,
         mode: UiTableMode,
+        timeLeftUntilEndOfMergeMode: String,
         onTableClick: (UiTable) -> Unit,
         onMergeClick: () -> Unit,
         onMergeOkClick: () -> Unit,
@@ -334,11 +338,12 @@ class TableScreen @Inject constructor(
                 }
                 Box(modifier = Modifier
                     .constrainAs(mergeButtonRow){
-                        bottom.linkTo(tables.bottom)
+                        top.linkTo(tables.bottom)
                     }
                 ) {
                     MergeButtonLayout(
                         mode = mode,
+                        timeLeftUntilEndOfMergeMode = timeLeftUntilEndOfMergeMode,
                         onMergeClick = onMergeClick,
                         onMergeOkClick = onMergeOkClick,
                         onMergeCancelClick = onMergeCancelClick
@@ -351,6 +356,7 @@ class TableScreen @Inject constructor(
     @Composable
     fun MergeButtonLayout(
         mode: UiTableMode,
+        timeLeftUntilEndOfMergeMode: String,
         onMergeClick: () -> Unit,
         onMergeOkClick: () -> Unit,
         onMergeCancelClick: () -> Unit
@@ -358,6 +364,7 @@ class TableScreen @Inject constructor(
         if (mode == UiTableMode.Merge) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = stringResource(R.string.select_table), style = MaterialTheme.typography.bodyMedium)
+                Text(text = timeLeftUntilEndOfMergeMode, style = MaterialTheme.typography.bodyMedium)
                 Row {
                     Button(onClick = onMergeOkClick ) {
                         Text(text = stringResource(R.string.ok))

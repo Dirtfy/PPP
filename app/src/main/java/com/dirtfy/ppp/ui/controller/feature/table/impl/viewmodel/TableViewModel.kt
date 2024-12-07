@@ -35,6 +35,7 @@ class TableViewModel @Inject constructor(
                 menuListState = menuScreenState.menuListState,
                 tableList = listScreenData.tableList,
                 sourceTableList = listScreenData.sourceTableList,
+                timeLeftUntilEndOfMergeMode = listScreenData.timeLeftUntilEndOfMergeMode,
                 mode = listScreenData.mode,
                 tableListState = listScreenData.tableListState,
                 trySetMergeModeState = listScreenData.trySetMergeModeState,

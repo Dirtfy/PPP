@@ -1,15 +1,20 @@
 package com.dirtfy.ppp.data.api.impl.feature.table.firebase
 
+import android.icu.util.Calendar
+import android.os.CountDownTimer
 import android.util.Log
 import com.dirtfy.ppp.common.exception.ExternalException
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.api.TableApi
+import com.dirtfy.ppp.data.api.TableApi.Companion.TABLE_GROUP_LOCK_EXPIRE_TIME_MILLISECONDS
 import com.dirtfy.ppp.data.api.impl.common.firebase.FireStorePath
+import com.dirtfy.ppp.data.api.impl.common.firebase.Utils.convertToMilliseconds
 import com.dirtfy.ppp.data.api.impl.feature.table.firebase.FireStoreTableOrder.Companion.convertToFireStoreTableOrder
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.tagger.Tagger
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
@@ -20,6 +25,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 import javax.inject.Inject
 
 class TableFireStore @Inject constructor(): TableApi, Tagger {
@@ -56,6 +62,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
 
         val createdGroup = group.copy(group = groupId)
         transaction.set(tableRef.document("$groupId"), createdGroup)
+        transaction.update(mergeLockRef, "last_occupied", Timestamp(Date(Calendar.getInstance().timeInMillis)))
 
         return createdGroup
     }
@@ -135,11 +142,19 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     override fun checkTableGroupLock(transaction: Transaction) {
         val snapshot = transaction.get(mergeLockRef)
         val preoccupied = snapshot.getBoolean("occupied")!!
-        if (preoccupied) throw TableException.TableLockPreempted()
+        val timestamp = snapshot.getTimestamp("last_occupied")!!
+        if (preoccupied && !isExpiredLock(timestamp)) throw TableException.TableLockPreempted()
+    }
+
+    private fun isExpiredLock(lastOccupied: Timestamp): Boolean {
+        val lastMillis = lastOccupied.convertToMilliseconds()
+        val nowMillis = Calendar.getInstance().timeInMillis
+        return nowMillis - lastMillis > TABLE_GROUP_LOCK_EXPIRE_TIME_MILLISECONDS
     }
 
     override fun getTableGroupLock(transaction: Transaction) {
         transaction.update(mergeLockRef, "occupied", true)
+        transaction.update(mergeLockRef, "last_occupied", Timestamp(Date(Calendar.getInstance().timeInMillis)))
     }
 
     override fun releaseTableGroupLock(transaction: Transaction) {
@@ -167,6 +182,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
             movedGroupRef,
             FireStoreGroup(member = emptyList())
         )
+        transaction.update(mergeLockRef, "last_occupied", Timestamp(Date(Calendar.getInstance().timeInMillis)))
 
         return combinedGroup.convertToDataTableGroup(group1.group)
     }

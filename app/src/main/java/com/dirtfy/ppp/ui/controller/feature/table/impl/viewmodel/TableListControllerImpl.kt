@@ -1,8 +1,10 @@
 package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.dirtfy.ppp.common.exception.TableException
+import com.dirtfy.ppp.data.api.TableApi.Companion.TABLE_GROUP_LOCK_EXPIRE_TIME_MILLISECONDS
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
@@ -40,6 +42,9 @@ class TableListControllerImpl @Inject constructor(
     )
     private val selectedTableSet: MutableSet<Int> = mutableSetOf()
     private val groupMap: MutableMap<Int, Int> = mutableMapOf()
+
+    private var timer: CountDownTimer? = null
+    private var timeLeftInMillis: Long = TABLE_GROUP_LOCK_EXPIRE_TIME_MILLISECONDS
 
     private val retryTrigger: MutableStateFlow<Int> = MutableStateFlow(0)
 
@@ -237,7 +242,30 @@ class TableListControllerImpl @Inject constructor(
             }.collect {
                 setTrySetMergeModeState(UiScreenState(UiState.COMPLETE))
                 _screenData.update { it.copy(mode = UiTableMode.Merge) }
+                startSessionTimer()
             }
+    }
+
+    private fun startSessionTimer() {
+        timer?.cancel()
+        timeLeftInMillis = TABLE_GROUP_LOCK_EXPIRE_TIME_MILLISECONDS
+        updateSessionTimerText()
+
+        timer = object : CountDownTimer(timeLeftInMillis, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                timeLeftInMillis = millisUntilFinished
+                updateSessionTimerText()
+            }
+
+            override fun onFinish() {
+                setMode(UiTableMode.Main)
+            }
+        }.start()
+    }
+
+    private fun updateSessionTimerText() {
+        val timeLeftInSeconds = (timeLeftInMillis / 1000).toInt()
+        _screenData.update { it.copy(timeLeftUntilEndOfMergeMode = "$timeLeftInSeconds") }
     }
 
     override suspend fun escapeFromMergeMode() {
@@ -247,7 +275,7 @@ class TableListControllerImpl @Inject constructor(
                 setEscapeFromMergeModeState(UiScreenState(UiState.FAIL, cause))
             }.collect {
                 setEscapeFromMergeModeState(UiScreenState(UiState.COMPLETE))
-                _screenData.update { it.copy(mode = UiTableMode.Main) }
+                setMode(UiTableMode.Main)
             }
     }
 
@@ -278,6 +306,7 @@ class TableListControllerImpl @Inject constructor(
             .collect { mergedGroupNum ->
                 selectedTableSet.clear()
                 Log.d("WeGlonD", "merged group number: $mergedGroupNum")
+                startSessionTimer()
             }
     }
     override suspend fun mergeTable() {

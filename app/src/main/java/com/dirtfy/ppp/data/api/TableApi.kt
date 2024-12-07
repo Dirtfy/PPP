@@ -7,6 +7,9 @@ import com.google.firebase.firestore.Transaction
 import kotlinx.coroutines.flow.Flow
 
 interface TableApi {
+    companion object {
+        const val TABLE_GROUP_LOCK_EXPIRE_TIME_MILLISECONDS = 30000L // 30초
+    }
 
     fun createGroup(group: DataTableGroup, transaction: Transaction): DataTableGroup
     fun deleteGroup(groupNumber: Int, transaction: Transaction)

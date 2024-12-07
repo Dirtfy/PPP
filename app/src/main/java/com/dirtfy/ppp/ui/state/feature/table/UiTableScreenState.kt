@@ -16,7 +16,7 @@ data class UiTableScreenState(
 
     val orderTotalPrice: String = "",
     val pointUse: UiPointUse = UiPointUse(),
-
+    val timeLeftUntilEndOfMergeMode: String = "",
     val mode: UiTableMode = UiTableMode.Main,
 
     val tableListState: UiScreenState = UiScreenState(),
