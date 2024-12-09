@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class RecordFireStore @Inject constructor(): RecordApi, Tagger {
+class RecordFireStore @Inject constructor(): RecordApi<Transaction>, Tagger {
 
     private val recordRef = Firebase.firestore.collection(FireStorePath.RECORD)
     private val recordIdRef = Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)

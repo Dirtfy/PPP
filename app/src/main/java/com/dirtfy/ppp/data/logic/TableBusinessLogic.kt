@@ -17,8 +17,8 @@ import com.google.firebase.firestore.Transaction
 import javax.inject.Inject
 
 class TableBusinessLogic @Inject constructor(
-    private val tableApi: TableApi,
-    private val recordApi: RecordApi,
+    private val tableApi: TableApi<Transaction>,
+    private val recordApi: RecordApi<Transaction>,
     private val transactionManager: TransactionManager<Transaction> // TODO com.google.firebase.firestore.Transaction 숨기기
 ): BusinessLogic {
 
