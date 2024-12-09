@@ -12,25 +12,17 @@ interface TableApi {
     }
 
     fun createGroup(group: DataTableGroup, transaction: Transaction): DataTableGroup
-    fun deleteGroup(groupNumber: Int, transaction: Transaction)
+    fun deleteGroup(groupNumber: Int, orderList: List<DataTableOrder>, transaction: Transaction)
     suspend fun readTable(tableNumber: Int): DataTable
-    suspend fun readAllTable(): List<DataTable>
-    suspend fun updateTable(table: DataTable)
+    suspend fun readAllGroupedTable(): List<DataTable>
     fun checkTableGroupLock(transaction: Transaction)
     fun getTableGroupLock(transaction: Transaction)
     fun releaseTableGroupLock(transaction: Transaction)
-    fun combineGroup(group1: DataTableGroup, group2: DataTableGroup, transaction: Transaction): DataTableGroup
     fun tableStream(): Flow<List<DataTable>>
 
-    /*suspend fun createOrder(
-        tableNumber: Int,
-        menuName: String,
-        menuPrice: Int
-    )*/
     suspend fun readOrder(groupNumber: Int, menuName: String): DataTableOrder
     fun readOrder(groupNumber: Int, menuName: String, transaction: Transaction): DataTableOrder
     suspend fun readAllOrder(groupNumber: Int): List<DataTableOrder>
-    /*suspend fun updateOrder(tableNumber: Int, order: DataTableOrder)*/
     suspend fun setOrder(groupNumber: Int, order: DataTableOrder)
     fun setOrder(groupNumber: Int, order: DataTableOrder, transaction: Transaction)
     fun incrementOrder(groupNumber: Int, menuName: String, transaction: Transaction)

@@ -7,7 +7,9 @@ import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.api.TableApi.Companion.TABLE_GROUP_LOCK_EXPIRE_TIME_MILLISECONDS
 import com.dirtfy.ppp.data.dto.feature.table.DataTable
 import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
+import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
+import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToDataTableOrder
 import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToUiTable
 import com.dirtfy.ppp.ui.controller.feature.table.TableListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
@@ -15,6 +17,7 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableListScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -317,8 +320,8 @@ class TableListControllerImpl @Inject constructor(
         selectedTableSet.clear()
     }
 
-    override suspend fun dissolveGroup(groupNumber: Int) {
-        tableBusinessLogic.dissolveGroup(groupNumber)
+    override suspend fun dissolveGroup(groupNumber: Int, orderList: List<UiTableOrder>) {
+        tableBusinessLogic.dissolveGroup(groupNumber, orderList.map { it.convertToDataTableOrder() })
     }
 
     override fun setMode(mode: UiTableMode) {

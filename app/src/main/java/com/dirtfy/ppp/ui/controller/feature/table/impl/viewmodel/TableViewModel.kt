@@ -118,7 +118,7 @@ class TableViewModel @Inject constructor(
 
     private fun disbandGroup() {
         //listController.disbandGroup(selectedTableNumber)
-        setMode(UiTableMode.Main)
+        listController.setMode(UiTableMode.Main)
     }
 
     override suspend fun payTableWithCash() {

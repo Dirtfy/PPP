@@ -5,6 +5,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableListScreenState
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import kotlinx.coroutines.flow.Flow
 
 interface TableListController {
@@ -20,7 +21,7 @@ interface TableListController {
     suspend fun escapeFromMergeMode()
     suspend fun mergeTable()
     fun cancelMergeTable()
-    suspend fun dissolveGroup(groupNumber: Int)
+    suspend fun dissolveGroup(groupNumber: Int, orderList: List<UiTableOrder>)
     fun syncTableList()
     fun retryUpdateTableList()
     fun setMode(mode: UiTableMode)

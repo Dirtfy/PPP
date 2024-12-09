@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.data.logic
 
 import android.util.Log
+import androidx.collection.mutableIntSetOf
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.TableApi
@@ -26,8 +27,15 @@ class TableBusinessLogic @Inject constructor(
     }
 
     fun readTables() = operate {
-        val tableList = tableApi.readAllTable()
-        tableList
+        val tableList = tableApi.readAllGroupedTable()
+        val groupedTableSet = mutableIntSetOf()
+        tableList.forEach { groupedTableSet.add(it.number) }
+        val ungroupedTableList = (1..11).filter { !groupedTableSet.contains(it) }
+            .map { DataTable(
+                number = it,
+                group = DataTable.GROUP_NOT_ASSIGNED
+            ) }
+        tableList + ungroupedTableList
     }
 
     fun readOrders(groupNumber: Int) = operate {
@@ -73,8 +81,10 @@ class TableBusinessLogic @Inject constructor(
 
         val orderCombineList = mutableListOf<DataTableOrder>()
 
+        val orderListMap = mutableMapOf<Int, List<DataTableOrder>>()
         groupUniqueList.map {
             val orderList = tableApi.readAllOrder(it)
+            orderListMap[it] = orderList
             orderList
         }.forEach { list ->
             list.forEach { order ->
@@ -107,7 +117,7 @@ class TableBusinessLogic @Inject constructor(
             }
             Log.d("WeGlonD", "merge - order list set")
             groupUniqueList.forEach {
-                tableApi.deleteGroup(it, transaction)
+                tableApi.deleteGroup(it, orderListMap[it]!!, transaction)
             }
             Log.d("WeGlonD", "merge - original group deleted")
             createdGroup.group
@@ -138,7 +148,7 @@ class TableBusinessLogic @Inject constructor(
             )
 
             tableApi.getTableGroupLock(transaction)
-            cleanGroup(groupNumber, transaction)
+            cleanGroup(groupNumber, orderList, transaction)
             tableApi.releaseTableGroupLock(transaction)
             payment
         }
@@ -157,7 +167,7 @@ class TableBusinessLogic @Inject constructor(
             )
 
             tableApi.getTableGroupLock(transaction)
-            cleanGroup(groupNumber, transaction)
+            cleanGroup(groupNumber, orderList, transaction)
             tableApi.releaseTableGroupLock(transaction)
             payment
         }
@@ -185,7 +195,7 @@ class TableBusinessLogic @Inject constructor(
             )
 
             tableApi.getTableGroupLock(transaction)
-            cleanGroup(groupNumber, transaction)
+            cleanGroup(groupNumber, orderList, transaction)
             tableApi.releaseTableGroupLock(transaction)
             payment
         }
@@ -212,14 +222,14 @@ class TableBusinessLogic @Inject constructor(
         )
     }
 
-    private fun cleanGroup(group: Int, transaction: Transaction) {
-        tableApi.deleteGroup(group, transaction)
+    private fun cleanGroup(group: Int, orderList: List<DataTableOrder>, transaction: Transaction) {
+        tableApi.deleteGroup(group, orderList, transaction)
     }
 
-    fun dissolveGroup(groupNumber: Int) = operate {
+    fun dissolveGroup(groupNumber: Int, orderList: List<DataTableOrder>) = operate {
         transactionManager.transaction { transaction ->
             tableApi.getTableGroupLock(transaction)
-            cleanGroup(groupNumber, transaction)
+            cleanGroup(groupNumber, orderList, transaction)
             tableApi.releaseTableGroupLock(transaction)
             groupNumber
         }

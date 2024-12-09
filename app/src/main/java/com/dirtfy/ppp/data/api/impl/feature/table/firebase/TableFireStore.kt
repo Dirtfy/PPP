@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.data.api.impl.feature.table.firebase
 
 import android.icu.util.Calendar
-import android.os.CountDownTimer
 import android.util.Log
 import com.dirtfy.ppp.common.exception.ExternalException
 import com.dirtfy.ppp.common.exception.TableException
@@ -34,13 +33,13 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
     private val mergeLockRef = Firebase.firestore.document(FireStorePath.TABLE_GROUP_LOCK)
     private val groupIdRef = Firebase.firestore.document(FireStorePath.GROUP_ID_COUNT)
 
-    private suspend fun readGroup(tableNumber: Int): Int {
+    private suspend fun getGroupNumber(tableNumber: Int): Int {
         val query = tableRef.whereArrayContains("member", tableNumber)
         val documents = query.get().await().documents
 
         return when (documents.size) {
             1 -> documents[0].id.toInt()
-            0 -> throw TableException.GroupLoss() // TODO readTable 에서 이 함수를 호출하는데 이때 다 바꿔야 함 group이 없을 수 있다....
+            0 -> DataTable.GROUP_NOT_ASSIGNED
             else -> throw TableException.NonUniqueGroup()
         }
     }
@@ -67,18 +66,19 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         return createdGroup
     }
 
-    override fun deleteGroup(groupNumber: Int, transaction: Transaction) {
+    override fun deleteGroup(groupNumber: Int, orderList: List<DataTableOrder>, transaction: Transaction) {
         val groupRef = tableRef.document("$groupNumber")
+        val orderRef = getOrderRef(groupNumber)
         Log.d("WeGlonD", "delete group $groupNumber")
-//        if (isGroupExist(groupNumber, transaction)) // transaction 내부에서는 모든 read 연산 후 write 연산을 진행해야함.
+        orderList.forEach { order ->
+            transaction.delete(orderRef.document(order.name))
+        }
         transaction.delete(groupRef)
-//        else
-//            throw TableException.GroupLoss()
         Log.d("WeGlonD", "group$groupNumber deleted")
     }
 
     override suspend fun readTable(tableNumber: Int): DataTable {
-        val group = readGroup(tableNumber)
+        val group = getGroupNumber(tableNumber)
 
         return DataTable(
             number = tableNumber,
@@ -86,12 +86,12 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         )
     }
 
-    override suspend fun readAllTable(): List<DataTable> {
+    override suspend fun readAllGroupedTable(): List<DataTable> {
         val snapshot = tableRef.get().await()
-        return readAllTable(snapshot)
+        return readAllGroupedTable(snapshot)
     }
 
-    private fun readAllTable( // order가 있는 것들만 가져온다
+    private fun readAllGroupedTable( // group 있는 것들만 가져온다
         tableSnapshot: QuerySnapshot
     ): List<DataTable> {
         val resultList = mutableListOf<DataTable>()
@@ -125,20 +125,6 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         return document.exists()
     }
 
-    override suspend fun updateTable(table: DataTable) {
-        val nowGroup = readGroup(table.number)
-
-        val nowGroupMember = readGroupMember(nowGroup)
-        tableRef.document("$nowGroup").set(
-            FireStoreGroup(member = nowGroupMember.filter { it != table.number })
-        ).await()
-
-        val targetGroupMember = readGroupMember(table.group)
-        tableRef.document("${table.group}").set(
-            FireStoreGroup(member = targetGroupMember + table.number)
-        ).await()
-    }
-
     override fun checkTableGroupLock(transaction: Transaction) {
         val snapshot = transaction.get(mergeLockRef)
         val preoccupied = snapshot.getBoolean("occupied")!!
@@ -161,32 +147,6 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
         transaction.update(mergeLockRef, "occupied", false)
     }
 
-    override fun combineGroup(
-        group1: DataTableGroup,
-        group2: DataTableGroup,
-        transaction: Transaction
-    ): DataTableGroup {
-        if (group1.group == group2.group || group1.member.intersect(group2.member.toSet()).isNotEmpty()) {
-            throw TableException.InValidGroupState()
-        }
-
-        val baseGroupRef = tableRef.document("${group1.group}")
-        val combinedGroup = FireStoreGroup(member = group1.member + group2.member)
-        transaction.set(
-            baseGroupRef,
-            combinedGroup
-        )
-
-        val movedGroupRef = tableRef.document("${group2.group}")
-        transaction.set(
-            movedGroupRef,
-            FireStoreGroup(member = emptyList())
-        )
-        transaction.update(mergeLockRef, "last_occupied", Timestamp(Date(Calendar.getInstance().timeInMillis)))
-
-        return combinedGroup.convertToDataTableGroup(group1.group)
-    }
-
     override fun tableStream(): Flow<List<DataTable>> = callbackFlow {
         Log.d(TAG, "tableStream start")
         val tableSubscription = tableRef.addSnapshotListener { snapshot, error ->
@@ -205,7 +165,7 @@ class TableFireStore @Inject constructor(): TableApi, Tagger {
                     throw ExternalException.ServerError()
                 }*/
 
-                val tableList = readAllTable(snapshot)
+                val tableList = readAllGroupedTable(snapshot)
                 trySend(tableList)
             } catch (e: Throwable) {
                 Log.e(TAG, "table subscription fail\n${e.message}")
