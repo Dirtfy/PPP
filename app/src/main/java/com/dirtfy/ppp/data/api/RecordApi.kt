@@ -2,7 +2,6 @@ package com.dirtfy.ppp.data.api
 
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
-import com.google.firebase.firestore.Transaction
 import kotlinx.coroutines.flow.Flow
 
 interface RecordApi <TransactionType> {

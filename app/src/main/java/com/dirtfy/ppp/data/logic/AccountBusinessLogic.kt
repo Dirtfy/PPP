@@ -8,13 +8,14 @@ import com.dirtfy.ppp.data.dto.feature.account.DataAccountRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.logic.common.BusinessLogic
 import com.dirtfy.ppp.data.logic.common.converter.RecordDataConverter.convertToDataAccountRecord
+import com.google.firebase.firestore.Transaction
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import kotlin.random.Random
 
 class AccountBusinessLogic @Inject constructor(
     private val accountApi: AccountApi,
-    private val recordApi: RecordApi
+    private val recordApi: RecordApi<Transaction>
 ): BusinessLogic {
 
     private fun isValidPhoneNumber(phoneNumber: String): Boolean {

@@ -7,12 +7,13 @@ import com.dirtfy.ppp.data.api.impl.feature.record.firebase.RecordFireStore
 import com.dirtfy.ppp.data.api.impl.feature.table.firebase.TableFireStore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.memoryCacheSettings
 import com.google.firebase.ktx.Firebase
 
 class FireStoreProvider private constructor(): ApiProvider {
     init {
         Firebase.firestore.firestoreSettings = FirebaseFirestoreSettings.Builder()
-            .setPersistenceEnabled(false) // TODO deprecated function call
+            .setLocalCacheSettings(memoryCacheSettings {  })
             .build()
     }
 

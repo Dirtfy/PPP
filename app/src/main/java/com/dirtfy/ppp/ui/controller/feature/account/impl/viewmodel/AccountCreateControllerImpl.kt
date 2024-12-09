@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.account.impl.viewmodel
 
 import android.util.Log
-import com.dirtfy.ppp.common.exception.AccountException
 import com.dirtfy.ppp.data.logic.AccountBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
 import com.dirtfy.ppp.ui.controller.feature.account.AccountCreateController

@@ -1,7 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 
 import android.util.Log
-import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.logic.TableBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.controller.common.converter.feature.table.TableAtomConverter.convertToDataTableOrder
