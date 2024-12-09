@@ -27,7 +27,7 @@ import kotlinx.coroutines.tasks.await
 import java.util.Date
 import javax.inject.Inject
 
-class TableFireStore @Inject constructor(): TableApi, Tagger {
+class TableFireStore @Inject constructor(): TableApi<Transaction>, Tagger {
 
     private val tableRef = Firebase.firestore.collection(FireStorePath.TABLE)
     private val mergeLockRef = Firebase.firestore.document(FireStorePath.TABLE_GROUP_LOCK)
