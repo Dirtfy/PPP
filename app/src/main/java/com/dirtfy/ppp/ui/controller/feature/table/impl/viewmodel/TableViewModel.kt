@@ -27,8 +27,6 @@ class TableViewModel @Inject constructor(
     private val menuController: TableMenuController
 ): ViewModel(), TableController, Tagger {
 
-    private var selectedTableNumber: Int = 0
-
     override val screenData: StateFlow<UiTableScreenState>
         = menuController.screenData
         .combine(listController.screenData) { menuScreenState, listScreenData ->
@@ -37,8 +35,11 @@ class TableViewModel @Inject constructor(
                 menuListState = menuScreenState.menuListState,
                 tableList = listScreenData.tableList,
                 sourceTableList = listScreenData.sourceTableList,
+                timeLeftUntilEndOfMergeMode = listScreenData.timeLeftUntilEndOfMergeMode,
                 mode = listScreenData.mode,
                 tableListState = listScreenData.tableListState,
+                trySetMergeModeState = listScreenData.trySetMergeModeState,
+                escapeFromMergeModeState = listScreenData.escapeFromMergeModeState,
                 mergeTableState = listScreenData.mergeTableState
             )
         }.combine(orderController.screenData) { state, orderScreenData ->
@@ -69,9 +70,9 @@ class TableViewModel @Inject constructor(
     }
 
     override fun updateOrderList(table: UiTable) {
-        selectedTableNumber = table.number.toInt()
-        println(selectedTableNumber.toString())
-        orderController.updateOrderList(table)
+        val groupNumber = listController.getGroupNumber(table.number.toInt())
+        println("table${table.number} is group$groupNumber")
+        orderController.updateOrderList(groupNumber)
     }
 
     override fun retryUpdateOrderList() {
@@ -98,6 +99,14 @@ class TableViewModel @Inject constructor(
         }
     }
 
+    override suspend fun trySetMergeMode() {
+        listController.trySetMergeMode()
+    }
+
+    override suspend fun escapeFromMergeMode() {
+        listController.escapeFromMergeMode()
+    }
+
     override suspend fun mergeTable() {
         listController.mergeTable()
     }
@@ -109,30 +118,30 @@ class TableViewModel @Inject constructor(
 
     private fun disbandGroup() {
         //listController.disbandGroup(selectedTableNumber)
-        setMode(UiTableMode.Main)
+        listController.setMode(UiTableMode.Main)
     }
 
     override suspend fun payTableWithCash() {
-        orderController.payTableWithCash(selectedTableNumber)
+        orderController.payTableWithCash()
         disbandGroup()
     }
 
     override suspend fun payTableWithCard() {
-        orderController.payTableWithCard(selectedTableNumber)
+        orderController.payTableWithCard()
         disbandGroup()
     }
 
     override suspend fun payTableWithPoint() {
-        orderController.payTableWithPoint(selectedTableNumber)
+        orderController.payTableWithPoint()
         disbandGroup()
     }
 
     override suspend fun addOrder(name: String, price: String) {
-        orderController.addOrder(selectedTableNumber, name, price)
+        orderController.addOrder(name, price)
     }
 
     override suspend fun cancelOrder(name: String, price: String) {
-        orderController.cancelOrder(selectedTableNumber, name, price)
+        orderController.cancelOrder(name, price)
     }
 
     override fun setMode(mode: UiTableMode) {
@@ -145,6 +154,14 @@ class TableViewModel @Inject constructor(
 
     override fun setTableListState(state: UiScreenState) {
         listController.setTableListState(state)
+    }
+
+    override fun setTrySetMergeModeState(state: UiScreenState) {
+        listController.setTrySetMergeModeState(state)
+    }
+
+    override fun setEscapeFromMergeModeState(state: UiScreenState) {
+        listController.setEscapeFromMergeModeState(state)
     }
 
     override fun setMergeTableState(state: UiScreenState) {

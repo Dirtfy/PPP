@@ -149,7 +149,7 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "accountStream snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val accountList = readAllAccount(snapshot)
                 trySend(accountList)

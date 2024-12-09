@@ -27,7 +27,7 @@ class AccountUpdateControllerImpl @Inject constructor(
 
         _screenData.update { it.copy(updateAccountState = UiScreenState(UiState.LOADING)) }
         accountBusinessLogic.updateAccount(
-            number = number.toInt(),
+            numberString = number,
             name = name,
             phoneNumber = phoneNumber
         ).catch { cause ->

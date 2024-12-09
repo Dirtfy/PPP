@@ -20,6 +20,8 @@ interface TableController: Controller<UiTableScreenState, TableController> {
     fun updatePointUse(pointUse: UiPointUse)
 
     fun clickTable(table: UiTable)
+    suspend fun trySetMergeMode()
+    suspend fun escapeFromMergeMode()
     suspend fun mergeTable()
     fun cancelMergeTable()
     suspend fun payTableWithCash()
@@ -31,6 +33,8 @@ interface TableController: Controller<UiTableScreenState, TableController> {
     fun setMode(mode: UiTableMode)
     fun setMenuListState(state: UiScreenState)
     fun setTableListState(state: UiScreenState)
+    fun setTrySetMergeModeState(state: UiScreenState)
+    fun setEscapeFromMergeModeState(state: UiScreenState)
     fun setMergeTableState(state: UiScreenState)
     fun setPayTableWithCashState(state: UiScreenState)
     fun setPayTableWithCardState(state: UiScreenState)

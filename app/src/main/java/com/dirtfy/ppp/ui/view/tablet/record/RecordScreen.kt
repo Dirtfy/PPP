@@ -62,7 +62,7 @@ class RecordScreen @Inject constructor(
         Component.HandleUiStateDialog(
             uiState = screenData.nowRecordState,
             onDismissRequest = { controller.setNowRecordState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = { } // TODO Retry 해결 후 실행 nowRecordState
+            onRetryAction = null
         )
 
     }

@@ -1,19 +1,25 @@
 package com.dirtfy.ppp.data.logic
 
 import android.util.Log
+import androidx.collection.mutableIntSetOf
 import com.dirtfy.ppp.common.exception.TableException
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.api.TableApi
+import com.dirtfy.ppp.data.api.TransactionManager
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.dirtfy.ppp.data.dto.feature.record.DataRecordType
+import com.dirtfy.ppp.data.dto.feature.table.DataTable
+import com.dirtfy.ppp.data.dto.feature.table.DataTableGroup
 import com.dirtfy.ppp.data.dto.feature.table.DataTableOrder
 import com.dirtfy.ppp.data.logic.common.BusinessLogic
+import com.google.firebase.firestore.Transaction
 import javax.inject.Inject
 
 class TableBusinessLogic @Inject constructor(
     private val tableApi: TableApi,
-    private val recordApi: RecordApi
+    private val recordApi: RecordApi,
+    private val transactionManager: TransactionManager<Transaction> // TODO com.google.firebase.firestore.Transaction 숨기기
 ): BusinessLogic {
 
     private fun isInValidTableNumber(tableNumber: Int): Boolean {
@@ -21,42 +27,65 @@ class TableBusinessLogic @Inject constructor(
     }
 
     fun readTables() = operate {
-        val tableList = tableApi.readAllTable()
-        tableList
+        val tableList = tableApi.readAllGroupedTable()
+        val groupedTableSet = mutableIntSetOf()
+        tableList.forEach { groupedTableSet.add(it.number) }
+        val ungroupedTableList = (1..11).filter { !groupedTableSet.contains(it) }
+            .map { DataTable(
+                number = it,
+                group = DataTable.GROUP_NOT_ASSIGNED
+            ) }
+        tableList + ungroupedTableList
     }
 
-    fun readOrders(tableNumber: Int) = operate {
-        if (isInValidTableNumber(tableNumber))
-            throw TableException.InvalidTableNumber()
+    fun readOrders(groupNumber: Int) = operate {
+        if (!tableApi.isGroupExist(groupNumber))
+            throw TableException.GroupLoss()
 
-        val group = tableApi.readTable(tableNumber).group
-
-        val tableOrderList = tableApi.readAllOrder(group)
+        val tableOrderList = tableApi.readAllOrder(groupNumber)
         tableOrderList
     }
 
     fun tableStream() = tableApi.tableStream()
     fun orderStream(tableNumber: Int) = tableApi.orderStream(tableNumber)
 
-    fun mergeTables(tableNumberList: List<Int>) = operate {
-        if (tableNumberList.size <= 1)
+    fun getTableGroupLock() = operate {
+        transactionManager.transaction { transaction ->
+            tableApi.checkTableGroupLock(transaction)
+            tableApi.getTableGroupLock(transaction)
+            true
+        }
+    }
+
+    fun releaseTableGroupLock() = operate {
+        transactionManager.transaction {transaction ->
+            tableApi.releaseTableGroupLock(transaction)
+            true
+        }
+    }
+
+    fun mergeTables(tableList: List<DataTable>) = operate {
+        if (tableList.isEmpty())
             throw TableException.NonEnoughMergingTargets()
 
-        for (tableNumber in tableNumberList) {
-            if (isInValidTableNumber(tableNumber))
+        for (table in tableList) {
+            if (isInValidTableNumber(table.number))
                 throw TableException.InvalidTableNumber()
         }
 
-        val tableList = tableApi.readAllTable()
-            .filter { tableNumberList.contains(it.number) }
-
         val groupUniqueList = tableList.map {
             it.group
+        }.filter {
+            it != DataTable.GROUP_NOT_ASSIGNED
         }.toSet().toList()
 
         val orderCombineList = mutableListOf<DataTableOrder>()
+
+        val orderListMap = mutableMapOf<Int, List<DataTableOrder>>()
         groupUniqueList.map {
-            tableApi.readAllOrder(it)
+            val orderList = tableApi.readAllOrder(it)
+            orderListMap[it] = orderList
+            orderList
         }.forEach { list ->
             list.forEach { order ->
                 val hasSameMenu = orderCombineList
@@ -76,37 +105,22 @@ class TableBusinessLogic @Inject constructor(
             }
         }
 
-        groupUniqueList.forEach {
-            tableApi.deleteAllOrder(it)
-        }
+        transactionManager.transaction { transaction ->
+            val mergedGroup = DataTableGroup(
+                member = tableList.map { it.number }
+            )
 
-        val baseGroup = groupUniqueList[0]
-
-        orderCombineList.forEach {
-            /*tableApi.createOrder(baseGroup, it.name, it.price)
-            tableApi.updateOrder(baseGroup, it)*/
-            tableApi.setOrder(baseGroup, it)
-        }
-
-        tableList.filter {
-            it.group != baseGroup
-        }.forEach {
-            tableApi.updateTable(it.copy(group = baseGroup))
-        }
-
-        baseGroup
-    }
-
-    private suspend fun cleanGroup(group: Int) {
-        tableApi.apply {
-            deleteAllOrder(group)
-            readAllTable()
-                .filter { it.group == group }
-                .forEach {
-                    updateTable(
-                        it.copy(group = it.number)
-                    )
-                }
+            val createdGroup = tableApi.createGroup(mergedGroup, transaction)
+            Log.d("WeGlonD", "merge - group created")
+            orderCombineList.forEach {
+                tableApi.setOrder(createdGroup.group, it, transaction)
+            }
+            Log.d("WeGlonD", "merge - order list set")
+            groupUniqueList.forEach {
+                tableApi.deleteGroup(it, orderListMap[it]!!, transaction)
+            }
+            Log.d("WeGlonD", "merge - original group deleted")
+            createdGroup.group
         }
     }
 
@@ -122,155 +136,168 @@ class TableBusinessLogic @Inject constructor(
     }
 
     fun payTableWithCash(
-        tableNumber: Int
+        groupNumber: Int,
+        orderList: List<DataTableOrder>
     ) = operate {
-        val group = tableApi.readTable(tableNumber).group
+        transactionManager.transaction { transaction ->
+            tableApi.checkTableGroupLock(transaction)
+            val payment = payTable(
+                orderList = orderList,
+                type = DataRecordType.Cash.name,
+                transaction = transaction
+            )
 
-        val orderList = tableApi.readAllOrder(group)
-
-        val payment = recordApi.create(
-            record = DataRecord(
-                income = orderList.calcTotalPrice(),
-                type = DataRecordType.Cash.name
-            ),
-            detailList = orderList.map{ it.convertToRecordDetail() }
-        )
-        // TODO 다른 DB간 transaction 처리
-
-        cleanGroup(group)
-        payment
+            tableApi.getTableGroupLock(transaction)
+            cleanGroup(groupNumber, orderList, transaction)
+            tableApi.releaseTableGroupLock(transaction)
+            payment
+        }
     }
+
     fun payTableWithCard(
-        tableNumber: Int
+        groupNumber: Int,
+        orderList: List<DataTableOrder>
     ) = operate {
-        val group = tableApi.readTable(tableNumber).group
+        transactionManager.transaction { transaction ->
+            tableApi.checkTableGroupLock(transaction)
+            val payment = payTable(
+                orderList = orderList,
+                type = DataRecordType.Card.name,
+                transaction = transaction
+            )
 
-        val orderList = tableApi.readAllOrder(group)
-
-        val payment = recordApi.create(
-            record = DataRecord(
-                income = orderList.calcTotalPrice(),
-                type = DataRecordType.Card.name
-            ),
-            detailList = orderList.map{ it.convertToRecordDetail() }
-        )
-        // TODO 다른 DB간 transaction 처리
-
-        cleanGroup(group)
-        payment
+            tableApi.getTableGroupLock(transaction)
+            cleanGroup(groupNumber, orderList, transaction)
+            tableApi.releaseTableGroupLock(transaction)
+            payment
+        }
     }
+
     fun payTableWithPoint(
-        tableNumber: Int,
+        groupNumber: Int,
         accountNumber: Int,
-        issuedName: String
+        issuedName: String,
+        orderList: List<DataTableOrder>
     ) = operate {
-        val group = tableApi.readTable(tableNumber).group
-
-        val orderList = tableApi.readAllOrder(group)
-
         val nowBalance = recordApi.readSumOf("type", "$accountNumber", "income")
         val totalPrice = orderList.calcTotalPrice()
 
         if (nowBalance < totalPrice)
             throw TableException.InvalidPay()
 
-        val payment = recordApi.create(
-            record = DataRecord(
-                income = -totalPrice,
-                type = accountNumber.toString(),
-                issuedBy = issuedName
-            ),
-            detailList = orderList.map{ it.convertToRecordDetail() }
-        )
-        // TODO 다른 DB간 transaction 처리
+        transactionManager.transaction { transaction ->
+            tableApi.checkTableGroupLock(transaction)
+            val payment = payTable(
+                orderList = orderList,
+                type = "$accountNumber",
+                issuedName = issuedName,
+                transaction = transaction
+            )
 
-        cleanGroup(group)
-        payment
+            tableApi.getTableGroupLock(transaction)
+            cleanGroup(groupNumber, orderList, transaction)
+            tableApi.releaseTableGroupLock(transaction)
+            payment
+        }
+    }
+
+    private fun payTable(
+        orderList: List<DataTableOrder>,
+        type: String,
+        issuedName: String? = null,
+        transaction: Transaction
+    ): DataRecord {
+        val absoluteTotalPrice = orderList.calcTotalPrice()
+        val isPoint = !(type == DataRecordType.Cash.name || type == DataRecordType.Card.name)
+        var record = DataRecord(
+            income = if (isPoint) -absoluteTotalPrice else absoluteTotalPrice,
+            type = type
+        )
+        if (issuedName != null) record = record.copy(issuedBy = issuedName)
+
+        return recordApi.create(
+            record = record,
+            detailList = orderList.map { it.convertToRecordDetail() },
+            transaction = transaction
+        )
+    }
+
+    private fun cleanGroup(group: Int, orderList: List<DataTableOrder>, transaction: Transaction) {
+        tableApi.deleteGroup(group, orderList, transaction)
+    }
+
+    fun dissolveGroup(groupNumber: Int, orderList: List<DataTableOrder>) = operate {
+        transactionManager.transaction { transaction ->
+            tableApi.getTableGroupLock(transaction)
+            cleanGroup(groupNumber, orderList, transaction)
+            tableApi.releaseTableGroupLock(transaction)
+            groupNumber
+        }
     }
 
     fun addOrder(
-        tableNumber: Int,
+        groupNumber: Int,
         menuName: String,
-        menuPrice: Int
+        menuPrice: Int,
+        nowCount: UInt
     ) = operate {
         Log.d("WeGlonD", "service addOrder")
-        tableApi.run {
-            val group = readTable(tableNumber).group
-
-            val count: Int
-            if (isOrderExist(group, menuName)) {
-                val order = readOrder(group, menuName)
-                count = order.count + 1
-
-                /*updateOrder(
-                    group,
-                    order.copy(count = count)
-                )*/
-                setOrder(
-                    group,
-                    order.copy(count = count)
-                )
-            } else {
-                count = 1
-                setOrder(
-                    group,
-                    DataTableOrder(
-                        name = menuName,
-                        price = menuPrice,
-                        count = count
+        transactionManager.transaction { transaction ->
+            tableApi.run {
+                if (nowCount.toInt() == 0) {
+                    setOrder(
+                        groupNumber,
+                        DataTableOrder(
+                            name = menuName,
+                            price = menuPrice,
+                            count = 1
+                        ),
+                        transaction
                     )
+                } else {
+                    incrementOrder(
+                        groupNumber,
+                        menuName,
+                        transaction
+                    )
+                }
+
+                DataTableOrder(
+                    menuName,
+                    menuPrice,
+                    nowCount.toInt() + 1
                 )
             }
-
-            DataTableOrder(
-                menuName,
-                menuPrice,
-                count
-            )
         }
     }
 
     fun cancelOrder(
-        tableNumber: Int,
+        groupNumber: Int,
         menuName: String,
-        menuPrice: Int
+        menuPrice: Int,
+        nowCount: UInt
     ) = operate {
-        tableApi.run {
-            val group = readTable(tableNumber).group
-
-            val count: Int
-            if (isOrderExist(group, menuName)) {
-                when(val menuCount = readOrder(group, menuName).count) {
-                    0 -> { throw TableException.NonEnoughMenuToCancel() }
-                    1 -> {
-                        count = 0
-                        deleteOrder(group, menuName)
-                    }
+        transactionManager.transaction { transaction ->
+            tableApi.run {
+                when (nowCount.toInt()) {
+                    0 -> throw TableException.NonEnoughMenuToCancel()
+                    1 -> deleteOrder(groupNumber, menuName, transaction)
                     else -> {
-                        count = menuCount-1
-                        setOrder(
-                            group,
-                            DataTableOrder(
-                                menuName,
-                                menuPrice,
-                                count
-                            )
+                        decrementOrder(
+                            groupNumber,
+                            menuName,
+                            transaction
                         )
                     }
                 }
-            }
-            else throw TableException.InvalidOrderName()
 
-            DataTableOrder(
-                menuName,
-                menuPrice,
-                count
-            )
+                DataTableOrder(
+                    menuName,
+                    menuPrice,
+                    nowCount.toInt() - 1
+                )
+            }
         }
     }
 
-    fun getGroup(tableNumber: Int) = operate {
-        val group = tableApi.readTable(tableNumber).group
-        group
-    }
 }

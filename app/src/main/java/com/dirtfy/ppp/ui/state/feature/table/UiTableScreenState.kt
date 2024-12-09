@@ -16,12 +16,14 @@ data class UiTableScreenState(
 
     val orderTotalPrice: String = "",
     val pointUse: UiPointUse = UiPointUse(),
-
+    val timeLeftUntilEndOfMergeMode: String = "",
     val mode: UiTableMode = UiTableMode.Main,
 
     val tableListState: UiScreenState = UiScreenState(),
     val orderListState: UiScreenState = UiScreenState(),
     val menuListState: UiScreenState = UiScreenState(),
+    val trySetMergeModeState: UiScreenState = UiScreenState(UiState.COMPLETE),
+    val escapeFromMergeModeState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val mergeTableState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val payTableWithCashState: UiScreenState = UiScreenState(UiState.COMPLETE),
     val payTableWithCardState: UiScreenState = UiScreenState(UiState.COMPLETE),

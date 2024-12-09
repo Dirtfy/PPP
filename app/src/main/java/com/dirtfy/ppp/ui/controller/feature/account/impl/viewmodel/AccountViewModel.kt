@@ -69,9 +69,7 @@ class AccountViewModel @Inject constructor(
 
 
     @Deprecated("screen state synchronized with repository")
-    override suspend fun updateAccountList() {
-        // TODO 다른 기기에서 어카운트 변경시 어떻게 뷰를 변경할 지 정해야 할 듯
-    }
+    override suspend fun updateAccountList() {}
 
     override fun retryUpdateAccountList() {
         accountListController.retryUpdateAccountList()
@@ -93,9 +91,6 @@ class AccountViewModel @Inject constructor(
         message = "accountRecordList will be automatically updated when nowAccount is updated",
         replaceWith = ReplaceWith("updateNowAccount(account)")
     )
-    override fun updateAccountRecordList() {
-        accountDetailController.updateAccountRecordList(_screenData.value.nowAccount)
-    }
 
     override fun retryUpdateAccountRecordList() {
         accountDetailController.retryUpdateAccountRecordList()

@@ -23,10 +23,15 @@ class AccountBusinessLogic @Inject constructor(
     }
 
     fun createAccount(
-        number: Int,
+        numberString: String,
         name: String,
         phoneNumber: String
     ) = operate {
+        if(numberString == "")throw AccountException.BlankNumber()
+        else if(name == "")throw AccountException.BlankName()
+        else if(phoneNumber == "")throw AccountException.BlankPhoneNumber()
+
+        val number = numberString.toInt()
         val account = accountApi.let {
             if (it.isSameNumberExist(number))
                 throw AccountException.NonUniqueNumber()
@@ -64,10 +69,15 @@ class AccountBusinessLogic @Inject constructor(
     }
 
     fun updateAccount(
-        number: Int,
+        numberString: String,
         name: String,
         phoneNumber: String
     ) = operate {
+        if(numberString == "") throw AccountException.BlankNumber()
+        else if(name == "") throw AccountException.BlankName()
+        else if(phoneNumber == "") throw AccountException.BlankPhoneNumber()
+
+        val number = numberString.toInt()
         val account = accountApi.let {
             if (!it.isNumberExist(number))
                 throw AccountException.InvalidNumber()
@@ -120,11 +130,14 @@ class AccountBusinessLogic @Inject constructor(
     fun addAccountRecord(
         accountNumber: Int,
         issuedName: String,
-        difference: Int
+        differenceString: String
     ) = operate {
         if (!accountApi.isNumberExist(accountNumber))
             throw AccountException.InvalidNumber()
+        if(issuedName == "") throw AccountException.BlankIssuedName()
+        if(differenceString == "") throw AccountException.BlankDifference()
 
+        val difference = differenceString.toInt()
         val currentBalance = readBalance(accountNumber)
 
         val result = currentBalance + difference

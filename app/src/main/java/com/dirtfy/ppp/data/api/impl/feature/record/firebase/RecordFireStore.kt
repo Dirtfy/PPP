@@ -15,6 +15,7 @@ import com.google.firebase.firestore.AggregateField
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Transaction
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -58,6 +59,34 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
         return createdRecord
     }
 
+    override fun create(
+        record: DataRecord,
+        detailList: List<DataRecordDetail>,
+        transaction: Transaction
+    ): DataRecord {
+        if (record.id != DataRecord.ID_NOT_ASSIGNED)
+            throw RecordException.IllegalIdAssignment()
+
+        val snapshot = transaction.get(recordIdRef)
+        val newRecordId = snapshot.getLong("count")!!.toInt()
+
+        val newRecord = recordRef.document(newRecordId.toString())
+
+        transaction.update(recordIdRef, "count", FieldValue.increment(1))
+
+        val recordWithId = record.copy(id = newRecordId)
+        transaction.set(newRecord, recordWithId.convertToFireStoreRecord())
+
+        detailList.forEach {
+            transaction.set(
+                newRecord.collection(FireStorePath.RECORD_DETAIL).document(),
+                it.convertToFireStoreRecordDetail()
+            )
+        }
+
+        return recordWithId
+    }
+
     override suspend fun read(id: Int): DataRecord {
         val recordSnapshot = recordRef.document(id.toString()).get().await()
         return recordSnapshot.toObject(FireStoreRecord::class.java)!!
@@ -96,7 +125,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
         val detailSnapshot = recordRef.document(record.id.toString())
             .collection(FireStorePath.RECORD_DETAIL).get().await()
-        if (detailSnapshot.metadata.isFromCache) throw ExternalException.NetworkError()
+        if (detailSnapshot.metadata.isFromCache) Log.e(TAG, "detailSnapshot is from cache")
         return detailSnapshot
             .documents.map { detailDocument ->
                 detailDocument.toObject(FireStoreRecordDetail::class.java)!!
@@ -119,7 +148,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "recordStream snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val recordList = readAll(snapshot)
                 trySend(recordList)
@@ -160,7 +189,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "recordStreamWith(key = $key, value = $value) - snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val accountRecordList = readAll(snapshot)
                 trySend(accountRecordList)
@@ -205,7 +234,7 @@ class RecordFireStore @Inject constructor(): RecordApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "recordStreamSumOf(key = $key, value = $value, target = $target) - snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val result = sum(
                     readAllRecordWith(

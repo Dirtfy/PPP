@@ -28,7 +28,6 @@ interface AccountController
         message = "accountRecordList will be automatically updated when nowAccount is updated",
         replaceWith = ReplaceWith("updateNowAccount(account)")
     )
-    fun updateAccountRecordList()
     fun retryUpdateAccountRecordList()
     fun updateNewAccountRecord(newAccountRecord: UiNewAccountRecord)
     suspend fun addRecord()

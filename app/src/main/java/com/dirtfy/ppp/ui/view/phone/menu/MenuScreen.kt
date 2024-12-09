@@ -60,8 +60,7 @@ class MenuScreen @Inject constructor(
         )
         Component.HandleUiStateDialog(
             uiState = screen.deleteMenuState,
-            onDismissRequest = { controller.setDeleteMenuState(UiScreenState(UiState.COMPLETE)) },
-            onRetryAction = { } // TODO Retry 이후 구현
+            onDismissRequest = { controller.setDeleteMenuState(UiScreenState(UiState.COMPLETE)) }
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

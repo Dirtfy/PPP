@@ -76,7 +76,7 @@ class MenuFireStore @Inject constructor(): MenuApi, Tagger {
                 }
                 if (snapshot.metadata.isFromCache) {
                     Log.e(TAG, "menuStream snapshot is from cache")
-                    throw ExternalException.NetworkError()
+//                    throw ExternalException.NetworkError()
                 }
                 val menuList = readAll(snapshot)
                 trySend(menuList)
