@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.data.logic
 
+import android.view.SurfaceControl.Transaction
 import com.dirtfy.ppp.data.api.RecordApi
 import com.dirtfy.ppp.data.dto.feature.record.DataRecord
 import com.dirtfy.ppp.data.logic.common.BusinessLogic
@@ -7,7 +8,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class RecordBusinessLogic @Inject constructor(
-    private val repository: RecordApi
+    private val repository: RecordApi<Transaction> // TODO com.google.firebase.firestore.Transaction 숨기기
 ): BusinessLogic {
 
     fun readRecord(id: Int) = operate {

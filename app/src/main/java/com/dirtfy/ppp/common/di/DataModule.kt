@@ -39,12 +39,12 @@ class DataModule {
     }
 
     @Provides
-    fun providesRecordApi(): RecordApi {
+    fun providesRecordApi(): RecordApi<Transaction> {
         return providesApiProvider().recordApi
     }
 
     @Provides
-    fun providesTableApi(): TableApi {
+    fun providesTableApi(): TableApi<Transaction> {
         return providesApiProvider().tableApi
     }
 

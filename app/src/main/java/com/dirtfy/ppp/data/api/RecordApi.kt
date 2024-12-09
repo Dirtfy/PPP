@@ -5,10 +5,10 @@ import com.dirtfy.ppp.data.dto.feature.record.DataRecordDetail
 import com.google.firebase.firestore.Transaction
 import kotlinx.coroutines.flow.Flow
 
-interface RecordApi {
+interface RecordApi <TransactionType> {
 
     suspend fun create(record: DataRecord, detailList: List<DataRecordDetail>): DataRecord
-    fun create(record: DataRecord, detailList: List<DataRecordDetail>, transaction: Transaction): DataRecord
+    fun create(record: DataRecord, detailList: List<DataRecordDetail>, transaction: TransactionType): DataRecord
     suspend fun read(id: Int): DataRecord
     suspend fun readAll(): List<DataRecord>
     suspend fun <ValueType> readRecordWith(key: String, value: ValueType): List<DataRecord>
