@@ -3,14 +3,20 @@ package com.dirtfy.ppp.ui.view.tablet.table
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -222,7 +228,15 @@ class TableScreen @Inject constructor(
             Box(
                 modifier = Modifier
                     .constrainAs(table) {
+                        start.linkTo(parent.start)
+                        if (mode == UiTableMode.Order || mode == UiTableMode.PointUse) {
+                            end.linkTo(menu.start)
+                        } else {
+                            end.linkTo(parent.end)
+                        }
                         top.linkTo(parent.top)
+
+                        width = Dimension.fillToConstraints
                     }
             ) {
                 Component.HandleUiStateDialog(
@@ -244,9 +258,13 @@ class TableScreen @Inject constructor(
 
             if (mode == UiTableMode.Order || mode == UiTableMode.PointUse) {
                 Box(
-                    modifier = Modifier.constrainAs(order){
+                    modifier = Modifier.constrainAs(order) {
+                        start.linkTo(parent.start)
+                        end.linkTo(menu.start)
                         top.linkTo(table.bottom)
-                        bottom.linkTo(menu.top)
+                        bottom.linkTo(parent.bottom)
+
+                        width = Dimension.fillToConstraints
                         height = Dimension.fillToConstraints
                     }
                 ) {
@@ -273,7 +291,7 @@ class TableScreen @Inject constructor(
                 Box(
                     modifier = Modifier
                         .constrainAs(menu) {
-                            bottom.linkTo(parent.bottom)
+                            end.linkTo(parent.end)
                         }
                 ) {
                     Component.HandleUiStateDialog(
@@ -316,7 +334,8 @@ class TableScreen @Inject constructor(
     ) {
         Box{
             ConstraintLayout(modifier = Modifier.padding(10.dp)) {
-                val (tables,mergeButtonRow) = createRefs()
+                val (tables, mergeButtonRow) = createRefs()
+
                 Box(
                     modifier = Modifier
                         .constrainAs(tables){
@@ -340,7 +359,7 @@ class TableScreen @Inject constructor(
                 }
                 Box(modifier = Modifier
                     .constrainAs(mergeButtonRow){
-                        top.linkTo(tables.bottom)
+                        bottom.linkTo(tables.bottom)
                     }
                 ) {
                     MergeButtonLayout(
@@ -396,7 +415,8 @@ class TableScreen @Inject constructor(
         if (table.number != "0") {
             Box(
                 modifier = Modifier
-                    .size(35.dp)
+                    .aspectRatio(1f)
+                    .padding(10.dp)
                     .background(
                         color = Color(table.color),
                         shape = RoundedCornerShape(12.dp)
@@ -423,25 +443,38 @@ class TableScreen @Inject constructor(
         onAddClick: (UiTableOrder) -> Unit,
         onCancelClick: (UiTableOrder) -> Unit
     ) {
-        Box{
-            Row(
-                modifier = Modifier.padding(10.dp),
-                verticalAlignment = Alignment.Top
+        Box {
+            ConstraintLayout (
+                modifier = Modifier.padding(10.dp)
             ) {
-                PaySelect(
-                    onCardClick = onCardClick,
-                    onCashClick = onCashClick,
-                    onPointClick = onPointClick
-                )
+                val (order, pay) = createRefs()
 
-                Spacer(modifier = Modifier.size(10.dp))
+                Box(
+                    modifier = Modifier.constrainAs(order) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                    }
+                ) {
+                    OrderList(
+                        tableOrderList = tableOrderList,
+                        totalPrice = totalPrice,
+                        onAddClick = onAddClick,
+                        onCancelClick = onCancelClick
+                    )
+                }
 
-                OrderList(
-                    tableOrderList = tableOrderList,
-                    totalPrice = totalPrice,
-                    onAddClick = onAddClick,
-                    onCancelClick = onCancelClick
-                )
+                Box(
+                    modifier = Modifier.constrainAs(pay) {
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end)
+                    }
+                ) {
+                    PaySelect(
+                        onCardClick = onCardClick,
+                        onCashClick = onCashClick,
+                        onPointClick = onPointClick
+                    )
+                }
             }
         }
 
@@ -453,13 +486,15 @@ class TableScreen @Inject constructor(
         onCashClick: () -> Unit,
         onPointClick: () -> Unit
     ) {
-        Column {
+        Row {
             Button(onClick = onCashClick) {
                 Text(text = stringResource(R.string.cash))
             }
+            Spacer(modifier = Modifier.size(10.dp))
             Button(onClick = onCardClick) {
                 Text(text = stringResource(R.string.card))
             }
+            Spacer(modifier = Modifier.size(10.dp))
             Button(onClick = onPointClick) {
                 Text(text = stringResource(R.string.point))
             }
@@ -538,14 +573,6 @@ class TableScreen @Inject constructor(
 
             if (tableOrderList.isNotEmpty()) {
                 Column {
-                    Row {
-                        Text(text = stringResource(R.string.name))
-                        Spacer(modifier = Modifier.size(20.dp))
-                        Text(text = stringResource(R.string.price))
-                        Spacer(modifier = Modifier.size(20.dp))
-                        Text(text = stringResource(R.string.count))
-                        Spacer(modifier = Modifier.size(20.dp))
-                    }
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -569,24 +596,62 @@ class TableScreen @Inject constructor(
         onAddClick: () -> Unit,
         onCancelClick: () -> Unit
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
+        Card(
+            modifier = Modifier.padding(10.dp)
         ) {
-            Text(text = tableOrder.name)
-            Spacer(modifier = Modifier.size(20.dp))
-            Text(text = tableOrder.price)
-            Spacer(modifier = Modifier.size(20.dp))
-            Text(text = tableOrder.count)
-            Spacer(modifier = Modifier.size(20.dp))
-            IconButton(onClick = onAddClick) {
-                val addIcon = Icons.Filled.Add
-                Icon(imageVector = addIcon, contentDescription = addIcon.name)
-            }
-            IconButton(onClick = onCancelClick) {
-                val cancelIcon = Icons.Filled.Close
-                Icon(imageVector = cancelIcon, contentDescription = cancelIcon.name)
+            ConstraintLayout(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp)
+            ) {
+                val (name, price, count) = createRefs()
+
+                Text(
+                    text = tableOrder.name, fontSize = 25.sp,
+                    modifier = Modifier.constrainAs(name) {
+                        start.linkTo(parent.start)
+
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                    }
+                )
+
+                Text(
+                    text = tableOrder.price, fontSize = 20.sp,
+                    modifier = Modifier.constrainAs(price) {
+                        end.linkTo(count.start)
+
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                    }
+                )
+
+                Row(
+                    modifier = Modifier.constrainAs(count) {
+                        end.linkTo(parent.end)
+
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                    },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onAddClick) {
+                        val addIcon = Icons.Filled.Add
+                        Icon(imageVector = addIcon, contentDescription = addIcon.name)
+                    }
+
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(text = tableOrder.count, fontSize = 20.sp)
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    IconButton(onClick = onCancelClick) {
+                        val cancelIcon = Icons.Filled.Close
+                        Icon(imageVector = cancelIcon, contentDescription = cancelIcon.name)
+                    }
+                }
             }
         }
+
     }
 
     @Composable
@@ -597,7 +662,7 @@ class TableScreen @Inject constructor(
         onAddClick: (UiMenu) -> Unit,
         onCancelClick: (UiMenu) -> Unit
     ) {
-        LazyRow {
+        LazyColumn {
             items(menuList) {
                 Box(
                     modifier = Modifier.padding(5.dp)
@@ -618,14 +683,36 @@ class TableScreen @Inject constructor(
         onAddClick: () -> Unit,
         onCancelClick: () -> Unit
     ) {
-        Card{
-            Column(
-                modifier = Modifier.padding(5.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+        Card(
+            modifier = Modifier.width(400.dp)
+        ) {
+//            Row (
+//                modifier = Modifier.padding(15.dp),
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+            ConstraintLayout(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp)
             ) {
-                Text(text = menu.name, fontSize = 20.sp)
-                Spacer(modifier = Modifier.size(10.dp))
-                Row {
+                val (item, buttons) = createRefs()
+
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier.constrainAs(item) {
+                        start.linkTo(parent.start)
+                    }
+                ) {
+                    Text(text = menu.name, fontSize = 20.sp)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(text = menu.price, fontSize = 16.sp)
+                }
+
+                Row(
+                    modifier = Modifier.constrainAs(buttons) {
+                        end.linkTo(parent.end)
+                    }
+                ) {
                     IconButton(onClick = onAddClick) {
                         val addIcon = Icons.Filled.Add
                         Icon(imageVector = addIcon, contentDescription = addIcon.name)

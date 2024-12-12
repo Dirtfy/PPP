@@ -190,7 +190,7 @@ class AccountScreen @Inject constructor(
         onItemClick: (UiAccount) -> Unit
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(150.dp),
+            columns = GridCells.Adaptive(300.dp),
             modifier = Modifier.padding(8.dp)
         ) {
             val moreIcon = Icons.Filled.MoreVert

@@ -1,8 +1,10 @@
 package com.dirtfy.ppp.ui.view.tablet.menu
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,15 +14,19 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -54,17 +60,10 @@ class MenuScreen @Inject constructor(
             controller.request { updateMenuList() }
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row(
+            verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxSize()
         ) {
-            Component.SearchBar(
-                searchClue = screen.searchClue, onClueChanged = {
-                    controller.request { updateSearchClue(it) }
-                },
-                placeholder = stringResource(R.string.menu_name)
-            )
-            
             NewMenu(
                 newMenu = screen.newMenu,
                 onMenuChanged = { controller.updateNewMenu(it) },
@@ -73,51 +72,54 @@ class MenuScreen @Inject constructor(
 
             Spacer(modifier = Modifier.size(10.dp))
 
-            when(screen.menuListState.state) {
-                UiState.COMPLETE -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(150.dp),
-                        contentPadding = PaddingValues(10.dp)
-                    ) {
-                        items(
-                            items = screen.menuList,
-                            key = { it.name }
+            Column(
+                horizontalAlignment = Alignment.Start
+            ) {
+                Component.SearchBar(
+                    searchClue = screen.searchClue, onClueChanged = {
+                        controller.request { updateSearchClue(it) }
+                    },
+                    placeholder = stringResource(R.string.menu_name)
+                )
+
+                Spacer(modifier = Modifier.size(10.dp))
+
+                when(screen.menuListState.state) {
+                    UiState.COMPLETE -> {
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(200.dp),
+                            contentPadding = PaddingValues(10.dp)
                         ) {
-                            ListItem(
-                                headlineContent = { Text(it.name) },
-                                supportingContent = {
-                                    Text(it.price)
-                                },
-                                trailingContent = {
-                                    IconButton(
-                                        onClick = {
-                                            controller.request { deleteMenu(it) }
-                                        }
-                                    ) {
-                                        val icon = Icons.Filled.Close
-                                        Icon(imageVector = icon, contentDescription = icon.name)
+                            items(
+                                items = screen.menuList,
+                                key = { it.name }
+                            ) {
+                                Menu(
+                                    menu = it,
+                                    onDeleteClick = {
+                                        controller.request { deleteMenu(it) }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
-                }
-                UiState.LOADING -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                UiState.FAIL -> {
-                    AlertDialog(
-                        onDismissRequest = { },
-                        confirmButton = {
-                            Button(onClick = { controller.request { updateMenuList() } }) {
-                                Text(text = "OK")
-                            }
-                        },
-                        title = { Text(text = screen.menuListState.errorException?.message ?: "unknown error") }
-                    )
+                    UiState.LOADING -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    UiState.FAIL -> {
+                        AlertDialog(
+                            onDismissRequest = { },
+                            confirmButton = {
+                                Button(onClick = { controller.request { updateMenuList() } }) {
+                                    Text(text = "OK")
+                                }
+                            },
+                            title = { Text(text = screen.menuListState.errorException?.message ?: "unknown error") }
+                        )
 
+                    }
                 }
             }
         }
@@ -142,7 +144,7 @@ class MenuScreen @Inject constructor(
                         horizontalAlignment = Alignment.End
                     ) {
                         TextField(
-                            label = { Text(text = "menu name") },
+                            label = { Text(text = stringResource(R.string.menu_name)) },
                             value = newMenu.name,
                             onValueChange = {
                                 onMenuChanged(newMenu.copy(name = it))
@@ -150,7 +152,7 @@ class MenuScreen @Inject constructor(
                         )
                         Spacer(modifier = Modifier.size(10.dp))
                         TextField(
-                            label = { Text(text = "menu price") },
+                            label = { Text(text = stringResource(R.string.menu_price)) },
                             value = newMenu.price,
                             onValueChange = {
                                 onMenuChanged(newMenu.copy(price = it))
@@ -162,7 +164,7 @@ class MenuScreen @Inject constructor(
                         Button(
                             onClick = { onMenuAdd(newMenu) }
                         ) {
-                            Text(text = "add")
+                            Text(text = stringResource(R.string.ok))
                         }
                     }
                 }
@@ -171,5 +173,38 @@ class MenuScreen @Inject constructor(
         }
     }
 
+    @Composable
+    fun Menu(
+        menu: UiMenu,
+        onDeleteClick: () -> Unit
+    ) {
+        Card(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.elevatedCardElevation(6.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 5.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(text = menu.name, style = MaterialTheme.typography.titleMedium)
+                    Text(text = menu.price, style = MaterialTheme.typography.bodyMedium)
+                }
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+    }
 
 }

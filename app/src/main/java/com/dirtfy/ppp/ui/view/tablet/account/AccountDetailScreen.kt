@@ -196,22 +196,27 @@ class AccountDetailScreen @Inject constructor(
         Card {
             Box(modifier = Modifier.padding(10.dp, 5.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(
-                        horizontalAlignment = Alignment.End,
+                    Box(
                         modifier = Modifier.weight(0.8f)
                     ) {
-                        IssuedNameInput(
-                            newRecord = newRecord,
-                            onRecordChange = onRecordChange
-                        )
-                        Spacer(modifier = Modifier.size(10.dp))
-                        DifferenceInput(
-                            newRecord = newRecord,
-                            onRecordChange = onRecordChange
-                        )
-                        Spacer(modifier = Modifier.size(10.dp))
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            modifier = Modifier.padding(10.dp).fillMaxWidth()
+                        ) {
+                            IssuedNameInput(
+                                newRecord = newRecord,
+                                onRecordChange = onRecordChange
+                            )
+                            Spacer(modifier = Modifier.size(10.dp))
+                            DifferenceInput(
+                                newRecord = newRecord,
+                                onRecordChange = onRecordChange
+                            )
+                            Spacer(modifier = Modifier.size(10.dp))
 
+                        }
                     }
+
                     IconButton(
                         onClick = { onAddClick(newRecord) },
                         modifier = Modifier.weight(0.2f)
@@ -234,7 +239,8 @@ class AccountDetailScreen @Inject constructor(
             value = newRecord.issuedName,
             onValueChange = {
                 onRecordChange(newRecord.copy(issuedName = it))
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
         )
     }
     @Composable
