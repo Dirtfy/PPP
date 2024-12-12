@@ -157,9 +157,8 @@ class AccountCreateScreen @Inject constructor(
             trailingIcon = {
                 AccountNumberGenerate(onAutoGenerateClick)
             },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            )
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
         )
     }
     @Composable
@@ -233,9 +232,8 @@ class AccountCreateScreen @Inject constructor(
             onValueChange = {
                 onValueChange(nowAccount.copy(phoneNumber = it))
             },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             visualTransformation = VisualTransformation { phoneNumber ->
                 getPhoneNumberTransfomred(phoneNumber.text)
             }

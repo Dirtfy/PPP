@@ -69,7 +69,7 @@ object Component {
                         singleLine = true,
                         modifier = Modifier.widthIn(200.dp, 400.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = if (isNumber) KeyboardType.Number else KeyboardType.Text
+                            keyboardType = if (isNumber) KeyboardType.NumberPassword else KeyboardType.Text
                         )
                     )
 

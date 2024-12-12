@@ -4,6 +4,9 @@ sealed class TableException(
     massage: String
 ): CustomException(massage) {
 
+    class BlankAccountNumber: TableException("account number can not be a blank")
+    class InvalidAccountNumber: TableException("it's invalid account number")
+
     class TableLockPreempted: TableException("simultaneous group edition is not allowed")
     class IllegalMergeModeSet: TableException("setMode(Merge) is not allowed. use trySetMergeMode()")
 

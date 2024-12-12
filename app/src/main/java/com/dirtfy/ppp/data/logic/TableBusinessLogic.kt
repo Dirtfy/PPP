@@ -175,11 +175,14 @@ class TableBusinessLogic @Inject constructor(
 
     fun payTableWithPoint(
         groupNumber: Int,
-        accountNumber: Int,
+        accountNumberString: String,
         issuedName: String,
         orderList: List<DataTableOrder>
     ) = operate {
-        val nowBalance = recordApi.readSumOf("type", "$accountNumber", "income")
+        if (accountNumberString == "")
+            throw TableException.BlankAccountNumber()
+
+        val nowBalance = recordApi.readSumOf("type", accountNumberString, "income")
         val totalPrice = orderList.calcTotalPrice()
 
         if (nowBalance < totalPrice)
@@ -189,7 +192,7 @@ class TableBusinessLogic @Inject constructor(
             tableApi.checkTableGroupLock(transaction)
             val payment = payTable(
                 orderList = orderList,
-                type = "$accountNumber",
+                type = accountNumberString,
                 issuedName = issuedName,
                 transaction = transaction
             )
