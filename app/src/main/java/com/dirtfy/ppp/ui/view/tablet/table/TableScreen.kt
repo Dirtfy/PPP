@@ -261,6 +261,7 @@ class TableScreen @Inject constructor(
                     modifier = Modifier.constrainAs(order) {
                         start.linkTo(parent.start)
                         end.linkTo(menu.start)
+
                         top.linkTo(table.bottom)
                         bottom.linkTo(parent.bottom)
 
@@ -443,29 +444,44 @@ class TableScreen @Inject constructor(
         onAddClick: (UiTableOrder) -> Unit,
         onCancelClick: (UiTableOrder) -> Unit
     ) {
-        Box {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             ConstraintLayout (
                 modifier = Modifier.padding(10.dp)
             ) {
-                val (order, pay) = createRefs()
+                val (order, total, pay) = createRefs()
 
                 Box(
                     modifier = Modifier.constrainAs(order) {
                         top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
+                        bottom.linkTo(pay.top)
                     }
                 ) {
                     OrderList(
                         tableOrderList = tableOrderList,
-                        totalPrice = totalPrice,
                         onAddClick = onAddClick,
                         onCancelClick = onCancelClick
                     )
                 }
 
+                Row(
+                    modifier = Modifier.constrainAs(total) {
+                        top.linkTo(order.bottom)
+                        bottom.linkTo(parent.bottom)
+
+                        start.linkTo(parent.start)
+                    }
+                ) {
+                    Text(text = stringResource(R.string.total), fontSize = 20.sp)
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(text = totalPrice, fontSize = 20.sp)
+                }
+
                 Box(
                     modifier = Modifier.constrainAs(pay) {
-                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+
                         end.linkTo(parent.end)
                     }
                 ) {
@@ -558,24 +574,15 @@ class TableScreen @Inject constructor(
     @Composable
     fun OrderList(
         tableOrderList: List<UiTableOrder>,
-        totalPrice: String,
         onAddClick: (UiTableOrder) -> Unit,
         onCancelClick: (UiTableOrder) -> Unit,
     ) {
-        Column {
-            Row {
-                Text(text = stringResource(R.string.total), fontSize = 20.sp)
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(text = totalPrice, fontSize = 20.sp)
-            }
-
-            Spacer(modifier = Modifier.size(15.dp))
-
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             if (tableOrderList.isNotEmpty()) {
                 Column {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    LazyColumn {
                         items(tableOrderList) {
                             Order(
                                 tableOrder = it,
@@ -585,9 +592,13 @@ class TableScreen @Inject constructor(
                         }
                     }
                 }
-
+            } else {
+                Text(
+                    text= stringResource(R.string.empty_list), fontSize = 20.sp
+                )
             }
         }
+
     }
 
     @Composable
