@@ -139,14 +139,14 @@ class TableOrderControllerImpl @Inject constructor(
 
     private suspend fun _payTableWithPoint(
         groupNumber: Int,
-        accountNumber: Int,
+        accountNumberString: String,
         issuedName: String,
         orderList: List<UiTableOrder>
     ) {
         _screenData.update { it.copy(payTableWithPointState = UiScreenState(UiState.LOADING)) }
         tableBusinessLogic.payTableWithPoint(
             groupNumber = groupNumber,
-            accountNumber = accountNumber,
+            accountNumberString = accountNumberString,
             issuedName = issuedName,
             orderList = orderList.map { it.convertToDataTableOrder() }
         ).catch { cause ->
@@ -156,7 +156,7 @@ class TableOrderControllerImpl @Inject constructor(
         }
     }
     override suspend fun payTableWithPoint() {
-        val accountNumber = _screenData.value.pointUse.accountNumber.toInt()
+        val accountNumber = _screenData.value.pointUse.accountNumber
         val issuedName = _screenData.value.pointUse.userName
         val orderList = _screenData.value.orderList
         _payTableWithPoint(

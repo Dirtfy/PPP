@@ -150,7 +150,8 @@ class MenuScreen @Inject constructor(
                     value = newMenu.price,
                     onValueChange = { onMenuChanged(newMenu.copy(price = it)) },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
                 )
 
                 Spacer(modifier = Modifier.size(16.dp))
