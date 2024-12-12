@@ -188,7 +188,7 @@ class MenuScreen @Inject constructor(
             ) {
                 Column {
                     Text(text = menu.name, style = MaterialTheme.typography.titleMedium)
-                    Text(text = "Price: ${menu.price}", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = menu.price, style = MaterialTheme.typography.bodyMedium)
                 }
                 IconButton(onClick = onDeleteClick) {
                     Icon(

@@ -2,15 +2,21 @@ package com.dirtfy.ppp.ui.view.phone.record
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.ui.controller.feature.record.RecordController
@@ -113,14 +119,30 @@ class RecordScreen @Inject constructor(
     ) {
         LazyVerticalGrid(columns = GridCells.Adaptive(150.dp)) {
             items(recordList) {
-                ListItem(
-                    overlineContent = { Text(text = it.timestamp.substring(0,10)) },
-                    headlineContent = { Text(text = it.income) },
-                    supportingContent = { Text(text = it.type)},
-                    modifier = Modifier.clickable {
-                        onItemClick(it)
-                    }
-                )
+                Record(record =  it, onClick = onItemClick)
+            }
+        }
+    }
+
+    @Composable
+    fun Record(
+        record: UiRecord,
+        onClick: (UiRecord) -> Unit
+    ) {
+        Card(
+            modifier = Modifier.clickable {
+                onClick(record)
+            }.padding(10.dp),
+            elevation = CardDefaults.elevatedCardElevation(6.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(10.dp)
+            ) {
+                Text(text=record.timestamp.substring(0,10), fontSize = 10.sp)
+                Spacer(modifier = Modifier.size(5.dp))
+                Text(text=record.income, fontSize = 20.sp)
+                Spacer(modifier = Modifier.size(5.dp))
+                Text(text=record.type, fontSize = 15.sp)
             }
         }
     }
