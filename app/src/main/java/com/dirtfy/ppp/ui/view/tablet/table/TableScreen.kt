@@ -679,7 +679,7 @@ class TableScreen @Inject constructor(
     ) {
         Row {
             Column {
-                Text("주류")
+                Text(stringResource(R.string.menu_category_alcohol))
                 RadioButton(
                     selected = nowMenuCategory == MenuCategory.ALCOHOL,
                     onClick = { onCategorySelected(MenuCategory.ALCOHOL) }
@@ -687,7 +687,7 @@ class TableScreen @Inject constructor(
             }
             Spacer(modifier = Modifier.size(20.dp))
             Column {
-                Text("런치")
+                Text(stringResource(R.string.menu_category_lunch))
                 RadioButton(
                     selected = nowMenuCategory == MenuCategory.LUNCH,
                     onClick = { onCategorySelected(MenuCategory.LUNCH) }
@@ -695,7 +695,7 @@ class TableScreen @Inject constructor(
             }
             Spacer(modifier = Modifier.size(20.dp))
             Column {
-                Text("디너")
+                Text(stringResource(R.string.menu_category_dinner))
                 RadioButton(
                     selected = nowMenuCategory == MenuCategory.DINNER,
                     onClick = { onCategorySelected(MenuCategory.DINNER) }

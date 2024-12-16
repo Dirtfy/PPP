@@ -1,7 +1,8 @@
 package com.dirtfy.ppp.data.dto.feature.menu
 
 enum class MenuCategory(
-    /** Korean name of the Category */
+    /** Korean name of the Category
+     * must be same with string resources */
     val koName: String,
 
     /** code should be a power of 2 */

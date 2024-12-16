@@ -174,7 +174,7 @@ class MenuScreen @Inject constructor(
                                 onCheckedChange = { onAlcoholCheckChanged(newMenu.copy(isAlcohol = it)) }
                             )
                             Text(
-                                text = "주류",
+                                text = stringResource(R.string.menu_category_alcohol),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -185,7 +185,7 @@ class MenuScreen @Inject constructor(
                                 onCheckedChange = { onLunchCheckChanged(newMenu.copy(isLunch = it)) }
                             )
                             Text(
-                                text = "런치",
+                                text = stringResource(R.string.menu_category_lunch),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -196,7 +196,7 @@ class MenuScreen @Inject constructor(
                                 onCheckedChange = { onDinnerCheckChanged(newMenu.copy(isDinner = it)) }
                             )
                             Text(
-                                text = "디너",
+                                text = stringResource(R.string.menu_category_dinner),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
