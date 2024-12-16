@@ -4,11 +4,17 @@ enum class MenuCategory(
     /** Korean name of the Category
      * must be same with string resources */
     val koName: String,
-
-    /** code should be a power of 2 */
-    val code: Int
 ) {
-    ALCOHOL("주류", 1),
-    LUNCH("런치", 2),
-    DINNER("디너", 4)
+    ALCOHOL("주류"),
+    LUNCH("런치"),
+    DINNER("디너");
+
+    val code: Int
+        get() = getCategoryCode()
+
+    private fun getCategoryCode(): Int {
+        var res = 1
+        for (i in 0 until this.ordinal) res *= 2
+        return res
+    }
 }
