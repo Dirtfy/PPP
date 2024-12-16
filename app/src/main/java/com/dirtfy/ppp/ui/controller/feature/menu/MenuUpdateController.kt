@@ -3,13 +3,14 @@ package com.dirtfy.ppp.ui.controller.feature.menu
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuUpdateScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiNewMenu
 import kotlinx.coroutines.flow.Flow
 
 interface MenuUpdateController {
 
     val screenData: Flow<UiMenuUpdateScreenState>
 
-    fun updateNewMenu(menu: UiMenu)
+    fun updateNewMenu(menu: UiNewMenu)
 
     suspend fun createMenu()
     suspend fun deleteMenu(menu: UiMenu)

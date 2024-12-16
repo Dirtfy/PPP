@@ -8,6 +8,7 @@ import com.dirtfy.ppp.ui.controller.feature.menu.MenuUpdateController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiNewMenu
 import com.dirtfy.tagger.Tagger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,7 +54,7 @@ class MenuViewModel @Inject constructor(
         listController.updateSearchClue(clue)
     }
 
-    override fun updateNewMenu(menu: UiMenu) {
+    override fun updateNewMenu(menu: UiNewMenu) {
         updateController.updateNewMenu(menu)
     }
 

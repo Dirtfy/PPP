@@ -10,7 +10,7 @@ object FireStorePath {
 
     const val ACCOUNT: String = "account_exp"
 
-    const val MENU: String = "menu_exp"
+    const val MENU: String = "menu_category_test"
 
     const val RECORD: String = "record_exp"
     const val RECORD_DETAIL: String = "detail"

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiNewMenu
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger
 import javax.inject.Inject
@@ -81,7 +83,10 @@ class MenuScreen @Inject constructor(
 
             NewMenuSection(
                 newMenu = screen.newMenu,
-                onMenuChanged = { controller.request { updateNewMenu(it) } },
+                onMenuChanged = { controller.updateNewMenu(it) },
+                onAlcoholCheckChanged = { controller.updateNewMenu(it) },
+                onLunchCheckChanged = { controller.updateNewMenu(it) },
+                onDinnerCheckChanged = { controller.updateNewMenu(it) },
                 onMenuAdd = { controller.request { createMenu() } }
             )
 
@@ -113,9 +118,12 @@ class MenuScreen @Inject constructor(
 
     @Composable
     fun NewMenuSection(
-        newMenu: UiMenu,
-        onMenuChanged: (UiMenu) -> Unit,
-        onMenuAdd: (UiMenu) -> Unit
+        newMenu: UiNewMenu,
+        onMenuChanged: (UiNewMenu) -> Unit,
+        onAlcoholCheckChanged: (UiNewMenu) -> Unit,
+        onLunchCheckChanged: (UiNewMenu) -> Unit,
+        onDinnerCheckChanged: (UiNewMenu) -> Unit,
+        onMenuAdd: () -> Unit
     ) {
         Card(
             modifier = Modifier
@@ -154,10 +162,48 @@ class MenuScreen @Inject constructor(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
                 )
 
+                Spacer(modifier = Modifier.size(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = newMenu.isAlcohol,
+                        onCheckedChange = { onAlcoholCheckChanged(newMenu.copy(isAlcohol = it)) }
+                    )
+                    Text(
+                        text = "주류",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.size(20.dp))
+
+                    Checkbox(
+                        checked = newMenu.isLunch,
+                        onCheckedChange = { onLunchCheckChanged(newMenu.copy(isLunch = it)) }
+                    )
+                    Text(
+                        text = "런치",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.size(20.dp))
+
+                    Checkbox(
+                        checked = newMenu.isDinner,
+                        onCheckedChange = { onDinnerCheckChanged(newMenu.copy(isDinner = it)) }
+                    )
+                    Text(
+                        text = "디너",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
                 Spacer(modifier = Modifier.size(16.dp))
 
                 Button(
-                    onClick = { onMenuAdd(newMenu) },
+                    onClick = { onMenuAdd() },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 ) {
