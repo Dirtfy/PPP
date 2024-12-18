@@ -25,6 +25,10 @@
     <string name="menu_name">메뉴 이름</string>
     <string name="menu_price">메뉴 가격</string>
     <string name="add_menu">메뉴 추가</string>
+    <!-- Menu Category (must be same with enum class MenuCategory's koName) -->
+    <string name="menu_category_alcohol">주류</string>
+    <string name="menu_category_lunch">런치</string>
+    <string name="menu_category_dinner">디너</string>
     <!--RecordDetailScreen && TableScreen-->
     <string name = "name">이름</string>
     <string name = "price">가격</string>

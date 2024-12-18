@@ -5,15 +5,17 @@ import com.dirtfy.ppp.data.dto.feature.menu.DataMenu
 
 data class FireStoreMenu(
     val name: String?,
-    val price: Int?
+    val price: Int?,
+    val category: Int?
 ) {
-    constructor() : this(null, null)
+    constructor() : this(null, null, null)
 
     companion object {
         fun DataMenu.convertToFireStoreMenu(): FireStoreMenu {
             return FireStoreMenu(
                 name = name,
                 price = price,
+                category = category,
             )
         }
     }
@@ -21,7 +23,8 @@ data class FireStoreMenu(
     fun convertToDataMenu(): DataMenu {
         return DataMenu(
             name = name?: throw MenuException.NameLoss(),
-            price = price?: throw MenuException.PriceLoss()
+            price = price?: throw MenuException.PriceLoss(),
+            category = category?: throw MenuException.CategoryLoss()
         )
     }
 }

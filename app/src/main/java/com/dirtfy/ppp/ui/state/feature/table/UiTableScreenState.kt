@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.state.feature.table
 
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
@@ -17,6 +18,7 @@ data class UiTableScreenState(
     val orderTotalPrice: String = "",
     val pointUse: UiPointUse = UiPointUse(),
     val timeLeftUntilEndOfMergeMode: String = "",
+    val nowMenuCategory: MenuCategory = MenuCategory.ALCOHOL,
     val mode: UiTableMode = UiTableMode.Main,
 
     val tableListState: UiScreenState = UiScreenState(),

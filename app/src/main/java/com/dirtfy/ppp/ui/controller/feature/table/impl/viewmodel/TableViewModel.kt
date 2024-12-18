@@ -2,6 +2,7 @@ package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.controller.feature.table.TableListController
 import com.dirtfy.ppp.ui.controller.feature.table.TableMenuController
@@ -36,6 +37,7 @@ class TableViewModel @Inject constructor(
                 tableList = listScreenData.tableList,
                 sourceTableList = listScreenData.sourceTableList,
                 timeLeftUntilEndOfMergeMode = listScreenData.timeLeftUntilEndOfMergeMode,
+                nowMenuCategory = menuScreenState.nowMenuCategory,
                 mode = listScreenData.mode,
                 tableListState = listScreenData.tableListState,
                 trySetMergeModeState = listScreenData.trySetMergeModeState,
@@ -90,6 +92,10 @@ class TableViewModel @Inject constructor(
 
     override fun updatePointUse(pointUse: UiPointUse) {
         orderController.updatePointUse(pointUse)
+    }
+
+    override fun setNowMenuCategory(category: MenuCategory) {
+        menuController.setNowMenuCategory(category)
     }
 
     override fun clickTable(table: UiTable) {

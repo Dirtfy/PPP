@@ -3,23 +3,17 @@ package com.dirtfy.ppp.ui.view.tablet.table
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -34,6 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -52,6 +47,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -133,6 +129,7 @@ class TableScreen @Inject constructor(
             pointUse = screenData.pointUse,
             mode = screenData.mode,
             timeLeftUntilEndOfMergeMode = screenData.timeLeftUntilEndOfMergeMode,
+            nowMenuCategory = screenData.nowMenuCategory,
             addOrderState = screenData.addOrderState,
             cancelOrderState = screenData.cancelOrderState,
             onTableClick = {
@@ -161,6 +158,7 @@ class TableScreen @Inject constructor(
                     setMode(UiTableMode.Main)
                 }
             },
+            onCategorySelected = { controller.setNowMenuCategory(it) },
             onMenuListFailDismissRequest = {
                 controller.setMenuListState(UiScreenState(UiState.COMPLETE))
             },
@@ -198,6 +196,7 @@ class TableScreen @Inject constructor(
         pointUse: UiPointUse,
         mode: UiTableMode,
         timeLeftUntilEndOfMergeMode: String,
+        nowMenuCategory: MenuCategory,
         addOrderState: UiScreenState,
         cancelOrderState: UiScreenState,
         onTableClick: (UiTable) -> Unit,
@@ -215,6 +214,7 @@ class TableScreen @Inject constructor(
         onPointUseUserNameChange: (String) -> Unit,
         onPointUseAccountNumberChange: (String) -> Unit,
         onPointUseConfirm: () -> Unit,
+        onCategorySelected: (MenuCategory) -> Unit,
         onMenuListFailDismissRequest: () -> Unit,
         onMenuListFailRetryClick: () -> Unit,
         onTableListFailDismissRequest: () -> Unit,
@@ -299,13 +299,20 @@ class TableScreen @Inject constructor(
                         uiState = menuListState,
                         onDismissRequest = onMenuListFailDismissRequest, onRetryAction = onMenuListFailRetryClick,
                         onComplete = {
-                            MenuList(
-                                menuList = menuList,
-                                addOrderState = addOrderState,
-                                cancelOrderState = cancelOrderState,
-                                onAddClick = onMenuAddClick,
-                                onCancelClick = onMenuCancelClick
-                            )
+                            Column {
+                                MenuCategoryRadioGroup(
+                                    nowMenuCategory = nowMenuCategory,
+                                    onCategorySelected = onCategorySelected
+                                )
+                                MenuList(
+                                    menuList = menuList,
+                                    addOrderState = addOrderState,
+                                    cancelOrderState = cancelOrderState,
+                                    onAddClick = onMenuAddClick,
+                                    onCancelClick = onMenuCancelClick
+                                )
+                            }
+
                         }
                     )
                 }
@@ -663,6 +670,38 @@ class TableScreen @Inject constructor(
             }
         }
 
+    }
+
+    @Composable
+    fun MenuCategoryRadioGroup(
+        nowMenuCategory: MenuCategory,
+        onCategorySelected: (MenuCategory) -> Unit
+    ) {
+        Row {
+            Column {
+                Text(stringResource(R.string.menu_category_alcohol))
+                RadioButton(
+                    selected = nowMenuCategory == MenuCategory.ALCOHOL,
+                    onClick = { onCategorySelected(MenuCategory.ALCOHOL) }
+                )
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            Column {
+                Text(stringResource(R.string.menu_category_lunch))
+                RadioButton(
+                    selected = nowMenuCategory == MenuCategory.LUNCH,
+                    onClick = { onCategorySelected(MenuCategory.LUNCH) }
+                )
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            Column {
+                Text(stringResource(R.string.menu_category_dinner))
+                RadioButton(
+                    selected = nowMenuCategory == MenuCategory.DINNER,
+                    onClick = { onCategorySelected(MenuCategory.DINNER) }
+                )
+            }
+        }
     }
 
     @Composable

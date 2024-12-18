@@ -9,6 +9,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuUpdateScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiNewMenu
 import com.dirtfy.tagger.Tagger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +27,7 @@ class MenuUpdateControllerImpl @Inject constructor(
     override val screenData: Flow<UiMenuUpdateScreenState>
         get() = _screenData
 
-    override fun updateNewMenu(menu: UiMenu) {
+    override fun updateNewMenu(menu: UiNewMenu) {
         _screenData.update { it.copy(newMenu = menu) }
     }
 
@@ -47,6 +48,12 @@ class MenuUpdateControllerImpl @Inject constructor(
             ) }
             return
         }
+        if (!(menu.isAlcohol || menu.isLunch || menu.isDinner)) {
+            _screenData.update { it.copy(
+                createMenuState = UiScreenState(UiState.FAIL, MenuException.BlankCategory())
+            ) }
+            return
+        }
 
         menuBusinessLogic.createMenu(
             menu.convertToDataMenu()
@@ -57,7 +64,7 @@ class MenuUpdateControllerImpl @Inject constructor(
             ) }
         }.collect {
             _screenData.update { it.copy(
-                newMenu = UiMenu(),
+                newMenu = UiNewMenu(),
                 createMenuState = UiScreenState(UiState.COMPLETE)
             ) }
         }

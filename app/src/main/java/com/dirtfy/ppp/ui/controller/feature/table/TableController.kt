@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.table
 
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.controller.common.Controller
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.table.UiTableScreenState
@@ -18,6 +19,7 @@ interface TableController: Controller<UiTableScreenState, TableController> {
     suspend fun updateMenuList()
     fun retryUpdateMenuList()
     fun updatePointUse(pointUse: UiPointUse)
+    fun setNowMenuCategory(category: MenuCategory)
 
     fun clickTable(table: UiTable)
     suspend fun trySetMergeMode()

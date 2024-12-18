@@ -7,7 +7,9 @@ sealed class MenuException(
 
     class BlankName: MenuException("menu name can not be a blank")
     class BlankPrice: MenuException("menu price can not be a blank")
+    class BlankCategory: MenuException("menu category can not be a blank")
 
     class NameLoss: MenuException("name not found")
     class PriceLoss: MenuException("price not found")
+    class CategoryLoss: MenuException("category not found")
 }

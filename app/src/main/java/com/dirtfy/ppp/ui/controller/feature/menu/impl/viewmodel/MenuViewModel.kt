@@ -2,12 +2,14 @@ package com.dirtfy.ppp.ui.controller.feature.menu.impl.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuListController
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuUpdateController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiNewMenu
 import com.dirtfy.tagger.Tagger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +31,9 @@ class MenuViewModel @Inject constructor(
             UiMenuScreenState(
                 menuList = listScreenData.menuList,
                 searchClue = listScreenData.searchClue,
+                searchAlcohol = listScreenData.searchAlcohol,
+                searchLunch = listScreenData.searchLunch,
+                searchDinner = listScreenData.searchDinner,
                 newMenu = updateScreenData.newMenu,
                 menuListState = listScreenData.menuListState,
                 createMenuState = updateScreenData.createMenuState,
@@ -53,7 +58,11 @@ class MenuViewModel @Inject constructor(
         listController.updateSearchClue(clue)
     }
 
-    override fun updateNewMenu(menu: UiMenu) {
+    override fun updateSearchCategory(category: MenuCategory) {
+        listController.updateSearchCategory(category)
+    }
+
+    override fun updateNewMenu(menu: UiNewMenu) {
         updateController.updateNewMenu(menu)
     }
 

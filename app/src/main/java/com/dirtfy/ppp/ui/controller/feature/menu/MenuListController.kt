@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.menu
 
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuListScreenState
 import kotlinx.coroutines.flow.Flow
@@ -13,5 +14,6 @@ interface MenuListController {
     fun retryUpdateMenuList()
 
     fun updateSearchClue(clue: String)
+    fun updateSearchCategory(category: MenuCategory)
     fun setMenuListState(state: UiScreenState)
 }

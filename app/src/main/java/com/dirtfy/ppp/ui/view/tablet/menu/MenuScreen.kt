@@ -13,24 +13,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +40,7 @@ import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiNewMenu
 import com.dirtfy.ppp.ui.view.phone.Component
 import com.dirtfy.tagger.Tagger
 import javax.inject.Inject
@@ -56,10 +55,6 @@ class MenuScreen @Inject constructor(
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
 
-        LaunchedEffect(key1 = controller) {
-            controller.request { updateMenuList() }
-        }
-
         Row(
             verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxSize()
@@ -67,6 +62,9 @@ class MenuScreen @Inject constructor(
             NewMenu(
                 newMenu = screen.newMenu,
                 onMenuChanged = { controller.updateNewMenu(it) },
+                onAlcoholCheckChanged = { controller.updateNewMenu(it) },
+                onLunchCheckChanged = { controller.updateNewMenu(it) },
+                onDinnerCheckChanged = { controller.updateNewMenu(it) },
                 onMenuAdd = { controller.request { createMenu() } }
             )
 
@@ -84,6 +82,9 @@ class MenuScreen @Inject constructor(
 
                 Spacer(modifier = Modifier.size(10.dp))
 
+                // TODO menu category search
+
+                // TODO Component.HandleUiStateDialog
                 when(screen.menuListState.state) {
                     UiState.COMPLETE -> {
                         LazyVerticalGrid(
@@ -128,9 +129,12 @@ class MenuScreen @Inject constructor(
 
     @Composable
     fun NewMenu(
-        newMenu: UiMenu,
-        onMenuChanged: (UiMenu) -> Unit,
-        onMenuAdd: (UiMenu) -> Unit
+        newMenu: UiNewMenu,
+        onMenuChanged: (UiNewMenu) -> Unit,
+        onAlcoholCheckChanged: (UiNewMenu) -> Unit,
+        onLunchCheckChanged: (UiNewMenu) -> Unit,
+        onDinnerCheckChanged: (UiNewMenu) -> Unit,
+        onMenuAdd: () -> Unit
     ) {
         Box {
             Card(
@@ -161,8 +165,43 @@ class MenuScreen @Inject constructor(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
                         )
                         Spacer(modifier = Modifier.size(10.dp))
+
+                        Row {
+                            Checkbox(
+                                checked = newMenu.isAlcohol,
+                                onCheckedChange = { onAlcoholCheckChanged(newMenu.copy(isAlcohol = it)) }
+                            )
+                            Text(
+                                text = stringResource(R.string.menu_category_alcohol),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.size(20.dp))
+
+                            Checkbox(
+                                checked = newMenu.isLunch,
+                                onCheckedChange = { onLunchCheckChanged(newMenu.copy(isLunch = it)) }
+                            )
+                            Text(
+                                text = stringResource(R.string.menu_category_lunch),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.size(20.dp))
+
+                            Checkbox(
+                                checked = newMenu.isDinner,
+                                onCheckedChange = { onDinnerCheckChanged(newMenu.copy(isDinner = it)) }
+                            )
+                            Text(
+                                text = stringResource(R.string.menu_category_dinner),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Spacer(modifier = Modifier.size(10.dp))
                         Button(
-                            onClick = { onMenuAdd(newMenu) }
+                            onClick = { onMenuAdd() }
                         ) {
                             Text(text = stringResource(R.string.ok))
                         }

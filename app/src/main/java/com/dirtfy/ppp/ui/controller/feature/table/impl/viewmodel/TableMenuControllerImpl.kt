@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.ui.controller.feature.table.impl.viewmodel
 
 import android.util.Log
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.data.logic.MenuBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.menu.MenuAtomConverter.convertToUiMenu
 import com.dirtfy.ppp.ui.controller.feature.table.TableMenuController
@@ -29,9 +30,8 @@ class TableMenuControllerImpl @Inject constructor(
     private val menuListFlow = retryTrigger
         .flatMapLatest {
             menuBusinessLogic.menuStream().map {
-                val menuList = it.map { data -> data.convertToUiMenu() }
                 _screenData.update { before -> before.copy(menuListState = UiScreenState(UiState.COMPLETE)) }
-                menuList
+                it
             }.onStart {
                 _screenData.update { before -> before.copy(menuListState = UiScreenState(UiState.LOADING)) }
                 emit(emptyList())
@@ -48,8 +48,11 @@ class TableMenuControllerImpl @Inject constructor(
     override val screenData: Flow<UiTableMenuScreenState>
         = _screenData
         .combine(menuListFlow) { state, menuList ->
+            val filteredList = menuList.filter { it.category and(state.nowMenuCategory.code) != 0 }
+                .map { it.convertToUiMenu() }
+                .sortedBy { it.name }
             state.copy(
-                menuList = menuList
+                menuList = filteredList
             )
         }
 
@@ -59,6 +62,10 @@ class TableMenuControllerImpl @Inject constructor(
 
     override fun retryUpdateMenuList() {
         retryTrigger.value += 1
+    }
+
+    override fun setNowMenuCategory(category: MenuCategory) {
+        _screenData.update { it.copy(nowMenuCategory = category) }
     }
 
     override fun setMenuListState(state: UiScreenState) {

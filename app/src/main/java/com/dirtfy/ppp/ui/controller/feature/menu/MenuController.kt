@@ -1,9 +1,11 @@
 package com.dirtfy.ppp.ui.controller.feature.menu
 
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.controller.common.Controller
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.UiMenuScreenState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
+import com.dirtfy.ppp.ui.state.feature.menu.atom.UiNewMenu
 
 interface MenuController: Controller<UiMenuScreenState, MenuController> {
 
@@ -12,7 +14,8 @@ interface MenuController: Controller<UiMenuScreenState, MenuController> {
     fun retryUpdateMenuList()
 
     fun updateSearchClue(clue: String)
-    fun updateNewMenu(menu: UiMenu)
+    fun updateSearchCategory(category: MenuCategory)
+    fun updateNewMenu(menu: UiNewMenu)
 
     suspend fun createMenu()
     suspend fun deleteMenu(menu: UiMenu)

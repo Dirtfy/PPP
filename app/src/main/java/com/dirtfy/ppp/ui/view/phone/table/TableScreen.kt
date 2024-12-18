@@ -28,6 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -46,6 +47,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.controller.feature.table.TableController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -122,8 +124,7 @@ class TableScreen @Inject constructor(
             pointUse = screenData.pointUse,
             mode = screenData.mode,
             timeLeftUntilEndOfMergeMode = screenData.timeLeftUntilEndOfMergeMode,
-            addOrderState = screenData.addOrderState,
-            cancelOrderState = screenData.cancelOrderState,
+            nowMenuCategory = screenData.nowMenuCategory,
             onTableClick = {
                 controller.request {
                     controller.clickTable(it)
@@ -150,6 +151,7 @@ class TableScreen @Inject constructor(
                     setMode(UiTableMode.Main)
                 }
             },
+            onCategorySelected = { controller.setNowMenuCategory(it) },
             onMenuListFailDismissRequest = {
                 controller.setMenuListState(UiScreenState(UiState.COMPLETE))
             },
@@ -187,8 +189,7 @@ class TableScreen @Inject constructor(
         pointUse: UiPointUse,
         mode: UiTableMode,
         timeLeftUntilEndOfMergeMode: String,
-        addOrderState: UiScreenState,
-        cancelOrderState: UiScreenState,
+        nowMenuCategory: MenuCategory,
         onTableClick: (UiTable) -> Unit,
         onMergeClick : () -> Unit,
         onMergeOkClick: () -> Unit,
@@ -204,6 +205,7 @@ class TableScreen @Inject constructor(
         onPointUseUserNameChange: (String) -> Unit,
         onPointUseAccountNumberChange: (String) -> Unit,
         onPointUseConfirm: () -> Unit,
+        onCategorySelected: (MenuCategory) -> Unit,
         onMenuListFailDismissRequest: () -> Unit,
         onMenuListFailRetryClick: () -> Unit,
         onTableListFailDismissRequest: () -> Unit,
@@ -253,8 +255,6 @@ class TableScreen @Inject constructor(
                             OrderLayout(
                                 tableOrderList = tableOrderList,
                                 totalPrice = totalPrice,
-                                addOrderState = addOrderState,
-                                cancelOrderState = cancelOrderState,
                                 onCardClick = onCardClick,
                                 onCashClick = onCashClick,
                                 onPointClick = onPointClick,
@@ -275,13 +275,17 @@ class TableScreen @Inject constructor(
                         uiState = menuListState,
                         onDismissRequest = onMenuListFailDismissRequest, onRetryAction = onMenuListFailRetryClick,
                         onComplete = {
-                            MenuList(
-                                menuList = menuList,
-                                addOrderState = addOrderState,
-                                cancelOrderState = cancelOrderState,
-                                onAddClick = onMenuAddClick,
-                                onCancelClick = onMenuCancelClick
-                            )
+                            Column {
+                                MenuCategoryRadioGroup(
+                                    nowMenuCategory = nowMenuCategory,
+                                    onCategorySelected = onCategorySelected
+                                )
+                                MenuList(
+                                    menuList = menuList,
+                                    onAddClick = onMenuAddClick,
+                                    onCancelClick = onMenuCancelClick
+                                )
+                            }
                         }
                     )
                 }
@@ -296,6 +300,38 @@ class TableScreen @Inject constructor(
                 onAccountNumberChange = onPointUseAccountNumberChange,
                 onConfirmClick = onPointUseConfirm,
             )
+        }
+    }
+
+    @Composable
+    fun MenuCategoryRadioGroup(
+        nowMenuCategory: MenuCategory,
+        onCategorySelected: (MenuCategory) -> Unit
+    ) {
+        Row {
+            Column {
+                Text(stringResource(R.string.menu_category_alcohol))
+                RadioButton(
+                    selected = nowMenuCategory == MenuCategory.ALCOHOL,
+                    onClick = { onCategorySelected(MenuCategory.ALCOHOL) }
+                )
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            Column {
+                Text(stringResource(R.string.menu_category_lunch))
+                RadioButton(
+                    selected = nowMenuCategory == MenuCategory.LUNCH,
+                    onClick = { onCategorySelected(MenuCategory.LUNCH) }
+                )
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            Column {
+                Text(stringResource(R.string.menu_category_dinner))
+                RadioButton(
+                    selected = nowMenuCategory == MenuCategory.DINNER,
+                    onClick = { onCategorySelected(MenuCategory.DINNER) }
+                )
+            }
         }
     }
 
@@ -410,8 +446,6 @@ class TableScreen @Inject constructor(
     fun OrderLayout(
         tableOrderList: List<UiTableOrder>,
         totalPrice: String,
-        addOrderState: UiScreenState,
-        cancelOrderState: UiScreenState,
         onCardClick: () -> Unit,
         onCashClick: () -> Unit,
         onPointClick: () -> Unit,
@@ -587,8 +621,6 @@ class TableScreen @Inject constructor(
     @Composable
     fun MenuList(
         menuList: List<UiMenu>,
-        addOrderState: UiScreenState,
-        cancelOrderState: UiScreenState,
         onAddClick: (UiMenu) -> Unit,
         onCancelClick: (UiMenu) -> Unit
     ) {
