@@ -50,6 +50,7 @@ class TableMenuControllerImpl @Inject constructor(
         .combine(menuListFlow) { state, menuList ->
             val filteredList = menuList.filter { it.category and(state.nowMenuCategory.code) != 0 }
                 .map { it.convertToUiMenu() }
+                .sortedBy { it.name }
             state.copy(
                 menuList = filteredList
             )

@@ -2,6 +2,7 @@ package com.dirtfy.ppp.ui.controller.feature.menu.impl.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuListController
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuUpdateController
@@ -30,6 +31,9 @@ class MenuViewModel @Inject constructor(
             UiMenuScreenState(
                 menuList = listScreenData.menuList,
                 searchClue = listScreenData.searchClue,
+                searchAlcohol = listScreenData.searchAlcohol,
+                searchLunch = listScreenData.searchLunch,
+                searchDinner = listScreenData.searchDinner,
                 newMenu = updateScreenData.newMenu,
                 menuListState = listScreenData.menuListState,
                 createMenuState = updateScreenData.createMenuState,
@@ -52,6 +56,10 @@ class MenuViewModel @Inject constructor(
 
     override fun updateSearchClue(clue: String) {
         listController.updateSearchClue(clue)
+    }
+
+    override fun updateSearchCategory(category: MenuCategory) {
+        listController.updateSearchCategory(category)
     }
 
     override fun updateNewMenu(menu: UiNewMenu) {

@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.controller.feature.menu.impl.viewmodel
 
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.data.logic.MenuBusinessLogic
 import com.dirtfy.ppp.ui.controller.common.converter.feature.menu.MenuAtomConverter.convertToUiMenu
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuListController
@@ -28,12 +29,12 @@ class MenuListControllerImpl @Inject constructor(
         = MutableStateFlow(UiMenuListScreenState())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val menuListFlow: Flow<List<UiMenu>> = retryTrigger
+    private val menuListFlow = retryTrigger
         .flatMapLatest {
             menuBusinessLogic.menuStream()
                 .map {
                     setMenuListState(UiScreenState(UiState.COMPLETE))
-                    it.map { menu -> menu.convertToUiMenu() }
+                    it
                 }
                 .onStart {
                     setMenuListState(UiScreenState(UiState.LOADING))
@@ -48,11 +49,24 @@ class MenuListControllerImpl @Inject constructor(
     override val screenData: Flow<UiMenuListScreenState>
          = _screenData
         .combine(menuListFlow) { state, menuList ->
-            val filteredList = menuList.filter {
+            var filteredList = menuList.filter {
                 it.name.contains(state.searchClue)
             }
+            if (state.searchAlcohol)
+                filteredList = filteredList.filter {
+                    it.category and(MenuCategory.ALCOHOL.code) != 0
+                }
+            if (state.searchLunch)
+                filteredList = filteredList.filter {
+                    it.category and(MenuCategory.LUNCH.code) != 0
+                }
+            if (state.searchDinner)
+                filteredList = filteredList.filter {
+                    it.category and(MenuCategory.DINNER.code) != 0
+                }
             state.copy(
-                menuList = filteredList
+                menuList = filteredList.map { it.convertToUiMenu() }
+                    .sortedBy { it.name }
             )
         }
 
@@ -66,6 +80,17 @@ class MenuListControllerImpl @Inject constructor(
 
     override fun updateSearchClue(clue: String) {
         _screenData.update { it.copy(searchClue = clue) }
+    }
+
+    override fun updateSearchCategory(category: MenuCategory) {
+        when (category){
+            MenuCategory.ALCOHOL ->
+                _screenData.update { it.copy(searchAlcohol = !it.searchAlcohol) }
+            MenuCategory.LUNCH ->
+                _screenData.update { it.copy(searchLunch = !it.searchLunch) }
+            MenuCategory.DINNER ->
+                _screenData.update { it.copy(searchDinner = !it.searchDinner) }
+        }
     }
 
     override fun setMenuListState(state: UiScreenState) {

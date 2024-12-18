@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
+import com.dirtfy.ppp.data.dto.feature.menu.MenuCategory
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -91,6 +92,13 @@ class MenuScreen @Inject constructor(
             )
 
             Spacer(modifier = Modifier.size(24.dp))
+
+            MenuSearchCategory(
+                searchAlcohol = screen.searchAlcohol,
+                searchLunch = screen.searchLunch,
+                searchDinner = screen.searchDinner,
+                onCategorySelectionChanged = { controller.updateSearchCategory(it) }
+            )
 
             Component.HandleUiStateDialog(
                 uiState = screen.menuListState,
@@ -213,6 +221,49 @@ class MenuScreen @Inject constructor(
         }
     }
 
+    @Composable
+    fun MenuSearchCategory(
+        searchAlcohol: Boolean,
+        searchLunch: Boolean,
+        searchDinner: Boolean,
+        onCategorySelectionChanged: (MenuCategory) -> Unit
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                checked = searchAlcohol,
+                onCheckedChange = { onCategorySelectionChanged(MenuCategory.ALCOHOL) }
+            )
+            Text(
+                text = stringResource(R.string.menu_category_alcohol),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.size(20.dp))
+
+            Checkbox(
+                checked = searchLunch,
+                onCheckedChange = { onCategorySelectionChanged(MenuCategory.LUNCH) }
+            )
+            Text(
+                text = stringResource(R.string.menu_category_lunch),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.size(20.dp))
+
+            Checkbox(
+                checked = searchDinner,
+                onCheckedChange = { onCategorySelectionChanged(MenuCategory.DINNER) }
+            )
+            Text(
+                text = stringResource(R.string.menu_category_dinner),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
     @Composable
     fun MenuCard(
         menu: UiMenu,

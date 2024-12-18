@@ -29,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,10 +54,6 @@ class MenuScreen @Inject constructor(
         controller: MenuController = menuController
     ) {
         val screen by controller.screenData.collectAsStateWithLifecycle()
-
-        LaunchedEffect(key1 = controller) {
-            controller.request { updateMenuList() }
-        }
 
         Row(
             verticalAlignment = Alignment.Top,
@@ -87,6 +82,9 @@ class MenuScreen @Inject constructor(
 
                 Spacer(modifier = Modifier.size(10.dp))
 
+                // TODO menu category search
+
+                // TODO Component.HandleUiStateDialog
                 when(screen.menuListState.state) {
                     UiState.COMPLETE -> {
                         LazyVerticalGrid(

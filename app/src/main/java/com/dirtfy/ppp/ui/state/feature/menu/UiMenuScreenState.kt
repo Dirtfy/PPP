@@ -8,6 +8,9 @@ import com.dirtfy.ppp.ui.state.feature.menu.atom.UiNewMenu
 data class UiMenuScreenState(
     val menuList: List<UiMenu> = emptyList(),
     val searchClue: String = "",
+    val searchAlcohol: Boolean = false,
+    val searchLunch: Boolean = false,
+    val searchDinner: Boolean = false,
     val newMenu: UiNewMenu = UiNewMenu(),
 
     val menuListState: UiScreenState = UiScreenState(),
