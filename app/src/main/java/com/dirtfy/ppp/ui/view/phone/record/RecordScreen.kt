@@ -1,17 +1,24 @@
 package com.dirtfy.ppp.ui.view.phone.record
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.DateRangePicker
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -19,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.controller.feature.record.RecordController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
@@ -41,13 +49,15 @@ class RecordScreen @Inject constructor(
         val screenData by controller.screenData.collectAsStateWithLifecycle()
 
         ScreenContent(
-            searchClue = screenData.searchClue,
+            selectedDatePair = screenData.dateRange,
             recordList = screenData.recordList,
             recordListState = screenData.recordListState,
             nowRecord = screenData.nowRecord,
             nowRecordState = screenData.nowRecordState,
             mode = screenData.mode,
-            onClueChanged = { controller.updateSearchClue(it) },
+            onSelectedDateChanged = { start, end ->
+                controller.updateDateRange(start, end)
+            },
             onItemClick = {
                 controller.request{
                     setMode(UiRecordMode.Detail)
@@ -74,32 +84,80 @@ class RecordScreen @Inject constructor(
 
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ScreenContent(
-        searchClue: String,
+        selectedDatePair: Pair<Long?, Long?>,
         recordList: List<UiRecord>,
         recordListState: UiScreenState,
         nowRecord: UiRecord,
         nowRecordState: UiScreenState,
         mode: UiRecordMode,
-        onClueChanged: (String) -> Unit,
+        onSelectedDateChanged: (Long?, Long?) -> Unit,
         onItemClick: (UiRecord) -> Unit,
         onDismissRequest: () -> Unit,
         onRetryClick: () -> Unit,
         onRecordListFailDismissRequest: () -> Unit
     ) {
         Column {
-            Component.HandleUiStateDialog(
-                uiState = recordListState,
-                onDismissRequest = onRecordListFailDismissRequest,
-                onRetryAction = onRetryClick,
-                onComplete = {
-                    RecordList(
-                        recordList = recordList,
-                        onItemClick = onItemClick
+            Column {
+                Column(
+                    modifier = Modifier.weight(0.4f)
+                ) {
+                    val dateRangePickerState = rememberDateRangePickerState(
+                        initialSelectedStartDateMillis = selectedDatePair.first,
+                        initialSelectedEndDateMillis = selectedDatePair.second
+                    )
+
+                    Button(
+                        content = {
+                            Text(text = "검색")
+                        },
+                        onClick = {
+                            val start = dateRangePickerState.selectedStartDateMillis
+                            val end = dateRangePickerState.selectedEndDateMillis
+
+                            onSelectedDateChanged(start, end)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    DateRangePicker(
+                        state = dateRangePickerState,
+                        headline = {
+                            val start = dateRangePickerState.selectedStartDateMillis
+                            val end = dateRangePickerState.selectedEndDateMillis
+
+                            val startText = if (start == null) "시작일"
+                            else StringFormatConverter.formatTimestampFromDay(start)
+
+                            val endText = if (end == null) "종료일"
+                            else StringFormatConverter.formatTimestampFromDay(end)
+
+                            Text(text = "$startText ~ $endText")
+                        }
                     )
                 }
-            )
+
+
+                Box(
+                    modifier = Modifier.weight(0.6f)
+                ) {
+                    Component.HandleUiStateDialog(
+                        uiState = recordListState,
+                        onDismissRequest = onRecordListFailDismissRequest,
+                        onRetryAction = onRetryClick,
+                        onComplete = {
+                            RecordList(
+                                recordList = recordList,
+                                onItemClick = onItemClick
+                            )
+                        }
+                    )
+                }
+
+            }
+
 
             when(mode) {
                 UiRecordMode.Detail -> {
