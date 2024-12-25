@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
@@ -100,22 +101,36 @@ class MenuScreen @Inject constructor(
                     onDismissRequest = { controller.setMenuListState(UiScreenState(UiState.COMPLETE)) },
                     onRetryAction = { controller.retryUpdateMenuList() },
                     onComplete = {
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(200.dp),
-                            contentPadding = PaddingValues(10.dp)
-                        ) {
-                            items(
-                                items = screen.menuList,
-                                key = { it.name }
+                        if (screen.menuList.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.empty_list),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(200.dp),
+                                contentPadding = PaddingValues(10.dp)
                             ) {
-                                Menu(
-                                    menu = it,
-                                    onDeleteClick = {
-                                        controller.request { deleteMenu(it) }
-                                    }
-                                )
+                                items(
+                                    items = screen.menuList,
+                                    key = { it.name }
+                                ) {
+                                    Menu(
+                                        menu = it,
+                                        onDeleteClick = {
+                                            controller.request { deleteMenu(it) }
+                                        }
+                                    )
+                                }
                             }
                         }
+
                     }
                 )
             }
