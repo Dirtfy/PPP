@@ -118,44 +118,6 @@ class MenuScreen @Inject constructor(
                         }
                     }
                 )
-
-//                when(screen.menuListState.state) {
-//                    UiState.COMPLETE -> {
-//                        LazyVerticalGrid(
-//                            columns = GridCells.Adaptive(200.dp),
-//                            contentPadding = PaddingValues(10.dp)
-//                        ) {
-//                            items(
-//                                items = screen.menuList,
-//                                key = { it.name }
-//                            ) {
-//                                Menu(
-//                                    menu = it,
-//                                    onDeleteClick = {
-//                                        controller.request { deleteMenu(it) }
-//                                    }
-//                                )
-//                            }
-//                        }
-//                    }
-//                    UiState.LOADING -> {
-//                        CircularProgressIndicator(
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//                    }
-//                    UiState.FAIL -> {
-//                        AlertDialog(
-//                            onDismissRequest = { },
-//                            confirmButton = {
-//                                Button(onClick = { controller.request { updateMenuList() } }) {
-//                                    Text(text = "OK")
-//                                }
-//                            },
-//                            title = { Text(text = screen.menuListState.errorException?.message ?: "unknown error") }
-//                        )
-//
-//                    }
-//                }
             }
         }
 

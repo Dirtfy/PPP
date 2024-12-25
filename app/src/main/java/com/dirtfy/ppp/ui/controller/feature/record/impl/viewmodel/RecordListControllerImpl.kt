@@ -48,7 +48,8 @@ class RecordListControllerImpl @Inject constructor(
                 }
         }
 
-    private val dateRangeFlow = MutableStateFlow(Pair(-1L, -1L))
+    private val dateRangeFlow: MutableStateFlow<Pair<Long?, Long?>>
+    = MutableStateFlow(Pair(null, null))
 
     override val screenData: Flow<UiRecordListScreenState>
         = _screenData
@@ -63,7 +64,7 @@ class RecordListControllerImpl @Inject constructor(
             val end = dateRange.second
 
             val filtered = state.recordList.filter { dataRecord ->
-                if (start == -1L || end == -1L) {
+                if (start == null || end == null) {
                     true
                 } else {
                     val timestamp = StringFormatConverter
@@ -86,7 +87,7 @@ class RecordListControllerImpl @Inject constructor(
         retryTrigger.value += 1
     }
 
-    override fun updateDateRange(start: Long, end: Long) {
+    override fun updateDateRange(start: Long?, end: Long?) {
         _screenData.update { it.copy(dateRange = Pair(start, end)) }
         dateRangeFlow.update { Pair(start, end) }
     }

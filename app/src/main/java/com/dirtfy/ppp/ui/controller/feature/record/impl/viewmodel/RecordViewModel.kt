@@ -63,7 +63,7 @@ class RecordViewModel @Inject constructor(
     }
 
     override fun updateDateRange(start: Long?, end: Long?) {
-        listController.updateDateRange(start?: -1L, end?: -1L)
+        listController.updateDateRange(start, end)
     }
 
     override suspend fun updateNowRecord(record: UiRecord) {
