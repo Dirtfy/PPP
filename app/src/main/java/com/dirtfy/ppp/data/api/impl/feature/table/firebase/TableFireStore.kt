@@ -29,9 +29,11 @@ import javax.inject.Inject
 
 class TableFireStore @Inject constructor(): TableApi<Transaction>, Tagger {
 
-    private val tableRef = Firebase.firestore.collection(FireStorePath.TABLE)
-    private val mergeLockRef = Firebase.firestore.document(FireStorePath.TABLE_GROUP_LOCK)
-    private val groupIdRef = Firebase.firestore.document(FireStorePath.GROUP_ID_COUNT)
+    private val pathVersion = FireStorePath.Service
+
+    private val tableRef = Firebase.firestore.collection(pathVersion.TABLE)
+    private val mergeLockRef = Firebase.firestore.document(pathVersion.TABLE_GROUP_LOCK)
+    private val groupIdRef = Firebase.firestore.document(pathVersion.GROUP_ID_COUNT)
 
     private suspend fun getGroupNumber(tableNumber: Int): Int {
         val query = tableRef.whereArrayContains("member", tableNumber)
@@ -179,7 +181,7 @@ class TableFireStore @Inject constructor(): TableApi<Transaction>, Tagger {
     private fun getOrderRef(tableNumber: Int): CollectionReference {
         return tableRef
             .document("$tableNumber")
-            .collection(FireStorePath.TABLE_ORDER)
+            .collection(pathVersion.TABLE_ORDER)
     }
 
     override suspend fun setOrder(groupNumber: Int, order: DataTableOrder) {

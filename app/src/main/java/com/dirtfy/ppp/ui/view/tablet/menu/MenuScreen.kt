@@ -36,10 +36,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
+import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
 import com.dirtfy.ppp.ui.view.phone.Component
@@ -59,6 +61,16 @@ class MenuScreen @Inject constructor(
         LaunchedEffect(key1 = controller) {
             controller.request { updateMenuList() }
         }
+
+        Component.HandleUiStateDialog(
+            uiState = screen.createMenuState,
+            onDismissRequest = { controller.setCreateMenuState(UiScreenState(UiState.COMPLETE)) },
+            onRetryAction = { controller.request { createMenu() } }
+        )
+        Component.HandleUiStateDialog(
+            uiState = screen.deleteMenuState,
+            onDismissRequest = { controller.setDeleteMenuState(UiScreenState(UiState.COMPLETE)) }
+        )
 
         Row(
             verticalAlignment = Alignment.Top,
@@ -84,43 +96,43 @@ class MenuScreen @Inject constructor(
 
                 Spacer(modifier = Modifier.size(10.dp))
 
-                when(screen.menuListState.state) {
-                    UiState.COMPLETE -> {
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(200.dp),
-                            contentPadding = PaddingValues(10.dp)
-                        ) {
-                            items(
-                                items = screen.menuList,
-                                key = { it.name }
+                Component.HandleUiStateDialog(
+                    uiState = screen.menuListState,
+                    onDismissRequest = { controller.setMenuListState(UiScreenState(UiState.COMPLETE)) },
+                    onRetryAction = { controller.retryUpdateMenuList() },
+                    onComplete = {
+                        if (screen.menuList.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.empty_list),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(200.dp),
+                                contentPadding = PaddingValues(10.dp)
                             ) {
-                                Menu(
-                                    menu = it,
-                                    onDeleteClick = {
-                                        controller.request { deleteMenu(it) }
-                                    }
-                                )
+                                items(
+                                    items = screen.menuList,
+                                    key = { it.name }
+                                ) {
+                                    Menu(
+                                        menu = it,
+                                        onDeleteClick = {
+                                            controller.request { deleteMenu(it) }
+                                        }
+                                    )
+                                }
                             }
                         }
-                    }
-                    UiState.LOADING -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    UiState.FAIL -> {
-                        AlertDialog(
-                            onDismissRequest = { },
-                            confirmButton = {
-                                Button(onClick = { controller.request { updateMenuList() } }) {
-                                    Text(text = "OK")
-                                }
-                            },
-                            title = { Text(text = screen.menuListState.errorException?.message ?: "unknown error") }
-                        )
 
                     }
-                }
+                )
             }
         }
 

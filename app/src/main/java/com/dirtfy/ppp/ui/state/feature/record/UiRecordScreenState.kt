@@ -9,7 +9,7 @@ import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
 data class UiRecordScreenState(
     val recordList: List<UiRecord> = emptyList(),
     val recordDetailList: List<UiRecordDetail> = emptyList(),
-    val searchClue: String = "",
+    val dateRange: Pair<Long?, Long?> = Pair(null, null),
     val nowRecord: UiRecord = UiRecord(),
     val mode: UiRecordMode = UiRecordMode.Main,
 

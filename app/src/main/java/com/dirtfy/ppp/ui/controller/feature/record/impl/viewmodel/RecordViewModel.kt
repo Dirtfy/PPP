@@ -34,7 +34,7 @@ class RecordViewModel @Inject constructor(
                 UiRecordScreenState(
                     mode = mode,
                     recordList = listScreenData.recordList,
-                    searchClue = listScreenData.searchClue,
+                    dateRange = listScreenData.dateRange,
                     recordListState = listScreenData.recordListState
                 )
             }.combine(detailController.screenData) { state, detailScreenData ->
@@ -62,8 +62,8 @@ class RecordViewModel @Inject constructor(
         detailController.updateRecordDetailList()
     }
 
-    override fun updateSearchClue(clue: String) {
-        listController.updateSearchClue(clue)
+    override fun updateDateRange(start: Long?, end: Long?) {
+        listController.updateDateRange(start, end)
     }
 
     override suspend fun updateNowRecord(record: UiRecord) {

@@ -1,6 +1,7 @@
 package com.dirtfy.ppp.ui.controller.feature.record.impl.viewmodel
 
 import com.dirtfy.ppp.data.logic.RecordBusinessLogic
+import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.controller.common.converter.feature.record.RecordAtomConverter.convertToUiRecord
 import com.dirtfy.ppp.ui.controller.feature.record.RecordListController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
@@ -32,7 +33,9 @@ class RecordListControllerImpl @Inject constructor(
             recordBusinessLogic.recordStream()
                 .map {
                     setRecordListState(UiScreenState(UiState.COMPLETE))
+
                     val recordList = it.map { data -> data.convertToUiRecord() }
+
                     recordList
                 }
                 .onStart {
@@ -45,12 +48,34 @@ class RecordListControllerImpl @Inject constructor(
                 }
         }
 
+    private val dateRangeFlow: MutableStateFlow<Pair<Long?, Long?>>
+    = MutableStateFlow(Pair(null, null))
+
     override val screenData: Flow<UiRecordListScreenState>
         = _screenData
         .combine(recordListFlow) { state, recordList ->
-            // TODO searchClue 구현되면 여기서 filtering
             state.copy(
                 recordList = recordList
+            )
+        }
+        .combine(dateRangeFlow) { state, dateRange ->
+            // TODO searchClue 구현되면 여기서 filtering
+            val start = dateRange.first
+            val end = dateRange.second
+
+            val filtered = state.recordList.filter { dataRecord ->
+                if (start == null || end == null) {
+                    true
+                } else {
+                    val timestamp = StringFormatConverter
+                        .parseTimestampFromSecond(dataRecord.timestamp)
+
+                    timestamp in start..end
+                }
+            }
+
+            state.copy(
+                recordList = filtered
             )
         }
 
@@ -62,8 +87,9 @@ class RecordListControllerImpl @Inject constructor(
         retryTrigger.value += 1
     }
 
-    override fun updateSearchClue(clue: String) {
-        _screenData.update { it.copy(searchClue = clue) }
+    override fun updateDateRange(start: Long?, end: Long?) {
+        _screenData.update { it.copy(dateRange = Pair(start, end)) }
+        dateRangeFlow.update { Pair(start, end) }
     }
 
     override fun setRecordListState(state: UiScreenState) {

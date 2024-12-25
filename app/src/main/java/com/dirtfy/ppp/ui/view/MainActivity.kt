@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view
 
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -59,6 +60,11 @@ class MainActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         startObservingNetworkConnection()
+
+        if (isTablet)
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        else
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         setContent {
             val navController = rememberNavController()

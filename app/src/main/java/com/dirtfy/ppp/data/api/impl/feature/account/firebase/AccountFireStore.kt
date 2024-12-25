@@ -26,8 +26,10 @@ import javax.inject.Inject
 
 class AccountFireStore @Inject constructor(): AccountApi, Tagger {
 
-    private val accountRef = Firebase.firestore.collection(FireStorePath.ACCOUNT)
-    private val recordRef = Firebase.firestore.collection(FireStorePath.RECORD)
+    private val pathVersion = FireStorePath.Service
+
+    private val accountRef = Firebase.firestore.collection(pathVersion.ACCOUNT)
+    private val recordRef = Firebase.firestore.collection(pathVersion.RECORD)
 
     override suspend fun create(account: DataAccount): DataAccount {
         Firebase.firestore.runTransaction {
@@ -42,7 +44,7 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
     }
 
     private suspend fun getNextRecordId(): Int {
-        return Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT).get().await()
+        return Firebase.firestore.document(pathVersion.RECORD_ID_COUNT).get().await()
             .getLong("count")!!.toInt() + 1
     }
 
@@ -58,7 +60,7 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
 
             Log.d(TAG, "$record")
 
-            Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
+            Firebase.firestore.document(pathVersion.RECORD_ID_COUNT)
                 .update("count", FieldValue.increment(1))
 
             newRecord.set(
@@ -136,7 +138,7 @@ class AccountFireStore @Inject constructor(): AccountApi, Tagger {
     }
 
     override suspend fun getMaxAccountNumber(): Int {
-        return Firebase.firestore.document(FireStorePath.MAX_ACCOUNT_NUMBER).get().await()
+        return Firebase.firestore.document(pathVersion.MAX_ACCOUNT_NUMBER).get().await()
             .getLong("number")!!.toInt()
     }
 

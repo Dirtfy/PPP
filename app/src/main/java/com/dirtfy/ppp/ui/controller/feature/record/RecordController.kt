@@ -12,7 +12,7 @@ interface RecordController: Controller<UiRecordScreenState, RecordController> {
     suspend fun updateRecordList()
     fun retryUpdateRecordList()
     suspend fun updateRecordDetailList()
-    fun updateSearchClue(clue: String)
+    fun updateDateRange(start: Long?, end: Long?)
     suspend fun updateNowRecord(record: UiRecord)
     fun setMode(mode: UiRecordMode)
     fun setRecordListState(state: UiScreenState)

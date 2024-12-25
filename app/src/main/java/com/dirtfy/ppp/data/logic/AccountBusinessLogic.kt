@@ -19,7 +19,7 @@ class AccountBusinessLogic @Inject constructor(
 ): BusinessLogic {
 
     private fun isValidPhoneNumber(phoneNumber: String): Boolean {
-        val regex = Regex("""^010-\d{3,4}-\d{4}$""") // TODO 053 등 집전화 적용?
+        val regex = Regex("""^\d{2,3}-\d{3,4}-\d{4}$""") // TODO 053 등 집전화 적용?
         return regex.matches(phoneNumber)
     }
 
