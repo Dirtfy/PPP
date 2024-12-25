@@ -25,8 +25,10 @@ import javax.inject.Inject
 
 class RecordFireStore @Inject constructor(): RecordApi<Transaction>, Tagger {
 
-    private val recordRef = Firebase.firestore.collection(FireStorePath.RECORD)
-    private val recordIdRef = Firebase.firestore.document(FireStorePath.RECORD_ID_COUNT)
+    private val pathVersion = FireStorePath.Service
+
+    private val recordRef = Firebase.firestore.collection(pathVersion.RECORD)
+    private val recordIdRef = Firebase.firestore.document(pathVersion.RECORD_ID_COUNT)
 
     override suspend fun create(
         record: DataRecord,
@@ -48,7 +50,7 @@ class RecordFireStore @Inject constructor(): RecordApi<Transaction>, Tagger {
 
             detailList.forEach {
                 transaction.set(
-                    newRecord.collection(FireStorePath.RECORD_DETAIL).document(),
+                    newRecord.collection(pathVersion.RECORD_DETAIL).document(),
                     it.convertToFireStoreRecordDetail()
                 )
             }
@@ -79,7 +81,7 @@ class RecordFireStore @Inject constructor(): RecordApi<Transaction>, Tagger {
 
         detailList.forEach {
             transaction.set(
-                newRecord.collection(FireStorePath.RECORD_DETAIL).document(),
+                newRecord.collection(pathVersion.RECORD_DETAIL).document(),
                 it.convertToFireStoreRecordDetail()
             )
         }
@@ -124,7 +126,7 @@ class RecordFireStore @Inject constructor(): RecordApi<Transaction>, Tagger {
 
     override suspend fun readDetail(record: DataRecord): List<DataRecordDetail> {
         val detailSnapshot = recordRef.document(record.id.toString())
-            .collection(FireStorePath.RECORD_DETAIL).get().await()
+            .collection(pathVersion.RECORD_DETAIL).get().await()
         if (detailSnapshot.metadata.isFromCache) Log.e(TAG, "detailSnapshot is from cache")
         return detailSnapshot
             .documents.map { detailDocument ->

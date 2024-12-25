@@ -18,7 +18,9 @@ import javax.inject.Inject
 
 class MenuFireStore @Inject constructor(): MenuApi, Tagger {
 
-    private val ref = Firebase.firestore.collection(FireStorePath.MENU)
+    private val pathVersion = FireStorePath.Service
+
+    private val ref = Firebase.firestore.collection(pathVersion.MENU)
 
     override suspend fun create(menu: DataMenu): DataMenu {
         Firebase.firestore.runTransaction {
