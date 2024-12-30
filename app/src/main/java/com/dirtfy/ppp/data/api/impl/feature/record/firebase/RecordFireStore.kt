@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.Transaction
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -25,7 +26,7 @@ import javax.inject.Inject
 
 class RecordFireStore @Inject constructor(): RecordApi<Transaction>, Tagger {
 
-    private val pathVersion = FireStorePath.Service
+    private val pathVersion = FireStorePath.Test
 
     private val recordRef = Firebase.firestore.collection(pathVersion.RECORD)
     private val recordIdRef = Firebase.firestore.document(pathVersion.RECORD_ID_COUNT)
@@ -134,6 +135,24 @@ class RecordFireStore @Inject constructor(): RecordApi<Transaction>, Tagger {
             }.map { recordDetail ->
                 recordDetail.convertToDataRecordDetail()
             }
+    }
+
+    override suspend fun update(record: DataRecord) {
+        recordRef.document("${record.id}")
+            .set(record.convertToFireStoreRecord())
+            .await()
+    }
+
+    override suspend fun delete(id: Int): DataRecord {
+        val docRef = recordRef.document("$id")
+        Log.d(TAG, "$docRef-$id")
+        val data = docRef.get().await()
+            .toObject(FireStoreRecord::class.java)!!
+            .convertToDataRecord()
+        Log.d(TAG, "$data")
+        docRef.delete().await()
+        Log.d(TAG, "deleted")
+        return data
     }
 
     override suspend fun getNextId(): Int {

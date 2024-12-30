@@ -37,7 +37,6 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
 import com.dirtfy.ppp.ui.view.phone.Component
-import com.dirtfy.ppp.ui.view.tablet.record.RecordDetailScreen
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(
@@ -227,7 +226,9 @@ class RecordScreen @Inject constructor(
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            recordDetailScreen.Main()
+            recordDetailScreen.Main(
+                onDismissRequest = onDismissRequest
+            )
         }
     }
 }

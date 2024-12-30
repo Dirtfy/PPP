@@ -18,4 +18,7 @@ sealed class RecordException(
 
     class NonUniqueQuery: RecordException("query result is not unique")
     class NonExistQuery: RecordException("query result is not exist")
+
+    class InvalidAccountNumber: RecordException("account number is invalid")
+    class InvalidBalance: RecordException("account balance is not enough")
 }

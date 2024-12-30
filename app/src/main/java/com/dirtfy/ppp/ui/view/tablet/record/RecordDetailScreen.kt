@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,6 +68,9 @@ class RecordDetailScreen @Inject constructor(
         nowRecord: UiRecord,
         recordDetailList: List<UiRecordDetail>,
         recordDetailListState: UiScreenState,
+        onConfirm: (String) -> Unit,
+        onTypeInputDismissRequest: () -> Unit,
+        onDelete: () -> Unit,
         onDismissRequest: () -> Unit,
         onRetryClick: () -> Unit
     ) {
@@ -78,6 +84,23 @@ class RecordDetailScreen @Inject constructor(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Box(
+                        modifier = Modifier.align(Alignment.Start)
+                    ) {
+                        Button(
+                            onClick = {
+                                onDismissRequest()
+                                onDelete()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Red, // 배경색
+                            )
+                        ) {
+                            Text(text = "삭제")
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(10.dp))
+
                     RecordDetailHead(nowRecord = nowRecord)
                     Component.HandleUiStateDialog(
                         uiState = recordDetailListState,

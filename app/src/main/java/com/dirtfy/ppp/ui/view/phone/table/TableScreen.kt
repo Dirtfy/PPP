@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view.phone.table
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -55,6 +56,7 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import com.dirtfy.ppp.ui.view.phone.Component
+import com.journeyapps.barcodescanner.ScanContract
 import javax.inject.Inject
 
 class TableScreen @Inject constructor(
@@ -469,6 +471,12 @@ class TableScreen @Inject constructor(
         onAccountNumberChange: (String) -> Unit,
         onConfirmClick: () -> Unit
     ) {
+//        val scanLauncher = rememberLauncherForActivityResult(
+//            contract = ScanContract()
+//        ) {
+//            controller.updateSearchClue(it.contents?:"")
+//        }
+
         Dialog(onDismissRequest = onDismissRequest) {
             Surface(
                 modifier = Modifier.wrapContentHeight(),

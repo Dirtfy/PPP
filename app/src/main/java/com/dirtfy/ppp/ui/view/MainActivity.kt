@@ -61,10 +61,10 @@ class MainActivity: ComponentActivity() {
 
         startObservingNetworkConnection()
 
-        if (isTablet)
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        requestedOrientation = if (isTablet)
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         else
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         setContent {
             val navController = rememberNavController()
