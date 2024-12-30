@@ -249,7 +249,8 @@ class AccountDetailScreen @Inject constructor(
                 onRecordChange(newRecord.copy(difference = it))
             },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+            visualTransformation = Component.CurrencyInputVisualTransformation()
         )
     }
 

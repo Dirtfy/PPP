@@ -28,13 +28,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.dirtfy.ppp.R
 import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
+import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
+import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
+import kotlin.math.max
+import kotlin.math.min
 
 object Component {
 
@@ -170,5 +178,97 @@ object Component {
                     onClick()
                 }
         )
+    }
+
+    class CurrencyInputVisualTransformation: VisualTransformation {
+        var originalText = ""
+        val trimmedText get(): String {
+            return if (!(originalText.toList().distinct().size == 1 &&
+                        originalText[0] == '0'))
+                originalText.trimStart { it == '0' }
+            else "0"
+        }
+        val formatedText get(): String {
+            return if (trimmedText != "")
+                StringFormatConverter.formatCurrency(
+                    trimmedText.toInt()
+                )
+            else ""
+        }
+
+        val offsetMapping = object: OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                val trimmedLength = originalText.length - trimmedText.length
+
+                if (offset < trimmedLength)
+                    return trimmedText.length
+
+                var formatedOffset = 0
+
+                val trimmedOffset = offset - trimmedLength
+                for (i in 0..< trimmedOffset) {
+                    if (formatedText[i] == ',')
+                        formatedOffset++
+                    formatedOffset++
+                }
+
+                return formatedOffset
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                val trimmedLength = originalText.length - trimmedText.length
+
+                var originalOffset = trimmedLength
+
+                for (i in 0..< offset) {
+                    if (formatedText[i] == ',')
+                        continue
+                    originalOffset++
+                }
+
+                return originalOffset
+            }
+
+        }
+
+        override fun filter(text: AnnotatedString): TransformedText {
+            originalText = text.text
+
+            return TransformedText(
+                AnnotatedString(text = formatedText),
+                offsetMapping
+            )
+        }
+
+    }
+    private fun getPhoneNumberTransfomred(input: String): TransformedText {
+        val transformedText = formatPhoneNumber(input)
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                var transformedOffset = 0
+                var originalCount = 0
+
+                for (element in transformedText) {
+                    if (originalCount == offset) break
+                    transformedOffset++
+                    if (element != '-') originalCount++
+                }
+                return transformedOffset
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                var originalOffset = 0
+                var transformedCount = 0
+
+                for (i in 0 until offset) {
+                    if (i < transformedText.length && transformedText[i] != '-') {
+                        originalOffset++
+                    }
+                    transformedCount++
+                }
+                return originalOffset
+            }
+        }
+        return TransformedText(AnnotatedString(transformedText), offsetMapping)
     }
 }
