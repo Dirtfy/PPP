@@ -4,8 +4,10 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.view.phone.PhoneScreen
 import com.dirtfy.ppp.ui.view.tablet.TabletScreen
+import com.dirtfy.tagger.Tagger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +33,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity: ComponentActivity() {
+class MainActivity: ComponentActivity(), Tagger {
 
     @Inject
     lateinit var phoneScreen : PhoneScreen
@@ -52,8 +55,12 @@ class MainActivity: ComponentActivity() {
                 resources.configuration.screenLayout and
                         Configuration.SCREENLAYOUT_SIZE_MASK
 
+            val model = Build.MODEL
+            Log.d(TAG, model)
+
             return screenSizeType == Configuration.SCREENLAYOUT_SIZE_XLARGE ||
-                    screenSizeType == Configuration.SCREENLAYOUT_SIZE_LARGE
+                    screenSizeType == Configuration.SCREENLAYOUT_SIZE_LARGE ||
+                    model in setOf("SM-T220", "SM-T225N")
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
