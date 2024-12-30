@@ -39,7 +39,7 @@ import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
-import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.view.Component
 import com.dirtfy.tagger.Tagger
 import javax.inject.Inject
 

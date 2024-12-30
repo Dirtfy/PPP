@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ui.view.phone
+package com.dirtfy.ppp.ui.view
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -135,6 +136,21 @@ object Component {
                     onRetryAction = onRetryAction ?: {}
                 )
             }
+        }
+    }
+
+    @Composable
+    fun NamedRadioButton(
+        name: String,
+        selected: Boolean,
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier
+    ) {
+        Row(
+            modifier = modifier
+        ) {
+            RadioButton(selected = selected, onClick = onClick)
+            Text(text = name)
         }
     }
 }

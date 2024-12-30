@@ -38,7 +38,7 @@ import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
-import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.view.Component
 import javax.inject.Inject
 
 class AccountCreateScreen @Inject constructor(

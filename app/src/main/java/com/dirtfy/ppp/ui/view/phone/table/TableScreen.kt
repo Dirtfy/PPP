@@ -1,6 +1,5 @@
 package com.dirtfy.ppp.ui.view.phone.table
 
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -55,8 +54,7 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
-import com.dirtfy.ppp.ui.view.phone.Component
-import com.journeyapps.barcodescanner.ScanContract
+import com.dirtfy.ppp.ui.view.Component
 import javax.inject.Inject
 
 class TableScreen @Inject constructor(

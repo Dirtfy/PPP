@@ -1,8 +1,6 @@
 package com.dirtfy.ppp.ui.view.phone.record
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,7 +46,7 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordDetail
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
-import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.view.Component
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import javax.inject.Inject
@@ -190,21 +188,6 @@ class RecordDetailScreen @Inject constructor(
     }
 
     @Composable
-    fun NamedRadioButton(
-        name: String,
-        selected: Boolean,
-        onClick: () -> Unit,
-        modifier: Modifier = Modifier
-    ) {
-        Row(
-            modifier = modifier
-        ) {
-            RadioButton(selected = selected, onClick = onClick)
-            Text(text = name)
-        }
-    }
-
-    @Composable
     fun TypeInput(
         type: String,
         onConfirm: (String) -> Unit
@@ -229,12 +212,12 @@ class RecordDetailScreen @Inject constructor(
         }
 
         Column {
-            NamedRadioButton(
+            Component.NamedRadioButton(
                 name = "Card",
                 selected = newType == "Card",
                 onClick = { newType = "Card" })
 
-            NamedRadioButton(
+            Component.NamedRadioButton(
                 name = "Cash",
                 selected = newType == "Cash",
                 onClick = { newType = "Cash" })
