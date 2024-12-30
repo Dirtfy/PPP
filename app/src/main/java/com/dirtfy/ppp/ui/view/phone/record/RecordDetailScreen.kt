@@ -279,20 +279,7 @@ class RecordDetailScreen @Inject constructor(
         }
     }
 
-    @Composable
-    fun BarcodeIcon(
-        onClick: () -> Unit
-    ) {
-        val barcodeIcon = Icons.Filled.Menu
-        Icon(
-            imageVector = barcodeIcon, contentDescription = barcodeIcon.name,
-            modifier = Modifier
-                .rotate(90f)
-                .clickable {
-                    onClick()
-                }
-        )
-    }
+
 
     @Composable
     fun PointDataInput(
@@ -309,7 +296,7 @@ class RecordDetailScreen @Inject constructor(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 trailingIcon = {
-                    BarcodeIcon(onClick = onScanClick)
+                    Component.BarcodeIcon(onClick = onScanClick)
                 }
             )
             TextField(

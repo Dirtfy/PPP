@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view.phone.table
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -55,6 +56,8 @@ import com.dirtfy.ppp.ui.state.feature.table.atom.UiTable
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableMode
 import com.dirtfy.ppp.ui.state.feature.table.atom.UiTableOrder
 import com.dirtfy.ppp.ui.view.Component
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import javax.inject.Inject
 
 class TableScreen @Inject constructor(
@@ -469,12 +472,6 @@ class TableScreen @Inject constructor(
         onAccountNumberChange: (String) -> Unit,
         onConfirmClick: () -> Unit
     ) {
-//        val scanLauncher = rememberLauncherForActivityResult(
-//            contract = ScanContract()
-//        ) {
-//            controller.updateSearchClue(it.contents?:"")
-//        }
-
         Dialog(onDismissRequest = onDismissRequest) {
             Surface(
                 modifier = Modifier.wrapContentHeight(),
@@ -502,13 +499,26 @@ class TableScreen @Inject constructor(
         onUserNameChange: (String) -> Unit,
         onConfirmClick: () -> Unit
     ) {
+        val scanLauncher = rememberLauncherForActivityResult(
+            contract = ScanContract()
+        ) {
+            onAccountNumberChange(it.contents?:"")
+        }
+
         Column {
             TextField(
                 value = pointUse.accountNumber,
                 onValueChange = onAccountNumberChange,
                 label = { Text(text = stringResource(R.string.account_number)) },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                trailingIcon = {
+                    Component.BarcodeIcon {
+                        scanLauncher.launch(
+                            ScanOptions().setOrientationLocked(false)
+                        )
+                    }
+                }
             )
             TextField(
                 value = pointUse.userName,

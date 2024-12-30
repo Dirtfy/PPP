@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -23,6 +25,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -152,5 +155,20 @@ object Component {
             RadioButton(selected = selected, onClick = onClick)
             Text(text = name)
         }
+    }
+
+    @Composable
+    fun BarcodeIcon(
+        onClick: () -> Unit
+    ) {
+        val barcodeIcon = Icons.Filled.Menu
+        Icon(
+            imageVector = barcodeIcon, contentDescription = barcodeIcon.name,
+            modifier = Modifier
+                .rotate(90f)
+                .clickable {
+                    onClick()
+                }
+        )
     }
 }
