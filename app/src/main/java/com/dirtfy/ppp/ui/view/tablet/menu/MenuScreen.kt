@@ -166,7 +166,8 @@ class MenuScreen @Inject constructor(
                                 onMenuChanged(newMenu.copy(price = it))
                             },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                            visualTransformation = Component.CurrencyInputVisualTransformation()
                         )
                         Spacer(modifier = Modifier.size(10.dp))
                         Button(
