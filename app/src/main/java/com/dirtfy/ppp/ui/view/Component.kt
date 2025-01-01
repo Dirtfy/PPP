@@ -41,6 +41,7 @@ import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatCon
 import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -182,43 +183,24 @@ object Component {
 
     class CurrencyInputVisualTransformation: VisualTransformation {
         var originalText = ""
-        val trimmedText get(): String {
-            return if (!(originalText.toList().distinct().size == 1 &&
-                        originalText[0] == '0'))
-                originalText.trimStart { it == '0' }
-            else "0"
-        }
-        val formatedText get(): String {
-            return if (trimmedText != "")
-                StringFormatConverter.formatCurrency(
-                    trimmedText.toInt()
-                )
-            else ""
-        }
+        val formatedText get()  = StringFormatConverter.formatCurrency(
+            originalText
+        )
 
         val offsetMapping = object: OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                val trimmedLength = originalText.length - trimmedText.length
+                // 문자열 젤 뒤를 offset 0으로 offset 거꾸로 세기
+                val offsetComp = originalText.length - offset
 
-                if (offset < trimmedLength)
-                    return trimmedText.length
+                val remainComma = max((offsetComp + 2) / 3 - 1, 0)
+                val totalComma = abs(originalText.length - formatedText.length)
+                val passedComma = totalComma - remainComma
 
-                var formatedOffset = 0
-
-                val trimmedOffset = offset - trimmedLength
-                for (i in 0..< trimmedOffset) {
-                    if (formatedText[i] == ',')
-                        formatedOffset++
-                    formatedOffset++
-                }
-
-                return formatedOffset
+                return offset + passedComma
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                val trimmedLength = originalText.length - trimmedText.length
-
-                var originalOffset = trimmedLength
+                var originalOffset = 0
 
                 for (i in 0..< offset) {
                     if (formatedText[i] == ',')
@@ -241,6 +223,7 @@ object Component {
         }
 
     }
+
     private fun getPhoneNumberTransfomred(input: String): TransformedText {
         val transformedText = formatPhoneNumber(input)
         val offsetMapping = object : OffsetMapping {
