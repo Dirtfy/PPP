@@ -25,20 +25,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
-import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
 import com.dirtfy.ppp.ui.controller.feature.account.AccountController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccount
-import com.dirtfy.ppp.ui.view.Component
+import com.dirtfy.ppp.ui.view.common.Component
+import com.dirtfy.ppp.ui.view.common.VisualTransformation
 import javax.inject.Inject
 
 class AccountCreateScreen @Inject constructor(
@@ -189,38 +185,6 @@ class AccountCreateScreen @Inject constructor(
         )
     }
 
-
-    private fun getPhoneNumberTransfomred(input: String): TransformedText {
-        val transformedText = formatPhoneNumber(input)
-        val offsetMapping = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int {
-                var transformedOffset = 0
-                var originalCount = 0
-
-                for (element in transformedText) {
-                    if (originalCount == offset) break
-                    transformedOffset++
-                    if (element != '-') originalCount++
-                }
-                return transformedOffset
-            }
-
-            override fun transformedToOriginal(offset: Int): Int {
-                var originalOffset = 0
-                var transformedCount = 0
-
-                for (i in 0 until offset) {
-                    if (i < transformedText.length && transformedText[i] != '-') {
-                        originalOffset++
-                    }
-                    transformedCount++
-                }
-                return originalOffset
-            }
-        }
-        return TransformedText(AnnotatedString(transformedText), offsetMapping)
-    }
-
     @Composable
     fun AccountPhoneNumberInput(
         nowAccount: UiNewAccount,
@@ -234,9 +198,7 @@ class AccountCreateScreen @Inject constructor(
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-            visualTransformation = VisualTransformation { phoneNumber ->
-                getPhoneNumberTransfomred(phoneNumber.text)
-            }
+            visualTransformation = VisualTransformation.PhoneNumberInputVisualTransformation()
         )
     }
 

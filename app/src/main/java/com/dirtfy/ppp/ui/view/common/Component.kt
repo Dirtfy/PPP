@@ -1,4 +1,4 @@
-package com.dirtfy.ppp.ui.view
+package com.dirtfy.ppp.ui.view.common
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -28,22 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.dirtfy.ppp.R
 import com.dirtfy.ppp.common.exception.ExceptionRetryHandling
-import com.dirtfy.ppp.ui.controller.common.converter.common.PhoneNumberFormatConverter.formatPhoneNumber
-import com.dirtfy.ppp.ui.controller.common.converter.common.StringFormatConverter
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 
 object Component {
 
@@ -181,77 +172,4 @@ object Component {
         )
     }
 
-    class CurrencyInputVisualTransformation: VisualTransformation {
-        var originalText = ""
-        val formatedText get()  = StringFormatConverter.formatCurrency(
-            originalText
-        )
-
-        val offsetMapping = object: OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int {
-                // 문자열 젤 뒤를 offset 0으로 offset 거꾸로 세기
-                val offsetComp = originalText.length - offset
-
-                val remainComma = max((offsetComp + 2) / 3 - 1, 0)
-                val totalComma = abs(originalText.length - formatedText.length)
-                val passedComma = totalComma - remainComma
-
-                return offset + passedComma
-            }
-
-            override fun transformedToOriginal(offset: Int): Int {
-                var originalOffset = 0
-
-                for (i in 0..< offset) {
-                    if (formatedText[i] == ',')
-                        continue
-                    originalOffset++
-                }
-
-                return originalOffset
-            }
-
-        }
-
-        override fun filter(text: AnnotatedString): TransformedText {
-            originalText = text.text
-
-            return TransformedText(
-                AnnotatedString(text = formatedText),
-                offsetMapping
-            )
-        }
-
-    }
-
-    private fun getPhoneNumberTransfomred(input: String): TransformedText {
-        val transformedText = formatPhoneNumber(input)
-        val offsetMapping = object : OffsetMapping {
-            override fun originalToTransformed(offset: Int): Int {
-                var transformedOffset = 0
-                var originalCount = 0
-
-                for (element in transformedText) {
-                    if (originalCount == offset) break
-                    transformedOffset++
-                    if (element != '-') originalCount++
-                }
-                return transformedOffset
-            }
-
-            override fun transformedToOriginal(offset: Int): Int {
-                var originalOffset = 0
-                var transformedCount = 0
-
-                for (i in 0 until offset) {
-                    if (i < transformedText.length && transformedText[i] != '-') {
-                        originalOffset++
-                    }
-                    transformedCount++
-                }
-                return originalOffset
-            }
-        }
-        return TransformedText(AnnotatedString(transformedText), offsetMapping)
-    }
 }

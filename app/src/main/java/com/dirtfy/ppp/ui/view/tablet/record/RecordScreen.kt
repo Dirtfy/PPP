@@ -35,7 +35,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
-import com.dirtfy.ppp.ui.view.Component
+import com.dirtfy.ppp.ui.view.common.Component
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(

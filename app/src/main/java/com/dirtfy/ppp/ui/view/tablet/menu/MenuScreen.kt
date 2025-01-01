@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
@@ -40,7 +40,8 @@ import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
-import com.dirtfy.ppp.ui.view.Component
+import com.dirtfy.ppp.ui.view.common.Component
+import com.dirtfy.ppp.ui.view.common.VisualTransformation
 import com.dirtfy.tagger.Tagger
 import javax.inject.Inject
 
@@ -167,7 +168,7 @@ class MenuScreen @Inject constructor(
                             },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                            visualTransformation = Component.CurrencyInputVisualTransformation()
+                            visualTransformation = VisualTransformation.CurrencyInputVisualTransformation()
                         )
                         Spacer(modifier = Modifier.size(10.dp))
                         Button(

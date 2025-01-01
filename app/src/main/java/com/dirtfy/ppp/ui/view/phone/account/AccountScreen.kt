@@ -37,7 +37,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountMode
-import com.dirtfy.ppp.ui.view.Component
+import com.dirtfy.ppp.ui.view.common.Component
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import javax.inject.Inject

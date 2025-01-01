@@ -43,7 +43,8 @@ import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccount
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiAccountRecord
 import com.dirtfy.ppp.ui.state.feature.account.atom.UiNewAccountRecord
-import com.dirtfy.ppp.ui.view.Component
+import com.dirtfy.ppp.ui.view.common.Component
+import com.dirtfy.ppp.ui.view.common.VisualTransformation
 import javax.inject.Inject
 
 class AccountDetailScreen @Inject constructor(
@@ -256,7 +257,7 @@ class AccountDetailScreen @Inject constructor(
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-            visualTransformation = Component.CurrencyInputVisualTransformation()
+            visualTransformation = VisualTransformation.CurrencyInputVisualTransformation()
         )
     }
 
