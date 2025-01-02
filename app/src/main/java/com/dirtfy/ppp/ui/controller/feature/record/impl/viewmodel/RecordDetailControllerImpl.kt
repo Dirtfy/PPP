@@ -26,6 +26,31 @@ class RecordDetailControllerImpl @Inject constructor(
     override val screenData: Flow<UiRecordDetailScreenState>
         get() = _screenData
 
+    override suspend fun updateRecordType(type: String) {
+        _screenData.update { it.copy(recordDetailListState = UiScreenState(UiState.LOADING)) }
+
+        val dataRecord = _screenData.value
+            .nowRecord.copy(type = type)
+            .convertToDataRecordFromNowRecord()
+
+        recordBusinessLogic.update(dataRecord)
+            .catch { cause ->
+                _screenData.update {
+                    it.copy(
+                        recordDetailListState = UiScreenState(UiState.FAIL, cause)
+                    )
+                }
+            }
+            .collect {
+                _screenData.update {
+                    it.copy(
+                        recordDetailListState = UiScreenState(UiState.COMPLETE)
+                    )
+                }
+            }
+
+    }
+
     override suspend fun updateRecordDetailList() {
         _screenData.update { it.copy(recordDetailListState = UiScreenState(UiState.LOADING)) }
 
@@ -61,6 +86,22 @@ class RecordDetailControllerImpl @Inject constructor(
             .collect { data ->
                 _screenData.update { it.copy(
                     nowRecord = data.convertToNowRecord(),
+                    nowRecordState = UiScreenState(UiState.COMPLETE)
+                ) }
+            }
+    }
+
+    override suspend fun deleteRecord(record: UiRecord) {
+        _screenData.update { it.copy(nowRecordState = UiScreenState(UiState.LOADING)) }
+        recordBusinessLogic.delete(record.id.toInt())
+            .catch { cause ->
+                _screenData.update { it.copy(
+                    nowRecordState = UiScreenState(UiState.FAIL, cause)
+                ) }
+            }
+            .collect { _ ->
+                _screenData.update { it.copy(
+                    nowRecord = UiRecord(),
                     nowRecordState = UiScreenState(UiState.COMPLETE)
                 ) }
             }

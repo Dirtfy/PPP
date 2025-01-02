@@ -58,6 +58,10 @@ class RecordViewModel @Inject constructor(
         listController.retryUpdateRecordList()
     }
 
+    override suspend fun updateRecordType(type: String) {
+        detailController.updateRecordType(type)
+    }
+
     override suspend fun updateRecordDetailList() {
         detailController.updateRecordDetailList()
     }
@@ -68,6 +72,10 @@ class RecordViewModel @Inject constructor(
 
     override suspend fun updateNowRecord(record: UiRecord) {
         detailController.updateNowRecord(record)
+    }
+
+    override suspend fun deleteRecord(record: UiRecord) {
+        detailController.deleteRecord(record)
     }
 
     override fun setMode(mode: UiRecordMode) {

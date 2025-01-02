@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 class MenuFireStore @Inject constructor(): MenuApi, Tagger {
 
-    private val pathVersion = FireStorePath.Service
+    private val pathVersion = FireStorePath.Test
 
     private val ref = Firebase.firestore.collection(pathVersion.MENU)
 

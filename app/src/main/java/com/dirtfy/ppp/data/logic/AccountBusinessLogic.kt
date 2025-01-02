@@ -161,7 +161,7 @@ class AccountBusinessLogic @Inject constructor(
 
     fun accountRecordStream(accountNumber: Int) =
         recordApi.recordStreamWith("type", "$accountNumber")
-            .map { it.sortedBy { data -> -data.timestamp } }
+            .map { it.sortedBy { data -> data.timestamp } }
             .map {
                 var result = 0
                 val accountRecordList = mutableListOf<DataAccountRecord>()
@@ -169,11 +169,11 @@ class AccountBusinessLogic @Inject constructor(
                     result += record.income
 
                     accountRecordList.add(
-                        record.convertToDataAccountRecord(result)
+                        record.copy().convertToDataAccountRecord(result)
                     )
                 }
 
-                accountRecordList
+                accountRecordList.reversed()
             }
 
     fun accountBalanceStream(accountNumber: Int) =

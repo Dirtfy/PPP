@@ -15,9 +15,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DateRangePicker
-import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
@@ -36,8 +36,7 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordMode
-import com.dirtfy.ppp.ui.view.phone.Component
-import com.dirtfy.ppp.ui.view.tablet.record.RecordDetailScreen
+import com.dirtfy.ppp.ui.view.common.Component
 import javax.inject.Inject
 
 class RecordScreen @Inject constructor(
@@ -227,7 +226,9 @@ class RecordScreen @Inject constructor(
         onDismissRequest: () -> Unit
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
-            recordDetailScreen.Main()
+            recordDetailScreen.Main(
+                onDismissRequest = onDismissRequest
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.dirtfy.ppp.ui.view.tablet.record
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,16 +12,27 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dirtfy.ppp.R
 import com.dirtfy.ppp.ui.controller.feature.record.RecordController
@@ -28,7 +40,10 @@ import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecord
 import com.dirtfy.ppp.ui.state.feature.record.atom.UiRecordDetail
-import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.state.feature.table.atom.UiPointUse
+import com.dirtfy.ppp.ui.view.common.Component
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import javax.inject.Inject
 
 class RecordDetailScreen @Inject constructor(
@@ -37,6 +52,7 @@ class RecordDetailScreen @Inject constructor(
 
     @Composable
     fun Main(
+        onDismissRequest: () -> Unit,
         controller: RecordController = recordController
     ) {
         val screenData by controller.screenData.collectAsStateWithLifecycle()
@@ -45,8 +61,18 @@ class RecordDetailScreen @Inject constructor(
             nowRecord = screenData.nowRecord,
             recordDetailList = screenData.recordDetailList,
             recordDetailListState = screenData.recordDetailListState,
+            onConfirm = { type ->
+                controller.request { updateRecordType(type) }
+            },
+            onTypeInputDismissRequest = {
+                controller.request { updateNowRecord(screenData.nowRecord) }
+            },
+            onDelete = {
+                controller.request { deleteRecord(screenData.nowRecord) }
+            },
             onDismissRequest = {
                 controller.setRecordDetailListState(UiScreenState(UiState.COMPLETE))
+                onDismissRequest()
             },
             onRetryClick = {
                 controller.request { updateRecordDetailList() }
@@ -65,6 +91,9 @@ class RecordDetailScreen @Inject constructor(
         nowRecord: UiRecord,
         recordDetailList: List<UiRecordDetail>,
         recordDetailListState: UiScreenState,
+        onConfirm: (String) -> Unit,
+        onTypeInputDismissRequest: () -> Unit,
+        onDelete: () -> Unit,
         onDismissRequest: () -> Unit,
         onRetryClick: () -> Unit
     ) {
@@ -78,7 +107,28 @@ class RecordDetailScreen @Inject constructor(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    RecordDetailHead(nowRecord = nowRecord)
+                    Box(
+                        modifier = Modifier.align(Alignment.Start)
+                    ) {
+                        Button(
+                            onClick = {
+                                onDismissRequest()
+                                onDelete()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Red, // 배경색
+                            )
+                        ) {
+                            Text(text = "삭제")
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(10.dp))
+
+                    RecordDetailHead(
+                        nowRecord = nowRecord,
+                        onConfirm = onConfirm,
+                        onTypeInputDismissRequest = onTypeInputDismissRequest
+                    )
                     Component.HandleUiStateDialog(
                         uiState = recordDetailListState,
                         onDismissRequest = onDismissRequest,
@@ -95,8 +145,12 @@ class RecordDetailScreen @Inject constructor(
 
     @Composable
     fun RecordDetailHead(
-        nowRecord: UiRecord
+        nowRecord: UiRecord,
+        onConfirm: (String) -> Unit,
+        onTypeInputDismissRequest: () -> Unit
     ) {
+        var typeDialogShow by remember { mutableStateOf(false) }
+
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -114,8 +168,142 @@ class RecordDetailScreen @Inject constructor(
                     Text(text = nowRecord.income, fontSize = 25.sp)
                     Spacer(modifier = Modifier.size(5.dp))
                     Text(text = nowRecord.type)
+                    Spacer(modifier = Modifier.size(5.dp))
+                    Button(onClick = { typeDialogShow = true},
+                        content = { Text(text = "수정") }
+                    )
                 }
             }
+        }
+
+        if (typeDialogShow) {
+            TypeInputDialog(
+                type = nowRecord.type,
+                onConfirm = onConfirm,
+                onDismissRequest = {
+                    onTypeInputDismissRequest()
+                    typeDialogShow = false
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun TypeInput(
+        type: String,
+        onConfirm: (String) -> Unit
+    ) {
+        var newType by remember { mutableStateOf(type) }
+
+        val parsedType = type.split("-")
+
+        val accountNumber = if (parsedType.size > 1) type.split("-")[0].trim() else ""
+        val userName = if (parsedType.size > 1) type.split("-")[1].trim() else ""
+        var pointState by remember {
+            mutableStateOf(UiPointUse(
+                accountNumber = accountNumber,
+                userName = userName
+            ))
+        }
+
+        val scanLauncher = rememberLauncherForActivityResult(
+            contract = ScanContract()
+        ) {
+            pointState = pointState.copy(accountNumber = it.contents?:"")
+        }
+
+        Column {
+            Component.NamedRadioButton(
+                name = "Card",
+                selected = newType == "Card",
+                onClick = { newType = "Card" })
+
+            Component.NamedRadioButton(
+                name = "Cash",
+                selected = newType == "Cash",
+                onClick = { newType = "Cash" })
+
+            Row {
+                RadioButton(
+                    selected = !(newType == "Card" || newType == "Cash"),
+                    onClick = {
+                        newType = "${pointState.accountNumber}-${pointState.userName}"
+                    })
+
+                PointDataInput(
+                    pointUse = pointState,
+                    onAccountNumberChange = { pointState = pointState.copy(accountNumber = it) },
+                    onUserNameChange = { pointState = pointState.copy(userName = it) },
+                    onScanClick = {
+                        scanLauncher.launch(
+                            ScanOptions().setOrientationLocked(false)
+                        )
+                    }
+                )
+            }
+
+            Button(
+                content = { Text(text = "변경") },
+                onClick = {
+                    if (!(newType == "Card" || newType == "Cash"))
+                        newType = "${pointState.accountNumber}-${pointState.userName}"
+                    onConfirm(newType)
+                })
+        }
+
+    }
+
+
+    @Composable
+    fun TypeInputDialog(
+        type: String,
+        onConfirm: (String) -> Unit,
+        onDismissRequest: () -> Unit
+    ) {
+        Dialog(onDismissRequest = onDismissRequest) {
+            Surface(
+                modifier = Modifier.wrapContentHeight(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier.padding(15.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TypeInput(
+                        type = type,
+                        onConfirm = {
+                            onConfirm(it)
+                            onDismissRequest()
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun PointDataInput(
+        pointUse: UiPointUse,
+        onAccountNumberChange: (String) -> Unit,
+        onUserNameChange: (String) -> Unit,
+        onScanClick: () -> Unit
+    ) {
+        Column {
+            TextField(
+                value = pointUse.accountNumber,
+                onValueChange = onAccountNumberChange,
+                label = { Text(text = stringResource(R.string.account_number)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                trailingIcon = {
+                    Component.BarcodeIcon(onClick = onScanClick)
+                }
+            )
+            TextField(
+                value = pointUse.userName,
+                onValueChange = onUserNameChange,
+                label = { Text(text = stringResource(R.string.issued_by)) }
+            )
         }
     }
 

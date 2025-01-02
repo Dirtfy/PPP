@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 class TableFireStore @Inject constructor(): TableApi<Transaction>, Tagger {
 
-    private val pathVersion = FireStorePath.Service
+    private val pathVersion = FireStorePath.Test
 
     private val tableRef = Firebase.firestore.collection(pathVersion.TABLE)
     private val mergeLockRef = Firebase.firestore.document(pathVersion.TABLE_GROUP_LOCK)
