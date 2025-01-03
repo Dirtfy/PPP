@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 class AccountFireStore @Inject constructor(): AccountApi, Tagger {
 
-    private val pathVersion = FireStorePath.Test
+    private val pathVersion = FireStorePath.Service
 
     private val accountRef = Firebase.firestore.collection(pathVersion.ACCOUNT)
     private val recordRef = Firebase.firestore.collection(pathVersion.RECORD)
