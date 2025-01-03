@@ -34,7 +34,22 @@ class TableListControllerImpl @Inject constructor(
     private val tableBusinessLogic: TableBusinessLogic
 ): TableListController, Tagger {
 
-    private val defaultColor = Color.LightGray.value
+    private val defaultColor = Color.LightGray
+    private val selectedColor = Color.White
+    private val groupColorMap = mapOf(
+        DataTable.GROUP_NOT_ASSIGNED to defaultColor,
+        1 to Color.Red,
+        2 to Color.Green,
+        3 to Color.Cyan,
+        4 to Color.Magenta,
+        5 to Color(0xFF4FEB33),
+        6 to Color(0xFF64DFBB),
+        7 to Color(0xFF765ED8),
+        8 to Color(0xFFFA96F4),
+        9 to Color(0xFFACBE47),
+        10 to Color(0xFFCBA01D),
+        11 to Color(0xFFD77D2E),
+    )
 
     private val tableFormation: List<Int> = listOf(
         11, 10, 9, 8, 7, 6, 5, 4, 3, 0,
@@ -107,6 +122,20 @@ class TableListControllerImpl @Inject constructor(
         return groupMap[tableNumber] ?: DataTable.GROUP_NOT_ASSIGNED
     }
 
+    private fun getColor(tableNumber: Int): Color {
+        if (tableNumber == 0)
+            return Color.Transparent
+
+        val groupNumber = getGroupNumber(tableNumber)
+
+        if (groupNumber == DataTable.GROUP_NOT_ASSIGNED)
+            return defaultColor
+
+        val member = getGroup(groupNumber).member
+
+        return groupColorMap[member.minOrNull()!!]!!
+    }
+
     override fun getGroup(groupNumber: Int): DataTableGroup {
         val member = groupMap.filter { it.value == groupNumber }.map { it.key }
         return DataTableGroup(groupNumber, member)
@@ -116,36 +145,38 @@ class TableListControllerImpl @Inject constructor(
         val newList = dbTableList.map { data -> data.convertToUiTable() }.toMutableList()
         val groupColorSet = mutableSetOf<ULong>()
 
-        val groupColorsMap = dbTableList
-            .map { it.group } //group 번호와 color 매칭
-            .distinct()
-            .associateWith {
-                var groupColor = getRandomColor()
-                while (groupColorSet.contains(groupColor)) {
-                    groupColor = getRandomColor()
-                }
-                groupColorSet.add(groupColor)
-                groupColor
-            }
+//        val groupColorsMap = dbTableList
+//            .map { it.group } //group 번호와 color 매칭
+//            .distinct()
+//            .associateWith {
+//                var groupColor = getRandomColor()
+//                while (groupColorSet.contains(groupColor)) {
+//                    groupColor = getRandomColor()
+//                }
+//                groupColorSet.add(groupColor)
+//                groupColor
+//            }
 
         groupMap.clear()
         for (idx in dbTableList.indices) {
             val dataTable = dbTableList[idx]
-            val color = groupColorsMap[dataTable.group]
-            newList[idx].color = color!!
+            Log.d(TAG, "$dataTable")
             groupMap[dataTable.number] = dataTable.group
+//            newList[idx].color = getColor(dataTable.number).value
         }
 
+//        return tableFormation.map { tableNumber ->
+//            if (tableNumber == 0)
+//                UiTable("0", Color.Transparent.value)
+//            else {
+//                Log.d(TAG, "$tableNumber")
+//                val uiTable = newList.find { table ->
+//                    table.number == tableNumber.toString()
+//                } ?: UiTable("$tableNumber", defaultColor.value)
+//                uiTable
+//            }
         return tableFormation.map { tableNumber ->
-            if (tableNumber == 0)
-                UiTable("0", Color.Transparent.value)
-            else {
-                Log.d(TAG, "$tableNumber")
-                val uiTable = newList.find { table ->
-                    table.number == tableNumber.toString()
-                } ?: UiTable("$tableNumber", defaultColor)
-                uiTable
-            }
+            UiTable("$tableNumber", getColor(tableNumber).value)
         }
     }
 
@@ -177,10 +208,12 @@ class TableListControllerImpl @Inject constructor(
 
         val newColor = if (selectedTableSet.contains(tableNumber)) {
             selectedTableSet.removeAll(member.toSet())
-            Color(table.color).copy(alpha = 1f)
+            getColor(tableNumber)
+//            if (group == DataTable.GROUP_NOT_ASSIGNED) defaultColor
+//            else groupColorMap[group%11]!!
         } else {
             selectedTableSet.addAll(member.toSet())
-            Color(table.color).copy(alpha = 0.5f)
+            selectedColor
         }
 
         _screenData.update { before ->
@@ -202,7 +235,7 @@ class TableListControllerImpl @Inject constructor(
         val member = getMembersOf(group)
         if (member.isEmpty()) member.add(tableNumber)
 
-        if (selectedTableSet.contains(tableNumber) || table.color == defaultColor) {
+        if (selectedTableSet.contains(tableNumber) || table.color == defaultColor.value) {
             Log.d(TAG, "table $tableNumber is already selected")
             setMode(UiTableMode.Main)
 //            selectedTableSet.removeAll(member.toSet()) // setMode 에서 해줌.
@@ -212,11 +245,11 @@ class TableListControllerImpl @Inject constructor(
             setMode(UiTableMode.Order)
             selectedTableSet.clear()
             selectedTableSet.addAll(member.toSet())
-            val newColor = Color(table.color).copy(alpha = 0.5f)
+            val newColor = selectedColor
 
             var tableList = _screenData.value.tableList.map {
-                val nowColor = Color(it.color)
-                it.copy(color = nowColor.copy(alpha = 1f).value)
+//                val nowGroup = getGroupNumber(it.number.toInt())
+                it.copy(color = getColor(it.number.toInt()).value)
             }
             Log.d(TAG, "tableList size: ${tableList.size}")
             tableList = tableList.map { nowTable ->
@@ -311,7 +344,11 @@ class TableListControllerImpl @Inject constructor(
             }
     }
     override suspend fun mergeTable() {
-        _mergeTable(selectedTableSet.toList())
+        val targetList = selectedTableSet.toList()
+
+        if (targetList.isEmpty()) return
+
+        _mergeTable(targetList)
     }
 
     override fun cancelMergeTable() {

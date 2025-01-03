@@ -136,6 +136,24 @@ class RecordFireStore @Inject constructor(): RecordApi<Transaction>, Tagger {
             }
     }
 
+    override suspend fun update(record: DataRecord) {
+        recordRef.document("${record.id}")
+            .set(record.convertToFireStoreRecord())
+            .await()
+    }
+
+    override suspend fun delete(id: Int): DataRecord {
+        val docRef = recordRef.document("$id")
+        Log.d(TAG, "$docRef-$id")
+        val data = docRef.get().await()
+            .toObject(FireStoreRecord::class.java)!!
+            .convertToDataRecord()
+        Log.d(TAG, "$data")
+        docRef.delete().await()
+        Log.d(TAG, "deleted")
+        return data
+    }
+
     override suspend fun getNextId(): Int {
         return recordIdRef.get().await()
             .getLong("count")!!.toInt() + 1

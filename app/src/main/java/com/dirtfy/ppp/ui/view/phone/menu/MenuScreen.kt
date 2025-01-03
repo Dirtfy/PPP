@@ -39,7 +39,8 @@ import com.dirtfy.ppp.ui.controller.feature.menu.MenuController
 import com.dirtfy.ppp.ui.state.common.UiScreenState
 import com.dirtfy.ppp.ui.state.common.UiState
 import com.dirtfy.ppp.ui.state.feature.menu.atom.UiMenu
-import com.dirtfy.ppp.ui.view.phone.Component
+import com.dirtfy.ppp.ui.view.common.Component
+import com.dirtfy.ppp.ui.view.common.VisualTransformation
 import com.dirtfy.tagger.Tagger
 import javax.inject.Inject
 
@@ -166,7 +167,8 @@ class MenuScreen @Inject constructor(
                     onValueChange = { onMenuChanged(newMenu.copy(price = it)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                    visualTransformation = VisualTransformation.CurrencyInputVisualTransformation()
                 )
 
                 Spacer(modifier = Modifier.size(16.dp))

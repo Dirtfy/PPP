@@ -11,6 +11,24 @@ object StringFormatConverter {
         return DecimalFormat("#,###").format(price)
     }
 
+    fun formatCurrency(price: String): String {
+        val reversed = price.reversed()
+
+        val formated = StringBuilder()
+
+        for (i in reversed.indices) {
+            formated.append(reversed[i])
+
+            if ((i + 1) % 3 == 0) {
+                formated.append(',')
+            }
+        }
+
+        val raw = formated.toString().reversed()
+
+        return raw.trimStart(',')
+    }
+
     fun parseCurrency(price: String): Int {
         return price.split(",").joinToString(separator = "").toInt()
     }

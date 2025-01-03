@@ -13,6 +13,8 @@ interface RecordApi <TransactionType> {
     suspend fun <ValueType> readRecordWith(key: String, value: ValueType): List<DataRecord>
     suspend fun <ValueType> readSumOf(key: String, value: ValueType, target:String): Int
     suspend fun readDetail(record: DataRecord): List<DataRecordDetail>
+    suspend fun update(record: DataRecord)
+    suspend fun delete(id: Int): DataRecord
 
     suspend fun getNextId(): Int
 
